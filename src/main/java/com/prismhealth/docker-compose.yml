@@ -1,0 +1,16 @@
+version: '3.7'
+services:
+  mongodb_container:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_DATABASE: UsersDb
+      MONGO_INITDB_ROOT_USERNAME: prismhealth
+      MONGO_INITDB_ROOT_PASSWORD: prismhealth
+    ports:
+      - 27017:27017
+    volumes:
+      #- /init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - mongodb_data_container:/data/UsersDb
+
+volumes:
+  mongodb_data_container:

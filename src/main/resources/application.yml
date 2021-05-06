@@ -1,0 +1,16 @@
+spring:
+  data:
+    rest:
+      base-path: "/api"
+    mongodb:
+      url: mongodb://admin:admin@127.0.0.1:27017/UsersDb?authSource=admin
+      username: prismhealth
+      password: prismhealth
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          mongodb:
+            core:
+              MongoTemplate: DEBUG
