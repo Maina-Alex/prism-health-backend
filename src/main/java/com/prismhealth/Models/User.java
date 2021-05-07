@@ -7,9 +7,6 @@ import org.springframework.data.annotation.Id;
 @Data
 public class User{
 
-	@JsonProperty("Id")
-	private String Id;
-
 	@JsonProperty("password")
 	private String password;
 

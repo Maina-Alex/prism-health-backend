@@ -1,5 +1,6 @@
 package com.prismhealth.security;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -53,6 +54,7 @@ public class AppSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        LoggerFactory.getLogger(this.getClass()).info(userDetailsService.toString());
         auth.userDetailsService(userDetailsService).passwordEncoder(passEncoder);
     }
 

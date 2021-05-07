@@ -8,6 +8,8 @@ import lombok.Data;
 public class SignUpResponse {
     @JsonProperty("user")
     private User user;
+    @JsonProperty("authCode")
+    private String authCode;
     @JsonProperty("message")
     private String message;
 }
