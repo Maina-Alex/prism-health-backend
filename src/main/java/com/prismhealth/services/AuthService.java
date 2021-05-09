@@ -24,10 +24,9 @@ public class AuthService {
         this.uwaziiConfig = uwaziiConfig;
     }
 
-    public  String getAuthentication(SignUpRequest signUpRequest) {
+    public  String getAuthentication(String phone) {
         String confirmCode = HelperUtility.getConfirmCodeNumber();
         UwaziiSmsRequest uwaziiSmsRequest = new UwaziiSmsRequest();
-        String phone = signUpRequest.getPhone();
         uwaziiSmsRequest.setApiKey(uwaziiConfig.getApi_Key());
         uwaziiSmsRequest.setSenderId(uwaziiConfig.getSenderId());
         uwaziiSmsRequest.setMessage(HelperUtility.getMessageTemplate(confirmCode));

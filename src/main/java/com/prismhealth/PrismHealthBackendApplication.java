@@ -2,6 +2,7 @@ package com.prismhealth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prismhealth.services.AuthService;
+import okhttp3.OkHttpClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,10 @@ public class PrismHealthBackendApplication {
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+	@Bean
+	public OkHttpClient getOkHttpClient(){
+		return new OkHttpClient();
 	}
 
 }

@@ -13,6 +13,13 @@ import java.util.Base64;
 
 public class HelperUtility {
 
+    public static String getTransactionUniqueNumber(){
+        RandomStringGenerator randomStringGenerator = new RandomStringGenerator.Builder()
+                .withinRange('0','z')
+                .filteredBy(CharacterPredicates.LETTERS,CharacterPredicates.DIGITS)
+                .build();
+        return randomStringGenerator.generate(12).toUpperCase();
+    }
     public static String toJson(Object object) {
         try {
             return new ObjectMapper().writeValueAsString(object);
@@ -40,12 +47,12 @@ public class HelperUtility {
         return Base64.getEncoder().encodeToString(data);
     }
     public static String getTimeStamp(){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         return dtf.format(LocalDateTime.now());
     }
-    public static String calculateAmount(String origin,String destination){
+    public static String calculateAmount(String productPrice,String quantity){
         //TODO  calculate the amount based on the distance between origin and destination
-        int amount = 1;
+        int amount = Integer.parseInt(productPrice)*Integer.parseInt(quantity);
         return String.valueOf(amount);
     }
 }

@@ -31,14 +31,14 @@ public class ProductsController {
     public ResponseEntity<List<Category>> getAllCategories(){
         return ResponseEntity.ok(categoryRepository.findAll());
     }
-    @GetMapping("/{categories}")
+    @GetMapping("/{categoryName}")
     public ResponseEntity<List<Category>> getCategoryByName(@PathVariable String categoryName){
         return ResponseEntity.ok(productsService.categoryByName(categoryName));
     }
 
-    @GetMapping("/categories/{subCategoryName}")
-    public ResponseEntity<List<SubCategory>> getAllSubCategories(@PathVariable String subCategoryName){
-        return ResponseEntity.ok(productsService.getAllSubcategories(subCategoryName));
+    @GetMapping("/subCategories/{categoryName}")
+    public ResponseEntity<List<SubCategory>> getAllSubCategories(@PathVariable String categoryName){
+        return ResponseEntity.ok(productsService.getAllSubcategories(categoryName));
     }
     @GetMapping("/{subCategoryName}/products")
     public ResponseEntity<List<Product>> getSubCategoryProducts(@PathVariable String subCategoryName){
@@ -59,8 +59,19 @@ public class ProductsController {
         return ResponseEntity.ok(productsService.saveSubCategory(subCategory));
     }
     @PostMapping("/products")
-    public ResponseEntity<Product> createCategory(@RequestBody Product product){
+    public ResponseEntity<Product> createProduct(@RequestBody Product product){
         return ResponseEntity.ok(productsService.saveProduct(product));
+    }
+    /*PUT MAPPINGS*/
+    @PutMapping("/products/{product}")
+    public ResponseEntity<?> updateProduct(@PathVariable("product") Product product){
+        return ResponseEntity.ok(productsService.updateProduct(product));
+    }
+
+    /*DELETE MAPPINGS*/
+    @DeleteMapping("/products/{product}")
+    public ResponseEntity<?> deleteProduct(@PathVariable("product") Product product){
+        return ResponseEntity.ok(productsService.deleteProduct(product));
     }
 
 }

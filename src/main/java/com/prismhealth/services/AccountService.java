@@ -8,6 +8,8 @@ import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.repository.AccountRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +29,7 @@ public class AccountService {
     public ResponseEntity<SignInResponse> loginUser(SignInRequest signInRequest){
         SignInResponse response = new SignInResponse();
         Optional<User> user = accountRepository.findOneByPhone(signInRequest.getPhone());
-        if (user .isPresent()){
+        if (user.isPresent()){
         response.setUser(user.get());
         response.setMessage("successful login");
         }else {
@@ -37,9 +39,20 @@ public class AccountService {
 
         return ResponseEntity.ok(response);
     }
+    public ResponseEntity<SignUpResponse> authentication(String phone) {
+        SignUpResponse signUpResponse = new SignUpResponse();
+        if (accountRepository.findOneByPhone(phone).isPresent()){
+             signUpResponse.setMessage("user already exists");
+             return ResponseEntity.badRequest().body(signUpResponse);
+        }
+        String authCode = authService.getAuthentication(phone);
+        signUpResponse.setMessage("Create new user..");
+        signUpResponse.setAuthCode(authCode);
+        return ResponseEntity.ok(signUpResponse);
+    }
+
     public ResponseEntity<SignUpResponse> signUpUser(SignUpRequest signUpRequest){
         SignUpResponse signUpResponse = new SignUpResponse();
-        String authCode = authService.getAuthentication(signUpRequest);
         User user1= new User();
         user1.setPassword(signUpRequest.getPassword());
         user1.setPhone(signUpRequest.getPhone());
@@ -47,26 +60,32 @@ public class AccountService {
         user1.setFirstName(signUpRequest.getFirstName());
         user1.setSecondName(signUpRequest.getSecondName());
         user1.setRole(signUpRequest.getRole());
+        user1.setGender(signUpRequest.getGender());
+        user1.setDateOfBirth(signUpRequest.getDateOfBirth());
         user1.setEmergencyContact1(null);
         user1.setEmergencyContact2(null);
 
-            signUpResponse.setMessage("successfully sent");
-            signUpResponse.setUser(user1);
-            signUpResponse.setAuthCode(authCode);
+            signUpResponse.setMessage("successfully created");
+            signUpResponse.setUser(accountRepository.save(user1));
 
-        return ResponseEntity.ok(signUpResponse);
+        return ResponseEntity.ok().body(signUpResponse);
     }
-    public ResponseEntity<User> saveAuthenticUser(SignUpResponse response,String code) throws InstanceAlreadyExistsException {
-        //TODO create provider sign up
-        if (response.getAuthCode().equals(code)){
-        if (accountRepository.findOneByPhone(response.getUser().getPhone()).isPresent()){
-            throw new InstanceAlreadyExistsException();
-        }
-       return ResponseEntity.ok().body(accountRepository.save(response.getUser()));}
-        else try {
-            throw new InvalidObjectException("Invalid user");
-        } catch (InvalidObjectException e) {
+
+    public ResponseEntity<HttpStatus> forgotPassword(String email) {
+       //TODO implement the notification service to send the change password link.
+        log.info("Send link to email "+email);
+        return ResponseEntity.ok().body(HttpStatus.OK);
+    }
+
+    public ResponseEntity<?> changePassword(String phone, String password) {
+        User user;
+        try {
+            user = accountRepository.findOneByPhone(phone).orElseThrow(ChangeSetPersister.NotFoundException::new);
+            user.setPassword(password);
+            return ResponseEntity.ok(accountRepository.save(user));
+        } catch (ChangeSetPersister.NotFoundException e) {
             e.printStackTrace();
-        } return null;
+        }
+        return ResponseEntity.badRequest().body("User does not exist");
     }
 }

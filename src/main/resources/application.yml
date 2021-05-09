@@ -9,7 +9,6 @@ spring:
       database: UsersDb
       port: 27017
       host: localhost
-
 uwazii:
   sender-id: uwazii
   sms-endpoint-url: 'https://api.uwaziimobile.com/api/v2/SendSMS'
@@ -31,6 +30,16 @@ uwazii:
 
 #volumes:
  #   mongodb_data_container:
+mpesa:
+  consumer_key: r79bGBar96vCWgVimdGmrtciLzRl1jOu
+  consumer_secret: fLlxKKE6JmKATAa4
+  business_short_code: 174379
+  pass_key: bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919
+  call_back_url: https://d4ddb5035f43.ngrok.io/payments/confirm
+  stk_push_url: https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest
+  initiator_security_credential: BXOGhf4Z0HJadcedjRf+eefLhWVIYvMRxkYutfUzf35Krh+2V5SA260JLegzyDSEorZ14XnTGR/QjacT7kkxJfTPBiy2KJWH6rq0aMfexFyW+je/7XwVm9L5+gNbYJ1U34Ibf4Z4XMfB4y8V/kPod+wR63GX/VDDNvs+FyY2cbVZB+TkCILaOI+myvHcOPsnXFzrdNUKKnI5k+jb3qETk4gfqWnfFnsJMTCqDTPcw8j3W9ZPtH4pxEMQ8hABhU59F6T+oZwjL86JkOxwwyO7UWP6G/5iZ+3bszmc+guwqrsVk37SQeAcdD7hcw9Jo8vHDTD30Qt4q8hPauJUEeigqQ==
+  oauth_url_endpoint: https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials
+
 logging:
   level:
     org:

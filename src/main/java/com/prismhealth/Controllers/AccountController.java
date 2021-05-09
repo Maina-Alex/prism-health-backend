@@ -30,15 +30,19 @@ public class AccountController {
     public ResponseEntity<SignUpResponse> signup(@RequestBody SignUpRequest signUpRequest){
         return accountService.signUpUser(signUpRequest);
     }
-    @PostMapping("/confirm")
-    public ResponseEntity<User> userDetailsConfirmation(@RequestBody String receivedAuthCode,@RequestBody SignUpResponse user){
-        try {
-            return accountService.saveAuthenticUser(user,receivedAuthCode);
-        } catch (InstanceAlreadyExistsException e) {
-            e.printStackTrace();
-        }
-        return null;
+    @PostMapping("/authentication")
+    public ResponseEntity<SignUpResponse> authentication(@RequestBody String phone){
+        return accountService.authentication(phone);
     }
+    @PostMapping("/forgotPassword")
+    public ResponseEntity<HttpStatus> forgotPassword(@RequestBody String email){
+        return accountService.forgotPassword(email);
+    }
+    @PutMapping("/changePassword/{phone}")
+    public ResponseEntity<?> changePassword(@PathVariable("phone") String phone, @RequestBody String password){
+        return accountService.changePassword(phone,password);
+    }
+
     //TODO review the security implementation
     //TODO make endpoint to receiving phone,another to post the remaining user details
     //TODO Create an implementation for change password

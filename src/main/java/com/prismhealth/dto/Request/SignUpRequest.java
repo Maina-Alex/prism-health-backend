@@ -26,9 +26,17 @@ public class SignUpRequest {
 	@JsonProperty("email")
 	private String email;
 
+	@JsonProperty("DateOfBirth")
+	private String DateOfBirth;
+
+	@JsonProperty("gender")
+	private String gender;
+
 	@Override
  	public String toString(){
 		return
-				String.format("SignUpRequest{password = '%s',role = '%s',phone = '%s',name = '%s',email = '%s'}", password, role, phone, firstName+" "+secondName, email);
+				String.format("SignUpRequest{password = '%s',role = '%s',phone = '%s'," +
+						"name = '%s',email = '%s',gender = '%s',Dob = '%s'}", password, role, phone,
+						firstName+" "+secondName, email, gender,DateOfBirth);
 		}
 }

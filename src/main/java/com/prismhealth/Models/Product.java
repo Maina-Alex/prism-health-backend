@@ -19,8 +19,11 @@ public class Product {
 	private String productDescription;
 
 	@JsonProperty("productProvider")
-	private User user;
+	private String user;
 
 	@JsonProperty("subCategory")
 	private String subCategory;
+
+	@JsonProperty("productVariant")
+	private String productVariant;
 }

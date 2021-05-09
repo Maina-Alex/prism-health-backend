@@ -32,8 +32,14 @@ public class User{
 	@JsonProperty("email")
 	private String email;
 
+	@JsonProperty("DateOfBirth")
+	private String DateOfBirth;
+
+	@JsonProperty("gender")
+	private String gender;
+
 	@Override
 	public String toString() {
-		return String.format("User{password='%s', role='%s', phone='%s', firstName='%s', secondName='%s', email='%s'}", password, role, phone, firstName, secondName, email);
+		return String.format("User{password='%s', role='%s', phone='%s', firstName='%s', secondName='%s', email='%s',gender = '%s',Dob = '%s'}", password, role, phone, firstName, secondName, email, gender,DateOfBirth);
 	}
 }
