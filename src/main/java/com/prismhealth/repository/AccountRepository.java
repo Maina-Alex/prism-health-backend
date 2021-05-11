@@ -13,5 +13,5 @@ import java.util.Optional;
 
 
 public interface AccountRepository extends MongoRepository<User,String> {
-    public Optional<User> findOneByPhone(String phone);
+    User findOneByPhone(String phone);
 }

@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "uwazii")
 public class UwaziiConfig {
-    String smsEndpointUrl;
     String senderId;
+    String smsEndpointUrl;
     String Api_Key;
     String ClientId;
 }

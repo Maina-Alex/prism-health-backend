@@ -4,13 +4,13 @@ spring:
       base-path: "/api"
     mongodb:
       authentication-database: admin
-      username: prismhealth
-      password: prismhealth
+      #username: prismhealth
+      #password: prismhealth
       database: UsersDb
       port: 27017
       host: localhost
 uwazii:
-  sender-id: uwazii
+  sender-id: Uwazii
   sms-endpoint-url: 'https://api.uwaziimobile.com/api/v2/SendSMS'
   apiKey: BcvVtJY+ApwKcY4xEw8k/s/eLZAvgcqA0M0ocY9IHJ8=
   clientId: 7f11e72b-fb3c-4b10-9d7d-41d84d770207

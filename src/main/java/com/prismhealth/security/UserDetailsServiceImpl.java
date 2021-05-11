@@ -30,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
 
-        Optional<com.prismhealth.Models.User> phoneUser = userRepository.findOneByPhone(phone);
+        Optional<com.prismhealth.Models.User> phoneUser = Optional.ofNullable(userRepository.findOneByPhone(phone));
         if (phoneUser.isPresent()) {
             List<SimpleGrantedAuthority> grantedAuthorities = roleRepo.findAllByUserId(phoneUser.get().getPhone()).stream()
                     .map(UserRoles::getRole).map(SimpleGrantedAuthority::new).collect(Collectors.toList());

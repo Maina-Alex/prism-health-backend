@@ -4,9 +4,9 @@ services:
     image: mongo:latest
     restart: always
     environment:
-      MONGO_INITDB_DATABASE: UsersDb
-      MONGO_INITDB_ROOT_USERNAME: prismhealth
-      MONGO_INITDB_ROOT_PASSWORD: prismhealth
+     MONGO_INITDB_DATABASE: UsersDb
+     # MONGO_INITDB_ROOT_USERNAME: prismhealth
+     # MONGO_INITDB_ROOT_PASSWORD: prismhealth
     ports:
       - 27017:27017
     volumes:

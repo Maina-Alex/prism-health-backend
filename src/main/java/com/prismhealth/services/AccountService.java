@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prismhealth.Models.User;
 import com.prismhealth.dto.Request.SignInRequest;
 import com.prismhealth.dto.Request.SignUpRequest;
+import com.prismhealth.dto.Request.phone;
 import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.repository.AccountRepository;
@@ -28,26 +29,29 @@ public class AccountService {
     }
     public ResponseEntity<SignInResponse> loginUser(SignInRequest signInRequest){
         SignInResponse response = new SignInResponse();
-        Optional<User> user = accountRepository.findOneByPhone(signInRequest.getPhone());
-        if (user.isPresent()){
-        response.setUser(user.get());
+        User user = accountRepository.findOneByPhone(signInRequest.getPhone());
+        if (user!=null&& user.getPassword().equals(signInRequest.getPassword())){
+        response.setUser(user);
         response.setMessage("successful login");
         }else {
             response.setUser(null);
-            response.setMessage("User not found !!");
+            response.setMessage("Please check your username or password is wrong!!");
         }
 
         return ResponseEntity.ok(response);
     }
-    public ResponseEntity<SignUpResponse> authentication(String phone) {
+    public ResponseEntity<SignUpResponse> authentication(phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
-        if (accountRepository.findOneByPhone(phone).isPresent()){
+        User user = accountRepository.findOneByPhone(phone.getPhone());
+        if (user!=null){
+            log.info("phone->"+user.getPhone());
              signUpResponse.setMessage("user already exists");
              return ResponseEntity.badRequest().body(signUpResponse);
-        }
-        String authCode = authService.getAuthentication(phone);
+        }else {
+        String authCode = authService.getAuthentication(phone.getPhone());
         signUpResponse.setMessage("Create new user..");
         signUpResponse.setAuthCode(authCode);
+        }
         return ResponseEntity.ok(signUpResponse);
     }
 
@@ -79,12 +83,11 @@ public class AccountService {
 
     public ResponseEntity<?> changePassword(String phone, String password) {
         User user;
-        try {
-            user = accountRepository.findOneByPhone(phone).orElseThrow(ChangeSetPersister.NotFoundException::new);
+
+            user = accountRepository.findOneByPhone(phone);
+            if (user!=null){
             user.setPassword(password);
             return ResponseEntity.ok(accountRepository.save(user));
-        } catch (ChangeSetPersister.NotFoundException e) {
-            e.printStackTrace();
         }
         return ResponseEntity.badRequest().body("User does not exist");
     }

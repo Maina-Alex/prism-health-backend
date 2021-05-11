@@ -3,6 +3,7 @@ package com.prismhealth.Controllers;
 import com.prismhealth.Models.User;
 import com.prismhealth.dto.Request.SignInRequest;
 import com.prismhealth.dto.Request.SignUpRequest;
+import com.prismhealth.dto.Request.phone;
 import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.repository.AccountRepository;
@@ -31,7 +32,7 @@ public class AccountController {
         return accountService.signUpUser(signUpRequest);
     }
     @PostMapping("/authentication")
-    public ResponseEntity<SignUpResponse> authentication(@RequestBody String phone){
+    public ResponseEntity<SignUpResponse> authentication(@RequestBody phone phone){
         return accountService.authentication(phone);
     }
     @PostMapping("/forgotPassword")
