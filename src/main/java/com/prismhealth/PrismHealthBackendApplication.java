@@ -6,17 +6,31 @@ import okhttp3.OkHttpClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.client.RestTemplate;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SpringBootApplication
 public class PrismHealthBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(PrismHealthBackendApplication.class, args);
+	}
+	@Bean
+	public RestTemplate getRestTemplate(){
+		return  new RestTemplate();
+	}
+	@Bean
+	public ExecutorService taskExecutor() {
+		ExecutorService executor = Executors.newFixedThreadPool(1);
+		return executor;
 	}
 	@Bean
 	public Docket api() {

@@ -4,15 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 
+import java.util.Date;
+import java.util.List;
+
 @Data
 public class User{
 
 	@JsonProperty("password")
 	private String password;
-
-	@JsonProperty("role")
-	private String role;
-
 	@Id
 	@JsonProperty("phone")
 	private String phone;
@@ -38,8 +37,52 @@ public class User{
 	@JsonProperty("gender")
 	private String gender;
 
+	@JsonProperty("auth")
+	private String auth;
+
+
+	@JsonProperty("rating")
+	private double rating;
+	@JsonProperty("locationName")
+	private String locationName;
+	@JsonProperty("position")
+	private double[] position;
+	@JsonProperty("username")
+	private String username;
+	@JsonProperty("accountType")
+	private String accountType;
+	@JsonProperty("verified")
+	private boolean verified;
+	@JsonProperty("deviceToken")
+	private String deviceToken;
+	@JsonProperty("verifiedOn")
+	private Date verifiedOn;
+	@JsonProperty("verifiedBy")
+	private String verifiedBy;
+	@JsonProperty("roles")
+	private List<String> roles;
+	@JsonProperty("blocked")
+	private boolean blocked;
+	@JsonProperty("blockedOn")
+	private Date blockedOn;
+	@JsonProperty("blockedBy")
+	private String blockedBy;
+	@JsonProperty("deleted")
+	private boolean deleted;
+	@JsonProperty("deletedOn")
+	private Date deletedOn;
+	@JsonProperty("deletedBy")
+	private String deletedBy;
+	@JsonProperty("approveDeleteBy")
+	private String approveDeleteBy;
+	@JsonProperty("opproveDeleteOn")
+	private Date opproveDeleteOn;
+	@JsonProperty("approveDelete")
+	private boolean approveDelete;
+
 	@Override
 	public String toString() {
-		return String.format("User{password='%s', role='%s', phone='%s', firstName='%s', secondName='%s', email='%s',gender = '%s',Dob = '%s'}", password, role, phone, firstName, secondName, email, gender,DateOfBirth);
+		return String.format("User{password='%s', role='%s', phone='%s', firstName='%s', secondName='%s'," +
+				" email='%s',gender = '%s',Dob = '%s'}", password, roles, phone, firstName, secondName, email, gender,DateOfBirth);
 	}
 }
