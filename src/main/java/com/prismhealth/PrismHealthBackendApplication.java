@@ -13,10 +13,11 @@ import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+@EnableSwagger2
 @SpringBootApplication
 public class PrismHealthBackendApplication {
 
@@ -40,6 +41,7 @@ public class PrismHealthBackendApplication {
 				.paths(PathSelectors.any())
 				.build();
 	}
+
 	@Bean
 	public ObjectMapper getObjectMapper(){
 		return new ObjectMapper();
