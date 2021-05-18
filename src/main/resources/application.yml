@@ -1,4 +1,5 @@
 server:
+  port: 8081
   servlet:
   context-path: "/api/"
 spring:
@@ -7,12 +8,12 @@ spring:
      max-file-size: 10MB
      max-request-size: 10MB
     mongodb:
-      authentication-database: admin
+      #authentication-database: admin
       #username: prismhealth
       #password: prismhealth
       database: UsersDb
       port: 27017
-      host: localhost
+      host: 127.0.0.1
 uwazii:
   sender-id: Uwazii
   sms-endpoint-url: 'https://api.uwaziimobile.com/api/v2/SendSMS'

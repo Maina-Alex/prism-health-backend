@@ -39,7 +39,7 @@ public class ServiceProviderController {
     }
 
     @PostMapping("/providers/services")
-    public Services createService(@RequestParam String services, @RequestParam MultipartFile[] multipartFile){
+    public Services createService(@RequestParam String services, @RequestParam MultipartFile multipartFile){
         return serviceProviderService.createService(services,multipartFile);
     }
     @GetMapping("/users/all")
