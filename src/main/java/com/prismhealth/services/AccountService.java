@@ -24,6 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.security.Principal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -196,6 +197,22 @@ public class AccountService {
         }
         signUpResponse.setMessage("Failed update, User not found");
         return ResponseEntity.badRequest().body(signUpResponse);
+    }
+    public ResponseEntity<?> getUsers(Principal principal) {
+        SignInResponse signInResponse = new SignInResponse();
+        String phone = principal.getName();
+        Optional<Users> users = Optional.ofNullable(accountRepository.findOneByPhone(phone));
+        if (users.isPresent()) {
+            Users u = users.get();
+            u.setRoles(userRolesRepo.findAllByUserId(u.getPhone()).stream().map(UserRoles::getRole)
+                    .collect(Collectors.toList()));
+            signInResponse.setUsers(u);
+            signInResponse.setMessage("successful login");
+            return ResponseEntity.ok().body(signInResponse);
+        } else {
+            signInResponse.setMessage("User does not exists");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(signInResponse);
+        }
     }
     /*
     public Product setCarAvailabilityFalse(List<Bookings> bookings) {

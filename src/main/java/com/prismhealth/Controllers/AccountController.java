@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.Optional;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
@@ -70,6 +71,10 @@ public class AccountController {
     @PutMapping("/changePassword/{phone}")
     public ResponseEntity<?> changePassword(@PathVariable("phone") String phone, @RequestBody String password){
         return accountService.changePassword(phone,password);
+    }
+    @GetMapping
+    public ResponseEntity<?> getUsers(Principal principal) {
+        return accountService.getUsers(principal);
     }
 
     //TODO review the security implementation
