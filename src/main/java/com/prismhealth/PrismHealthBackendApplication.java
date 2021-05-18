@@ -1,12 +1,17 @@
 package com.prismhealth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prismhealth.services.AuthService;
+import com.prismhealth.Models.Users;
+import com.prismhealth.Models.UserRoles;
+import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRolesRepo;
 import okhttp3.OkHttpClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import springfox.documentation.builders.PathSelectors;
@@ -19,8 +24,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 @EnableSwagger2
 @SpringBootApplication
-public class PrismHealthBackendApplication {
-
+public class PrismHealthBackendApplication implements ApplicationRunner {
+@Autowired
+private UserRolesRepo rolesRepo;
+@Autowired
+private AccountRepository accountRepository;
 	public static void main(String[] args) {
 		SpringApplication.run(PrismHealthBackendApplication.class, args);
 	}
@@ -55,4 +63,33 @@ public class PrismHealthBackendApplication {
 		return new OkHttpClient();
 	}
 
+
+	@Override
+	public void run(ApplicationArguments args) throws Exception {
+		if (!accountRepository.existsByPhone("+254711111111")){
+		Users users1 = new Users();
+		users1.setPassword(passwordEncoder().encode("password"));
+		users1.setPhone("+254711111111");
+		users1.setEmail("joshuajoe12561@gmail.com");
+		users1.setFirstName("Admin");
+		users1.setLocationName("Location");
+		users1.setPosition(new double[]{Double.parseDouble("-1.2345"), Double.parseDouble("24.345")});
+		users1.setEmergencyContact1(null);
+		users1.setEmergencyContact2(null);
+		users1.setAccountType("ADMIN");
+
+		users1.setVerified(true);
+		users1.setBlocked(false);
+		users1.setDeleted(false);
+
+		users1 = accountRepository.save(users1);
+
+		UserRoles role = new UserRoles();
+		role.setAssignedBy("DEFAULT");
+		role.setRole("ROLE_ADMIN");// "ROLE_ADMIN", "ROLE_HELP_SUPPORT", "ROLE_SITE_CONTENT_UPDATER"));
+		role.setUserId(users1.getPhone());
+		rolesRepo.save(role);
+	}
+
+	}
 }

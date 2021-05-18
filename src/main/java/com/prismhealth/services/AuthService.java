@@ -3,7 +3,7 @@ package com.prismhealth.services;
 import com.auth0.jwt.JWT;
 import com.prismhealth.Models.AccountDetails;
 import com.prismhealth.Models.Notification;
-import com.prismhealth.Models.User;
+import com.prismhealth.Models.Users;
 import com.prismhealth.config.UwaziiConfig;
 import com.prismhealth.dto.Request.UwaziiSmsRequest;
 
@@ -17,7 +17,6 @@ import java.util.Optional;
 
 import com.prismhealth.repository.AccountRepository;
 import com.prismhealth.repository.NotificationRepo;
-import com.prismhealth.repository.UserRolesRepo;
 import com.prismhealth.security.SecurityConstants;
 import com.prismhealth.util.Actions;
 import com.prismhealth.util.AppConstants;
@@ -41,8 +40,6 @@ public class AuthService {
     private final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final AccountRepository usersRepo;
-
-
     private final BCryptPasswordEncoder encoder;
     private final RestTemplate restTemplate;
     private final NotificationRepo notificationRepo;
@@ -95,7 +92,7 @@ public class AuthService {
     }
 
     public String getToken(String phone) {
-        Optional<User> users = Optional.ofNullable(usersRepo.findOneByPhone(phone));
+        Optional<Users> users = Optional.ofNullable(usersRepo.findOneByPhone(phone));
         if (users.isPresent() && checkUserValidity(users.get())) {
             String token = JWT.create().withSubject(users.get().getPhone())
                     .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
@@ -110,7 +107,10 @@ public class AuthService {
     }
 
     public String forgotPassword(String phone) {
-        Optional<User> users = Optional.ofNullable(usersRepo.findOneByPhone(phone));
+        Optional<Users> users = Optional.ofNullable(usersRepo.findOneByPhone(phone));
+        if (!users.isPresent()){
+            return "User with phone number "+ phone+" not found";
+        }
 
         if (users.isPresent()) {
             log.info("Forgot password request, user email  " + users.get().getEmail());
@@ -128,7 +128,7 @@ public class AuthService {
 
             HttpEntity<AccountDetails> entity = new HttpEntity<>(details, headers);
             ResponseEntity<String> responseEntity = restTemplate
-                    .postForEntity(AppConstants.notificationUrl + "/account/reset", entity, String.class);
+                    .postForEntity(AppConstants.notificationUrl + "/changePassword/"+phone, entity, String.class);
 
             if (responseEntity.getStatusCode().is2xxSuccessful()) {
                 Notification notification = new Notification();
@@ -147,26 +147,26 @@ public class AuthService {
             }
 
         } else {
-            log.info("Sending password reset to " + users.get().getEmail() + " " + LogMessage.FAILED + " User does not exist");
+            log.info("Sending password reset  " + LogMessage.FAILED + " User does not exist");
             return null;
         }
 
     }
 
-    public User resetPassword(Principal principal, User users) {
-        Optional<User> account = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+    public Users resetPassword(Principal principal, Users users) {
+        Optional<Users> account = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         if (account.isPresent()) {
 
-            User oldUser = account.get();
-            oldUser.setPassword(encoder.encode(users.getPassword()));
+            Users oldUsers = account.get();
+            oldUsers.setPassword(encoder.encode(users.getPassword()));
             log.info("Password reset for User id:" + users.getPhone() + " " + LogMessage.SUCCESS);
-            return usersRepo.save(oldUser);
+            return usersRepo.save(oldUsers);
 
         } else
             return null;
     }
 
-    public boolean checkUserValidity(User user) {
-        return !user.isBlocked() && !user.isApproveDelete();
+    public boolean checkUserValidity(Users users) {
+        return !users.isBlocked() && !users.isApproveDelete();
     }
 }

@@ -2,7 +2,7 @@ package com.prismhealth.dto.Request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prismhealth.Models.Product;
-import com.prismhealth.Models.User;
+import com.prismhealth.Models.Users;
 import lombok.Data;
 
 @Data
@@ -15,5 +15,5 @@ public class OrderRequest{
 	private String quantity;
 
 	@JsonProperty("user")
-	private User user;
+	private Users users;
 }

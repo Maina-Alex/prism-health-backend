@@ -9,13 +9,24 @@ import com.prismhealth.repository.CategoryRepository;
 import com.prismhealth.repository.ProductsRepository;
 import com.prismhealth.repository.SubCategoriesRepository;
 import com.prismhealth.repository.VariantRepository;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 @Service
 public class ProductsService {
@@ -29,11 +40,15 @@ public class ProductsService {
         this.subCategoriesRepository = subCategoriesRepository1;
         this.productsRepository = productsRepository;
     }
-    public List<SubCategory> getAllSubcategories(String categoryName){
+    public List<SubCategory> getSubcategoriesByName(String categoryName){
         //TODO marshal up a response for when sub category does not exists
         return subCategoriesRepository.findAll()
                         .stream().filter(r-> r.getCategory().equals(categoryName))
                         .collect(Collectors.toList());
+    }
+    public List<SubCategory> getAllSubcategories(){
+        //TODO marshal up a response for when sub category does not exists
+        return new ArrayList<>(subCategoriesRepository.findAll());
     }
     public List<Product> getAllProducts(String subCategoryName){
         //TODO marshal up a response for when products do not exists
@@ -82,13 +97,19 @@ public class ProductsService {
         //TODO marshal up a response for when category does not exists
         return null;
     }
-    public Product saveProduct(Product product) {
+    public Product saveProduct(Product product, MultipartFile multipartFile) {
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
         variant.setSubCategory(product.getSubCategory());
+
         if (!subCategoryByName(product.getSubCategory()).isEmpty()){
             if (variantByName(product.getProductVariant()).isEmpty())
                 variantRepository.save(variant);
+            LoggerFactory.getLogger(getClass()).info("->>"+product.toString());
+            String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+            product.setPhotos(fileName);
+            String uploadDir = "user-photos/" + product.getUser();
+            saveFile(uploadDir, fileName, multipartFile);
             return productsRepository.save(product);
         }
         //TODO marshal up a response for when subCategory does not exists
@@ -134,5 +155,25 @@ public class ProductsService {
 
         productsRepository.save(product);
         return ResponseEntity.ok().body(product.getProductName()+" Successfully deleted");
+    }
+    public static void saveFile(String uploadDir, String fileName,
+                                MultipartFile multipartFile)  {
+        try{
+        Path uploadPath = Paths.get(uploadDir);
+
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+         InputStream inputStream = multipartFile.getInputStream();
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+        } catch ( IOException ioe) {
+            try {
+                throw new IOException("Could not save image file: " + fileName, ioe);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

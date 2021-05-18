@@ -11,11 +11,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -53,7 +55,13 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "sub-category not found") })
     @GetMapping("/subCategories/{categoryName}")
     public ResponseEntity<List<SubCategory>> getSubCategories(@PathVariable String categoryName){
-        return ResponseEntity.ok(productsService.getAllSubcategories(categoryName));
+        return ResponseEntity.ok(productsService.getSubcategoriesByName(categoryName));
+    }
+    @ApiOperation(value = "Get sub-categories ")
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "sub-category not found") })
+    @GetMapping("/subCategories")
+    public ResponseEntity<List<SubCategory>> getAllSubCategories(){
+        return ResponseEntity.ok(productsService.getAllSubcategories());
     }
     @ApiOperation(value = "Get products under a sub-category")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
@@ -84,9 +92,11 @@ public class ProductsController {
     @ApiOperation(value = "Post a product")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/products")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product){
+    public ResponseEntity<Product> createProduct(@RequestParam String productDetails,@RequestParam("image") MultipartFile multipartFile){
         try {
-            return new  ResponseEntity<>(productsService.saveProduct(product), HttpStatus.ACCEPTED);
+            Product product = objectMapper.readValue(productDetails,Product.class);
+            LoggerFactory.getLogger(this.getClass()).info("Products-> "+product.toString());
+            return new  ResponseEntity<>(productsService.saveProduct(product,multipartFile), HttpStatus.CREATED);
         }catch (Throwable e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

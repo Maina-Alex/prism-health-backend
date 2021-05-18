@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
 import com.prismhealth.repository.AccountRepository;
@@ -44,7 +45,7 @@ public class NotificationService {
     }
 
     public Notification addUserNotification(Principal principal, Notification notification) {
-        Optional<User> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         if (user.isPresent()) {
             log.info("New user notification added for user " + user.get().getPhone());
             notification.setUserId(user.get().getPhone());
@@ -57,8 +58,7 @@ public class NotificationService {
     }
 
     public List<Notification> getAllUserNotification(Principal principal) {
-        Optional<User> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
-
+        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         if (user.isPresent()) {
             return notificationRepo.findAllByUserId(user.get().getPhone());
         } else
@@ -105,7 +105,7 @@ public class NotificationService {
         }
 
     }
-
+/*
     public void sendPickCarConfirmEmail(EmailData emailData) {
         Runnable task = () -> {
             sendEmailNotification(AppConstants.notificationUrl + "/product/confirm/pick", emailData);
@@ -144,10 +144,11 @@ public class NotificationService {
 
         executorService.execute(task);
 
-    }
+    }*/
+
     public void addHelpNotification(String userid) {
         Runnable task = () -> {
-            User owner = usersRepo.findById(userid).get();
+            Users owner = usersRepo.findById(userid).get();
             Optional<String> deviceToken = Optional.ofNullable(owner.getAuth());
             if (deviceToken.isPresent()) {
                 PushNotification notification = new PushNotification();
@@ -172,7 +173,7 @@ public class NotificationService {
 
     public void addHelpReplyNotification(String userid) {
         Runnable task = () -> {
-            User owner = usersRepo.findById(userid).get();
+            Users owner = usersRepo.findById(userid).get();
             Optional<String> deviceToken = Optional.ofNullable(owner.getAuth());
             if (deviceToken.isPresent()) {
                 PushNotification notification = new PushNotification();
@@ -230,7 +231,7 @@ public class NotificationService {
         executorService.execute(task);
 
     }
-
+*/
     public boolean deleteNotification(String id, Principal principal) {
         Optional<Notification> optional = notificationRepo.findById(id);
 
@@ -242,24 +243,25 @@ public class NotificationService {
         return false;
     }
 
-    public void addCarNotification(Product product) {
+    public void addProductNotification(Product product) {
 
         Runnable task = () -> {
 
-            User owner = usersRepo.findOne().filter(user -> user.getPhone().equals(product.getUser()));
-            Optional<String> deviceToken = Optional.ofNullable(owner.getDeviceToken());
+            List<Users> owner = usersRepo.findAll().stream().filter(user -> user.getPhone().equals(product.getUser())).collect(Collectors.toList());
+            if (!owner.isEmpty()){
+            Optional<String> deviceToken = Optional.ofNullable(owner.get(0).getDeviceToken());
             if (deviceToken.isPresent()) {
                 PushNotification notification = new PushNotification();
                 notification.setDeviceToken(deviceToken.get());
-                notification.setNotification(new PushContent("M-Gari ", "Your car was added successfully"));
+                notification.setNotification(new PushContent("Prism-health ", "Your product was added successfully"));
                 Notification n = new Notification();
                 n.setAction("Push Notification");
                 n.setMessage(notification.getNotification().getBody());
                 n.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                 n.setTitle(notification.getNotification().getTitle());
-                n.setUserId(owner.getId());
+                n.setUserId(owner.get(0).getPhone());
                 notificationRepo.save(n);
-                this.sendPushNotification(notification);
+                this.sendPushNotification(notification);}
             }
 
         };
@@ -268,8 +270,7 @@ public class NotificationService {
 
     }
 
-
-
+/*
     public void addOrderNotification(Order order) {
         Runnable task = () -> {
             Users owner = usersRepo.findById(order.getUserId()).get();

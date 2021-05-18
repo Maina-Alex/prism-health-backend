@@ -1,11 +1,5 @@
 package com.prismhealth.services;
 
-import java.security.Principal;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-
 import com.prismhealth.Models.Users;
 import com.prismhealth.Models.UserRoles;
 import com.prismhealth.repository.AccountRepository;
@@ -14,8 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
-public class AdminStaffService {
+public class AdminProviderService {
 
     @Autowired
     private BCryptPasswordEncoder encoder;
@@ -24,7 +23,7 @@ public class AdminStaffService {
     @Autowired
     private UserRolesRepo userRolesRepo;
 
-    public Users getStaffById(String id) {
+    public Users getProviderById(String id) {
         Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(id));
         if (user.isPresent()) {
             Users u = user.get();
@@ -37,10 +36,10 @@ public class AdminStaffService {
             return null;
     }
 
-    public List<Users> getAllStaff() {
+    public List<Users> getAllProviders() {
 
         return usersRepo.findAll().stream().filter(u -> Optional.ofNullable(u.getAccountType()).isPresent())
-                .filter(u -> u.getAccountType().equals("STAFF")).map(u -> {
+                .filter(u -> u.getAccountType().equals("PROVIDER")).map(u -> {
                     u.setRoles(userRolesRepo.findAllByUserId(u.getPhone()).stream().map(UserRoles::getRole)
                             .collect(Collectors.toList()));
                     return u;
@@ -48,7 +47,7 @@ public class AdminStaffService {
 
     }
 
-    public boolean deleteStaff(String id) {
+    public boolean deleteProvider(String id) {
         Optional<Users> user = usersRepo.findById(id);
         if (user.isPresent() && !user.get().getEmail().equals("admin@prismhealth.com")) {
             usersRepo.delete(user.get());
@@ -81,7 +80,7 @@ public class AdminStaffService {
 
     private void updateUser(Users users, Principal principal) {
 
-        users.setAccountType("STAFF");
+        users.setAccountType("PROVIDER");
         users.setBlocked(false);
         users.setDeleted(false);
         users.setVerified(true);
@@ -108,7 +107,7 @@ public class AdminStaffService {
     }
 
     private void insertUser(Users users, Principal principal) {
-        users.setAccountType("STAFF");
+        users.setAccountType("PROVIDER");
         users.setBlocked(false);
         users.setDeleted(false);
         users.setVerified(true);

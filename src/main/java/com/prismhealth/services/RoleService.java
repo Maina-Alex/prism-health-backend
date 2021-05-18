@@ -22,9 +22,9 @@ public class RoleService {
 
     public UserRoles addRoles(UserRoles role, Principal principal) {
         role.setDeleted(false);
-        role.setApproved(false);
+        role.setApproved(true);
         role.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-        role.setCreated_by(principal.getName());
+        role.setCreated_by("+254719285868");
         return roleRepo.save(role);
 
     }
@@ -32,7 +32,7 @@ public class RoleService {
 
     public List<String> getRolesNames() {
         return roleRepo.findAll(Sort.by("timestamp").descending()).stream()
-                .filter(role -> role.isApproved() && !role.isDeleted()).map(r -> r.getRole()).distinct()
+                .filter(role -> role.isApproved() && !role.isDeleted()).map(UserRoles::getRole)
                 .collect(Collectors.toList());
 
     }

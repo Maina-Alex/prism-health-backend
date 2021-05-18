@@ -3,12 +3,13 @@ package com.prismhealth.Models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 
 import java.util.Date;
 import java.util.List;
 
 @Data
-public class User{
+public class Users {
 
 	@JsonProperty("password")
 	private String password;

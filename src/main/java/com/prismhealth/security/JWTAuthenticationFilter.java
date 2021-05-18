@@ -2,13 +2,14 @@ package com.prismhealth.security;
 
 import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prismhealth.Models.User;
+import com.prismhealth.Models.Users;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.servlet.Filter;
@@ -36,7 +37,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
             throws AuthenticationException {
         try {
-            User creds = new ObjectMapper().readValue(req.getInputStream(), User.class);
+            Users creds = new ObjectMapper().readValue(req.getInputStream(), Users.class);
             String username = creds.getPhone();
             String password = creds.getPassword();
 
@@ -53,10 +54,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest req, HttpServletResponse res, FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
 
-        String token = JWT.create().withSubject(((User) auth.getPrincipal()).getPhone())
+        String token = JWT.create().withSubject(((User) auth.getPrincipal()).getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
-        log.warn("Authentication Successful User " + ((User) auth.getPrincipal()).getPhone() + "from hostname"
+        log.warn("Authentication Successful User " + ((User) auth.getPrincipal()).getUsername() + "from hostname"
                 + req.getLocalName() + " Ip address: " + req.getLocalAddr());
 
         res.addHeader(SecurityConstants.HEADER_STRING, token);

@@ -3,8 +3,7 @@ package com.prismhealth.Controllers;
 import java.security.Principal;
 import java.util.List;
 
-import com.prismhealth.Models.User;
-import com.prismhealth.services.AccountService;
+import com.prismhealth.Models.Users;
 import com.prismhealth.services.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -13,7 +12,6 @@ import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,34 +23,35 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 
 @Api(tags = "Admin APIs")
 @RestController
-@RequestMapping("/admin/user")
-@CrossOrigin
-public class AdminUserControler {
+@RequestMapping("admin/user")
+public class AdminUserController {
     @Autowired
     private UserService userService;
     @ApiOperation(value = "Retrieves users using phone number")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @GetMapping("/find/{phone}")
-    public User getUserById(@PathVariable("phone") String phone) {
+    public Users getUserById(@PathVariable String phone) {
         return userService.getUserById(phone);
     }
+
     @ApiOperation(value = "Retrieves users that are blocked")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @GetMapping("/blocked")
-    public List<User> getBlockedUser() {
+    public List<Users> getBlockedUser() {
         return userService.getBlockedUsers();
     }
+
     @ApiOperation(value = "Retrieves users pending delete")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "Users not found") })
     @GetMapping("/pendingdelete")
-    public List<User> getPendingDelete() {
+    public List<Users> getPendingDelete() {
         return userService.getDeleteUser();
     }
 
     @ApiOperation(value = "Retrieves users pending verification")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "Users not found") })
     @GetMapping("/pendingverification")
-    public List<User> getpendingVerifications() {
+    public List<Users> getpendingVerifications() {
         return userService.getPendingVerifications();
     }
 

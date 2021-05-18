@@ -12,28 +12,36 @@ import java.util.stream.Collectors;
 
 import com.prismhealth.Models.BlockedUser;
 import com.prismhealth.Models.PushContent;
-import com.prismhealth.Models.User;
+import com.prismhealth.Models.Users;
 import com.prismhealth.Models.UserRating;
 import com.prismhealth.repository.AccountRepository;
 import com.prismhealth.repository.BlockedUserRepo;
 import com.prismhealth.repository.UserRatingsRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    @Autowired
-    private AccountRepository usersRepo;
-    @Autowired
-    private BlockedUserRepo blockedUserRepo;
-    @Autowired
-    private AuthService authService;
-    @Autowired
-    private NotificationService notificationService;
-    @Autowired
-    private UserRatingsRepo userRatingsRepo;
 
+    private final AccountRepository usersRepo;
+
+    private final BlockedUserRepo blockedUserRepo;
+
+    private final AuthService authService;
+
+    private final NotificationService notificationService;
+
+    private final UserRatingsRepo userRatingsRepo;
+
+    public UserService(AccountRepository usersRepo, BlockedUserRepo blockedUserRepo, AuthService authService,
+                       NotificationService notificationService, UserRatingsRepo userRatingsRepo, AccountRepository usersRepo1, BlockedUserRepo blockedUserRepo1, AuthService authService1, NotificationService notificationService1, UserRatingsRepo userRatingsRepo1){
+
+        this.usersRepo = usersRepo1;
+        this.blockedUserRepo = blockedUserRepo1;
+        this.authService = authService1;
+        this.notificationService = notificationService1;
+        this.userRatingsRepo = userRatingsRepo1;
+    }
     public Map<String, Integer> addUserRatings(UserRating r) {
         if (r.getRating() > 0 && r.getRating() < 6)
             userRatingsRepo.save(r);
@@ -76,22 +84,22 @@ public class UserService {
 
     }
 
-    public User getUserById(String phone) {
+    public Users getUserById(String phone) {
 
-        Optional<User> user = Optional.ofNullable(usersRepo.findOneByPhone(phone));
-        if (user.isPresent())
-            return user.get();
-        else
-            return null;
+        Users users = usersRepo.findOneByPhone(phone);
+        if (users !=null)
+            return users;
+                    else
+                        return null;
 
     }
 
-    public User addUserDeviceToken(String token, Principal principal) {
-        Optional<User> optional = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+    public Users addUserDeviceToken(String token, Principal principal) {
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         if (optional.isPresent()) {
-            User user = optional.get();
-            user.setDeviceToken(token);
-            return usersRepo.save(user);
+            Users users = optional.get();
+            users.setDeviceToken(token);
+            return usersRepo.save(users);
         } else
             return null;
 
@@ -99,13 +107,13 @@ public class UserService {
 
 
     public boolean deleteUser(String id, Principal principal) {
-        Optional<User> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
         if (optional.isPresent()) {
-            User user = optional.get();
-            user.setDeletedBy(principal.getName());
-            user.setDeletedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            user.setDeleted(true);
-            usersRepo.save(user);
+            Users users = optional.get();
+            users.setDeletedBy(principal.getName());
+            users.setDeletedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            users.setDeleted(true);
+            usersRepo.save(users);
             return true;
 
         } else
@@ -113,14 +121,14 @@ public class UserService {
     }
 
     public boolean approveDeleteUser(String id, Principal principal) {
-        Optional<User> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
         if (optional.isPresent()) {
-            User user = optional.get();
+            Users users = optional.get();
 
-            user.setApproveDelete(true);
-            user.setApproveDeleteBy(principal.getName());
-            user.setOpproveDeleteOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            usersRepo.save(user);
+            users.setApproveDelete(true);
+            users.setApproveDeleteBy(principal.getName());
+            users.setOpproveDeleteOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            usersRepo.save(users);
             return true;
 
         } else
@@ -129,19 +137,19 @@ public class UserService {
     }
 
     public boolean blockUser(String id, Principal principal) {
-        Optional<User> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
         if (optional.isPresent()) {
-            User user = optional.get();
-            user.setBlocked(true);
-            user.setBlockedBy(principal.getName());
-            user.setBlockedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            Users users = optional.get();
+            users.setBlocked(true);
+            users.setBlockedBy(principal.getName());
+            users.setBlockedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
             BlockedUser blockedUser = new BlockedUser();
-            blockedUser.setUser(user);
-            blockedUser.setBlockedOn(user.getBlockedOn());
-            blockedUser.setBlockedBy(user.getBlockedBy());
+            blockedUser.setUser(users);
+            blockedUser.setBlockedOn(users.getBlockedOn());
+            blockedUser.setBlockedBy(users.getBlockedBy());
             blockedUserRepo.save(blockedUser);
 
-            usersRepo.save(user);
+            usersRepo.save(users);
             PushContent content = new PushContent("Prism-health Services", "Your account has been blocked");
             //notificationService.genericUserNotification(user.getPhone(), content);
             return true;
@@ -151,11 +159,11 @@ public class UserService {
     }
 
     public boolean unBlockUser(String id, Principal principal) {
-        Optional<User> optional = usersRepo.findById(id);
+        Optional<Users> optional = usersRepo.findById(id);
         if (optional.isPresent()) {
-            User user = optional.get();
-            user.setBlocked(false);
-            usersRepo.save(user);
+            Users users = optional.get();
+            users.setBlocked(false);
+            usersRepo.save(users);
             PushContent content = new PushContent("Prism-health Services", "Your account has been unblocked");
             //notificationService.genericUserNotification(user.getPhone(), content);
             return true;
@@ -166,13 +174,12 @@ public class UserService {
     }
 
     public boolean verifyUser(String id, Principal principal) {
-        Optional<User> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
-        if (optional.isPresent()) {
-            User user = optional.get();
-            user.setVerified(true);
-            user.setVerifiedBy(principal.getName());
-            user.setVerifiedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            usersRepo.save(user);
+        Users users = usersRepo.findOneByPhone(id);
+        if (users !=null) {
+            users.setVerified(true);
+            users.setVerifiedBy(principal.getName());
+            users.setVerifiedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            usersRepo.save(users);
             PushContent content = new PushContent("Prism-health Services", "Your account has been approved");
             //notificationService.genericUserNotification(user.getPhone(), content);
             return true;
@@ -181,17 +188,17 @@ public class UserService {
             return false;
     }
 
-    public List<User> getBlockedUsers() {
+    public List<Users> getBlockedUsers() {
         return usersRepo.findByBlocked(true, Sort.by("blockedOn").descending()).stream()
                 .filter(u -> !u.isDeleted() && !u.isApproveDelete()).collect(Collectors.toList());
 
     }
 
-    public List<User> getDeleteUser() {
+    public List<Users> getDeleteUser() {
         return usersRepo.findByDeletedAndApproveDelete(true, false, Sort.by("deletedOn").descending());
     }
 
-    public List<User> getPendingVerifications() {
+    public List<Users> getPendingVerifications() {
         return usersRepo.findByVerified(false).stream().filter(u -> authService.checkUserValidity(u))
                 .collect(Collectors.toList());
     }

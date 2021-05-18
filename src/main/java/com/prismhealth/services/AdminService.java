@@ -3,7 +3,7 @@ package com.prismhealth.services;
 import java.util.List;
 
 import java.util.stream.Collectors;
-import com.prismhealth.Models.User;
+import com.prismhealth.Models.Users;
 import com.prismhealth.repository.AccountRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ public class AdminService {
     @Autowired
     private AccountRepository usersRepo;
 
-    public List<User> getAllUsers() {
+    public List<Users> getAllUsers() {
         log.info("Admin: GET all Verified Users.");
 
         return usersRepo.findAll().stream().filter(u -> authService.checkUserValidity(u) && u.isVerified())

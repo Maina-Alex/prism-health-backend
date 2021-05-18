@@ -1,7 +1,11 @@
+server:
+  servlet:
+  context-path: "/api/"
 spring:
-  data:
-    rest:
-      base-path: "/api"
+  servlet:
+    multipart:
+     max-file-size: 10MB
+     max-request-size: 10MB
     mongodb:
       authentication-database: admin
       #username: prismhealth

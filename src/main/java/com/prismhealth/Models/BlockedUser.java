@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class BlockedUser {
     @Id
     private String id;
-    private User user;
+    private Users users;
     private String blockedBy;
     private Date blockedOn;
 
@@ -21,12 +21,12 @@ public class BlockedUser {
         this.id = id;
     }
 
-    public User getUser() {
-        return user;
+    public Users getUser() {
+        return users;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUser(Users users) {
+        this.users = users;
     }
 
     public String getBlockedBy() {

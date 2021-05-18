@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import com.prismhealth.Models.Help;
 import com.prismhealth.Models.Issues;
 import com.prismhealth.Models.PushContent;
-import com.prismhealth.Models.User;
+import com.prismhealth.Models.Users;
 import com.prismhealth.repository.AccountRepository;
 import com.prismhealth.repository.HelpRepo;
 import com.prismhealth.repository.IssuesRepo;
@@ -38,7 +38,7 @@ public class HelpService {
     private Logger log = LoggerFactory.getLogger(HelpService.class);
 
     public Help addHelp(Principal principal, Help help) {
-        Optional<User> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         log.info("Adding new user help");
 
         if (user.isPresent()) {
@@ -69,7 +69,7 @@ public class HelpService {
     }
 
     public List<Help> findAllUserHelp(Principal principal) {
-        Optional<User> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         if (user.isPresent())
             return helpRepo.findAllByUserId(user.get().getPhone(), Sort.by("timestamp").descending());
         else
@@ -85,7 +85,7 @@ public class HelpService {
     private Issues populateIssue(Issues i) {
         i.setHelpMessages(helpRepo.findAllByIssueId(i.getId(), Sort.by("timestamp").descending()));
 
-        Optional<User> user = usersRepo.findById(i.getUserId());
+        Optional<Users> user = usersRepo.findById(i.getUserId());
         if (user.isPresent()) {
             i.setFullname(user.get().getFirstName() + " " + user.get().getSecondName());
             i.setEmail(user.get().getEmail());

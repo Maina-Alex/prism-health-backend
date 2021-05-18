@@ -22,16 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/role")
 @CrossOrigin
-public class RoleControler {
+public class RoleController {
     @Autowired
     private RoleService roleService;
 
-    @PostMapping
-
+    @PostMapping("addRole")
     public ResponseEntity<?> addRole(@RequestBody UserRoles role, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.addRoles(role, principal));
     }
-
     @GetMapping("/all")
     public ResponseEntity<?> getAllRoles() {
         return ResponseEntity.ok().body(roleService.getAllRoles());
@@ -45,15 +43,12 @@ public class RoleControler {
     @PostMapping("/approverole/{phone}")
     public ResponseEntity<?> approveRoleById(@PathVariable String phone, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.approveRoleById(phone, principal));
-
     }
 
     @DeleteMapping("/deleterole/{phone}")
     public ResponseEntity<?> deleteRoleById(@PathVariable String phone, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.deleteById(phone, principal));
-
     }
-
     @DeleteMapping("/approvedelete/{phone}")
     public ResponseEntity<?> approveDeleteById(@PathVariable String phone, Principal principal) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roleService.approveDeleteById(phone, principal));

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.prismhealth.Models.UserRoles;
+import com.prismhealth.Models.Users;
 import com.prismhealth.repository.AccountRepository;
 import com.prismhealth.repository.UserRolesRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
 
-        Optional<com.prismhealth.Models.User> phoneUser = Optional.ofNullable(userRepository.findOneByPhone(phone));
+        Optional<Users> phoneUser = Optional.ofNullable(userRepository.findOneByPhone(phone));
         if (phoneUser.isPresent()) {
             List<SimpleGrantedAuthority> grantedAuthorities = roleRepo.findAllByUserId(phoneUser.get().getPhone()).stream()
                     .map(UserRoles::getRole).map(SimpleGrantedAuthority::new).collect(Collectors.toList());

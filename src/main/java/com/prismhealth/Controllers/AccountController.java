@@ -1,45 +1,44 @@
 package com.prismhealth.Controllers;
 
-import com.prismhealth.Models.User;
 import com.prismhealth.dto.Request.SignInRequest;
 import com.prismhealth.dto.Request.SignUpRequest;
 import com.prismhealth.dto.Request.phone;
 import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
-import com.prismhealth.repository.AccountRepository;
 import com.prismhealth.services.AccountService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.InstanceAlreadyExistsException;
+import java.util.Optional;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
 @Api(tags = "Account Apis")
 @RestController
-@RequestMapping("api")
+@RequestMapping("accounts")
 public class AccountController {
     private final AccountService accountService;
     public AccountController(AccountService accountService){
         this.accountService = accountService;
     }
 
-    @ApiOperation(value = "login user")
-    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found or already exists") })
-    @PostMapping("/login")
-    public ResponseEntity<SignInResponse> login(@RequestBody SignInRequest signInRequest){
-        return accountService.loginUser(signInRequest);
-    }
     @ApiOperation(value = "sign up user")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/signUp")
     public ResponseEntity<SignUpResponse> signup(@RequestBody SignUpRequest signUpRequest){
         return accountService.signUpUser(signUpRequest);
+    }
+    @ApiOperation(value = "update user")
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
+    @PutMapping("/update")
+    public ResponseEntity<SignUpResponse> updateUser(@RequestBody SignUpRequest signUpRequest){
+        return accountService.updateUser(signUpRequest);
     }
     @ApiOperation(value = "Authenticate phone by sending otp")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User already exists") })
@@ -50,8 +49,21 @@ public class AccountController {
     @ApiOperation(value = "Make request to change password")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/forgotPassword")
-    public ResponseEntity<HttpStatus> forgotPassword(@RequestBody String email){
+    public ResponseEntity<?> forgotPassword(@RequestBody String email){
+
         return accountService.forgotPassword(email);
+    }
+    @GetMapping("/token")
+    public ResponseEntity<?> getUserToken(@RequestHeader("Authorization") String auth) {
+        Optional<String> token = Optional.ofNullable(accountService.getToken(auth));
+
+        if (token.isPresent()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization", token.get());
+            return new ResponseEntity<>(null, headers, HttpStatus.OK);
+
+        } else
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid User");
     }
     @ApiOperation(value = "actually change password")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
