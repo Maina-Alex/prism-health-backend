@@ -11,7 +11,7 @@ import java.util.List;
 @Api(tags = "AdminProvider Apis")
 @RestController
 @RequestMapping("/admin/providers")
-
+@CrossOrigin
 public class AdminProviderController {
     @Autowired
     private AdminProviderService providerService;

@@ -1,6 +1,7 @@
 package com.prismhealth.services;
 
 import com.auth0.jwt.JWT;
+import com.prismhealth.Models.EmergencyContactUpdate;
 import com.prismhealth.Models.Users;
 import com.prismhealth.Models.UserRating;
 import com.prismhealth.Models.UserRoles;
@@ -187,12 +188,14 @@ public class AccountService {
         return header.split(" *, *")[0];
     }
 
-    public ResponseEntity<SignUpResponse> updateUser(SignUpRequest signUpRequest) {
+    public ResponseEntity<SignUpResponse> updateUser(EmergencyContactUpdate ecUpdateRequest) {
         SignUpResponse signUpResponse =new SignUpResponse();
-        if (accountRepository.existsByPhone(signUpRequest.getPhone())){
-            Users user = accountRepository.findOneByPhone(signUpRequest.getPhone());
+            Users user = accountRepository.findOneByPhone(ecUpdateRequest.getPhone());
+            if (user!=null){
+            user.setEmergencyContact1(ecUpdateRequest.getEmergencyContact1());
+            user.setEmergencyContact2(ecUpdateRequest.getEmergencyContact2());
             signUpResponse.setMessage("successfully updated");
-            signUpResponse.setUsers( accountRepository.insert(user));
+            signUpResponse.setUsers( accountRepository.save(user));
             return ResponseEntity.ok(signUpResponse);
         }
         signUpResponse.setMessage("Failed update, User not found");

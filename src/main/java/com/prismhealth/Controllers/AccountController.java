@@ -1,5 +1,6 @@
 package com.prismhealth.Controllers;
 
+import com.prismhealth.Models.EmergencyContactUpdate;
 import com.prismhealth.dto.Request.SignInRequest;
 import com.prismhealth.dto.Request.SignUpRequest;
 import com.prismhealth.dto.Request.phone;
@@ -23,6 +24,7 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 @Api(tags = "Account Apis")
 @RestController
 @RequestMapping("accounts")
+@CrossOrigin
 public class AccountController {
     private final AccountService accountService;
     public AccountController(AccountService accountService){
@@ -38,8 +40,8 @@ public class AccountController {
     @ApiOperation(value = "update user")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PutMapping("/update")
-    public ResponseEntity<SignUpResponse> updateUser(@RequestBody SignUpRequest signUpRequest){
-        return accountService.updateUser(signUpRequest);
+    public ResponseEntity<SignUpResponse> updateUser(@RequestBody EmergencyContactUpdate ecUpdateRequest){
+        return accountService.updateUser(ecUpdateRequest);
     }
     @ApiOperation(value = "Authenticate phone by sending otp")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User already exists") })

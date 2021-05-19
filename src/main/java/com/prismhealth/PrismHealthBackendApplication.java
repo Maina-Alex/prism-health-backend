@@ -12,14 +12,19 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 @EnableSwagger2
@@ -91,5 +96,23 @@ private AccountRepository accountRepository;
 		rolesRepo.save(role);
 	}
 
+	}
+	@Configuration
+	public class MvcConfig implements WebMvcConfigurer {
+
+
+		@Override
+		public void addResourceHandlers(ResourceHandlerRegistry registry) {
+			exposeDirectory("user-photos", registry);
+		}
+
+		private void exposeDirectory(String dirName, ResourceHandlerRegistry registry) {
+			Path uploadDir = Paths.get(dirName);
+			String uploadPath = uploadDir.toFile().getAbsolutePath();
+
+			if (dirName.startsWith("../")) dirName = dirName.replace("../", "");
+
+			registry.addResourceHandler("/" + dirName + "/**").addResourceLocations("file:/"+ uploadPath + "/");
+		}
 	}
 }
