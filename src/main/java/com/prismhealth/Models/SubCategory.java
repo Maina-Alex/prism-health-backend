@@ -24,10 +24,10 @@ public class SubCategory{
 	@JsonProperty("photos")
 	private String photos;
 
-	@Transient
+	/*@Transient
 	public String getPhotosImagePath() {
 		if (photos == null || subCategoryName == null) return null;
 
 		return "/user-photos/" + subCategoryName + "/" + photos;
-	}
+	}*/
 }

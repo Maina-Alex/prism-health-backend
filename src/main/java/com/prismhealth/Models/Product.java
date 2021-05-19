@@ -31,10 +31,10 @@ public class Product {
 
 	@JsonProperty("photos")
 	private String photos;
-	@Transient
+	/*@Transient
 	public String getPhotosImagePath() {
 		if (photos == null || user == null) return null;
 
 		return "/user-photos/" + user + "/" + photos;
-	}
+	}*/
 }

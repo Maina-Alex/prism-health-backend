@@ -17,12 +17,12 @@ public class Category {
 	@JsonProperty("photos")
 	private String photos;
 
-	@Transient
+	/*@Transient
 	public String getPhotosImagePath() {
 		if (photos == null || categoryName == null) return null;
 
 		return "/user-photos/" + categoryName + "/" + photos;
-	}
+	}*/
 
 	//@JsonProperty("categorySubCategories")
 	//private List<SubCategory> subCategories;

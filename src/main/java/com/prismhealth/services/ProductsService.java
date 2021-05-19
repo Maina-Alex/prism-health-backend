@@ -99,11 +99,19 @@ public class ProductsService {
         try {
             Category category1 = new ObjectMapper().readValue(category,Category.class);
             if (categoryByName(category1.getCategoryName()).isEmpty()) {
+                Photos photos = new Photos();
                 String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-                category1.setPhotos(fileName);
-                String uploadDir = "user-photos/" + category1.getCategoryName();
-                saveFile(uploadDir, fileName, multipartFile);
-                return categoryRepository.save(category1);
+                try {
+                    photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
+                    category1.setPhotos(photoRepository.save(photos).getId());
+                    //category1.setPhotos(fileName);
+                    //String uploadDir = "user-photos/" + category1.getCategoryName();
+                    //saveFile(uploadDir, fileName, multipartFile);
+                    return categoryRepository.save(category1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -119,11 +127,18 @@ public class ProductsService {
             SubCategory subCategory = new ObjectMapper().readValue(subCategory1, SubCategory.class);
             if (!categoryByName(subCategory.getCategory()).isEmpty()) {
                 String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-                subCategory.setPhotos(fileName);
+                Photos photos = new Photos();
+                try {
+                    photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
+                    subCategory.setPhotos(photoRepository.save(photos).getId());
 
-                String uploadDir = "user-photos/" + subCategory.getSubCategoryName();
-                saveFile(uploadDir, fileName, multipartFile);
-                return subCategoriesRepository.save(subCategory);
+                    //String uploadDir = "user-photos/" + subCategory.getSubCategoryName();
+                    //saveFile(uploadDir, fileName, multipartFile);
+                    return subCategoriesRepository.save(subCategory);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
             }
         } catch (JsonProcessingException e) {
             e.printStackTrace();
