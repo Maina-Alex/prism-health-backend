@@ -166,7 +166,6 @@ public class ProductsService {
              Photos photos = new Photos();
             photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
             product.setPhotos(photoRepository.save(photos).getId());
-            product.setPhotos(fileName);
             product.setUser(users.getPhone());
             return productsRepository.save(product);
              } catch (IOException e) {
