@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.security.Principal;
 import java.util.List;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
@@ -92,11 +93,11 @@ public class ProductsController {
     @ApiOperation(value = "Post a product")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/products")
-    public ResponseEntity<Product> createProduct(@RequestParam String productDetails,@RequestParam("image") MultipartFile multipartFile){
+    public ResponseEntity<Product> createProduct(@RequestParam String productDetails, @RequestParam("image") MultipartFile multipartFile, Principal principal){
         try {
             Product product = objectMapper.readValue(productDetails,Product.class);
             LoggerFactory.getLogger(this.getClass()).info("Products-> "+product.toString());
-            return new  ResponseEntity<>(productsService.saveProduct(product,multipartFile), HttpStatus.CREATED);
+            return new  ResponseEntity<>(productsService.saveProduct(product,multipartFile,principal), HttpStatus.CREATED);
         }catch (Throwable e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

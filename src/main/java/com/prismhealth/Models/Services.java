@@ -5,6 +5,7 @@ import java.util.List;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document
@@ -31,5 +32,10 @@ public class Services {
     private Date approvedOn;
 
     private Date timestamp;
+    @Transient
+    public String getPhotosImagePath() {
+        if (images == null || name == null) return null;
 
+        return "/user-photos/" + name + "/" + images;
+    }
 }

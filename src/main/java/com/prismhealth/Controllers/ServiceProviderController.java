@@ -39,8 +39,8 @@ public class ServiceProviderController {
     }
 
     @PostMapping("/providers/services")
-    public Services createService(@RequestParam String services, @RequestParam MultipartFile multipartFile){
-        return serviceProviderService.createService(services,multipartFile);
+    public Services createService(@RequestParam String services, @RequestParam MultipartFile multipartFile,Principal principal){
+        return serviceProviderService.createService(services,multipartFile,principal);
     }
     @GetMapping("/users/all")
     public List<Services> getAllService(){

@@ -75,14 +75,18 @@ public class ServiceProviderService {
 
     }
 
-    public Services createService(String services, MultipartFile multipartFile) {
+    public Services createService(String services, MultipartFile multipartFile,Principal principal) {
         /*if(multipartFile==null||multipartFile.length<1){
             throw new MultipartException("is empty");
         }*/
         try {
+            Users users = usersRepo.findOneByPhone(principal.getName());
             Services services1 = new ObjectMapper().readValue(services,Services.class);
             String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
             services1.setImages(fileName);
+            services1.setProviderId(users.getPhone());
+            services1.setLocationName(users.getLocationName());
+            services1.setPosition(users.getPosition());
             String uploadDir = "user-photos/" + services1.getName();
             saveFile(uploadDir, fileName, multipartFile);
             return serviceRepo.save(services1);

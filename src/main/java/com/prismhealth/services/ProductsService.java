@@ -1,18 +1,9 @@
 package com.prismhealth.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prismhealth.Models.Category;
-import com.prismhealth.Models.Product;
-import com.prismhealth.Models.SubCategory;
-import com.prismhealth.Models.Variant;
-import com.prismhealth.repository.CategoryRepository;
-import com.prismhealth.repository.ProductsRepository;
-import com.prismhealth.repository.SubCategoriesRepository;
-import com.prismhealth.repository.VariantRepository;
+import com.prismhealth.Models.*;
+import com.prismhealth.repository.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -24,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,11 +26,13 @@ public class ProductsService {
     private final CategoryRepository categoryRepository;
     private final SubCategoriesRepository subCategoriesRepository;
     private final ProductsRepository productsRepository;
-    public ProductsService(VariantRepository variantRepository, CategoryRepository categoryRepository1, SubCategoriesRepository subCategoriesRepository1, ProductsRepository productsRepository){
+    private final AccountRepository accountRepository;
+    public ProductsService(VariantRepository variantRepository, CategoryRepository categoryRepository1, SubCategoriesRepository subCategoriesRepository1, ProductsRepository productsRepository, AccountRepository accountRepository){
         this.variantRepository = variantRepository;
         this.categoryRepository = categoryRepository1;
         this.subCategoriesRepository = subCategoriesRepository1;
         this.productsRepository = productsRepository;
+        this.accountRepository = accountRepository;
     }
     public List<SubCategory> getSubcategoriesByName(String categoryName){
         //TODO marshal up a response for when sub category does not exists
@@ -97,7 +91,8 @@ public class ProductsService {
         //TODO marshal up a response for when category does not exists
         return null;
     }
-    public Product saveProduct(Product product, MultipartFile multipartFile) {
+    public Product saveProduct(Product product, MultipartFile multipartFile, Principal principal) {
+        Users users = accountRepository.findOneByPhone(principal.getName());
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
         variant.setSubCategory(product.getSubCategory());
@@ -108,6 +103,7 @@ public class ProductsService {
             LoggerFactory.getLogger(getClass()).info("->>"+product.toString());
             String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
             product.setPhotos(fileName);
+            product.setUser(users.getPhone());
             String uploadDir = "user-photos/" + product.getUser();
             saveFile(uploadDir, fileName, multipartFile);
             return productsRepository.save(product);
