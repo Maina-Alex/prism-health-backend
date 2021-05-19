@@ -95,7 +95,7 @@ public class ProductsService {
 
     /* saving category,subCategory and product*/
     public Category saveCategory(String category,MultipartFile multipartFile) {
-        categoryRepository.deleteAll();
+
         try {
             Category category1 = new ObjectMapper().readValue(category,Category.class);
             if (categoryByName(category1.getCategoryName()).isEmpty()) {
@@ -122,7 +122,7 @@ public class ProductsService {
     }
 
     public SubCategory saveSubCategory(String subCategory1,MultipartFile multipartFile) {
-        subCategoriesRepository.deleteAll();
+
         try {
             SubCategory subCategory = new ObjectMapper().readValue(subCategory1, SubCategory.class);
             if (!categoryByName(subCategory.getCategory()).isEmpty()) {
@@ -149,7 +149,7 @@ public class ProductsService {
     }
 
     public Product saveProduct(Product product, MultipartFile multipartFile, Principal principal) {
-        productsRepository.deleteAll();
+
         Users users = accountRepository.findOneByPhone(principal.getName());
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
