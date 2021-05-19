@@ -144,19 +144,19 @@ public class ProductsService {
             if (variantByName(product.getProductVariant()).isEmpty())
                 variantRepository.save(variant);
             String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-            String uploadDir = "user-photos/" + users.getPhone();
+            //String uploadDir = "user-photos/" + users.getPhone();
 
-            saveFile(uploadDir, fileName, multipartFile);
-            //try {
-            // Photos photos = new Photos();
-            //photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
-            //product.setPhotos(photoRepository.save(photos).getId());
+            //saveFile(uploadDir, fileName, multipartFile);
+            try {
+             Photos photos = new Photos();
+            photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
+            product.setPhotos(photoRepository.save(photos).getId());
             product.setPhotos(fileName);
             product.setUser(users.getPhone());
             return productsRepository.save(product);
-            // } catch (IOException e) {
-            //    e.printStackTrace();
-            //}*/
+             } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         //TODO marshal up a response for when subCategory does not exists
         return null;

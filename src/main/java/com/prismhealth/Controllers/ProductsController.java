@@ -13,25 +13,19 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.websocket.server.PathParam;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.Principal;
-import java.util.Base64;
 import java.util.List;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
@@ -116,12 +110,19 @@ public class ProductsController {
         }
 
     }
-    @GetMapping("/photos/{id}")
-    public String getPhoto(@PathVariable String id, Model model) {
+    @GetMapping(value = "/photos/{id}",produces = {MediaType.IMAGE_JPEG_VALUE,MediaType.IMAGE_GIF_VALUE,MediaType.IMAGE_PNG_VALUE})
+    public byte[] getPhoto(@PathVariable String id, Model model) {
         Photos photo = productsService.getPhoto(id);
-        model.addAttribute("image",Base64.getEncoder().encodeToString(photo.getPhoto().getData()));
-        return  "image";
-
+        //model.addAttribute("image",Base64.getEncoder().encodeToString(photo.getPhoto().getData()));
+        ByteArrayInputStream bis = new ByteArrayInputStream(photo.getPhoto().getData());
+        try {
+        BufferedImage bImage2 = ImageIO.read(bis);
+        ImageIO.write(bImage2, "jpg", new File("output.jpg") );
+        return photo.getPhoto().getData();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new byte[0];
     }
     @GetMapping("/{productId}")
     @ResponseBody
