@@ -15,11 +15,15 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prismhealth.Models.Bookings;
+import com.prismhealth.Models.Photos;
 import com.prismhealth.Models.Services;
 import com.prismhealth.Models.Users;
 import com.prismhealth.repository.AccountRepository;
 import com.prismhealth.repository.BookingsRepo;
+import com.prismhealth.repository.PhotoRepository;
 import com.prismhealth.repository.ServiceRepo;
+import org.bson.BsonBinarySubType;
+import org.bson.types.Binary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Distance;
@@ -38,7 +42,8 @@ public class ServiceProviderService {
     private AccountRepository usersRepo;
     @Autowired
     private BookingsRepo bookingsRepo;
-
+    @Autowired
+    private PhotoRepository photoRepository;
     @Autowired
     private ServiceBookingService bookingsService;
     @Autowired
@@ -89,11 +94,12 @@ public class ServiceProviderService {
             services1.setProviderId(users.getPhone());
             services1.setLocationName(users.getLocationName());
             services1.setPosition(users.getPosition());
-            String uploadDir = "user-photos/" + services1.getName();
-            saveFile(uploadDir, fileName, multipartFile);
+            Photos photos = new Photos();
+            photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
+            services1.setImages(photoRepository.save(photos).getId());
             return serviceRepo.save(services1);
 
-        } catch (JsonProcessingException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
