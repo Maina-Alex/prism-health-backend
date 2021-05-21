@@ -2,7 +2,7 @@ package com.prismhealth.services;
 
 import java.security.Principal;
 import java.sql.Date;
-
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -32,18 +32,21 @@ public class BookingService {
     AccountRepository accountRepository;
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
-        LocalDateTime today = LocalDateTime.now();
-        LocalDateTime future = today.plusDays(7);
+        LocalDate today = LocalDate.now();
+        LocalDate future = today.plusDays(2);
 
         log.info("Getting bookings for service " + serviceId);
 
         List<ServiceBooking> bookings = new ArrayList<>();
         while (today.compareTo(future) <= 0) {
 
-            while (today.compareTo(today.withHour(23)) <= 0) {
+            System.out.println("compare " + today.compareTo(future));
+            int hour = 0;
+
+            while (hour <= 24) {
                 ServiceBooking b = new ServiceBooking();
-                List<Bookings> serviceB = bookingsRepo.findAllByServiceIdAndDateAndHour(serviceId,
-                        Date.valueOf(today.toLocalDate()), today.getHour());
+                List<Bookings> serviceB = bookingsRepo.findAllByServiceIdAndDateAndHour(serviceId, Date.valueOf(today),
+                        hour);
                 if (serviceB.isEmpty()) {
                     b.setAvailable(true);
 
@@ -53,16 +56,21 @@ public class BookingService {
                     else
                         b.setAvailable(false);
                 }
+                if (LocalDate.now().compareTo(today) == 0 && hour < LocalDateTime.now().getHour()) {
+                    b.setAvailable(false);
 
-                b.setDay(today.toLocalDate().toString());
-                b.setHour(today.getHour());
+                }
+
+                b.setDay(today.toString());
+                b.setHour(hour);
                 bookings.add(b);
-                today = today.plusHours(1);
+                hour = hour + 1;
 
             }
-            today = today.plusDays(1).withHour(0).withMinute(0).withSecond(0);
+            today = today.plusDays(1);
 
         }
+
         Map<String, List<ServiceBooking>> services = bookings.stream()
                 .collect(Collectors.groupingBy(ServiceBooking::getDay));
 

@@ -9,14 +9,13 @@ import com.prismhealth.Models.Services;
 import com.prismhealth.Models.Users;
 import com.prismhealth.services.BookingService;
 import com.prismhealth.services.ServiceProviderService;
-import com.prismhealth.util.HelperUtility;
+
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @Api(tags = "ServiceProvider Apis")
 @RestController
@@ -45,9 +44,8 @@ public class ServiceProviderController {
     }
 
     @PostMapping("/providers/services")
-    public Services createService(@RequestParam String services, @RequestParam MultipartFile multipartFile,
-            Principal principal) {
-        return serviceProviderService.createService(services, multipartFile, principal);
+    public Services createService(@RequestBody Services services, Principal principal) {
+        return serviceProviderService.createService(services, principal);
     }
 
     @GetMapping("/getServiceProviders")

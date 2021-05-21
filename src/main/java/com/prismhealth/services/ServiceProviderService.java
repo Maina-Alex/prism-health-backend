@@ -1,45 +1,26 @@
 package com.prismhealth.services;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.auth0.jwt.JWT;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prismhealth.Models.*;
 import com.prismhealth.repository.*;
-import com.prismhealth.security.SecurityConstants;
+
 import com.prismhealth.util.Actions;
-import com.prismhealth.util.AppConstants;
-import com.prismhealth.util.HelperUtility;
+
 import com.prismhealth.util.LogMessage;
-import org.bson.BsonBinarySubType;
-import org.bson.types.Binary;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartException;
-import org.springframework.web.multipart.MultipartFile;
 
-import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ServiceProviderService {
@@ -48,8 +29,7 @@ public class ServiceProviderService {
     private AccountRepository usersRepo;
     @Autowired
     private BookingsRepo bookingsRepo;
-    @Autowired
-    private PhotoRepository photoRepository;
+
     @Autowired
     private BookingService bookingsService;
     @Autowired
@@ -96,35 +76,30 @@ public class ServiceProviderService {
 
     }
 
-    public Services createService(String services, MultipartFile multipartFile, Principal principal) {
+    public Services createService(Services services, Principal principal) {
         /*
          * if(multipartFile==null||multipartFile.length<1){ throw new
          * MultipartException("is empty"); }
          */
-        try {
-            Users users = usersRepo.findOneByPhone(principal.getName());
-            Services services1 = new ObjectMapper().readValue(services, Services.class);
-            String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-            services1.setImages(fileName);
-            services1.setProviderId(users.getPhone());
-            services1.setLocationName(users.getLocationName());
-            services1.setPositions(users.getPositions());
-            services1.setPosition(users.getPosition());
-            Photos photos = new Photos();
-            photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
-            sendEmail(users, "createService");
-            services1.setImages(photoRepository.save(photos).getId());
-            return serviceRepo.save(services1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+
+        Users users = usersRepo.findOneByPhone(principal.getName());
+
+        services.setProviderId(users.getPhone());
+        services.setLocationName(users.getLocationName());
+        services.setPositions(users.getPositions());
+        services.setPosition(users.getPosition());
+
+        // (users, "createService");
+
+        return serviceRepo.save(services);
+
     }
 
     public List<Services> getAllServices() {
         List<Services> services = serviceRepo.findAll();
-        for (Services services1: services){
+        for (Services services1 : services) {
             services1.setUsers(accountRepository.findOneByPhone(services1.getProviderId()));
+            services1.setBookings(bookingsService.getServiceBookings(services1.getId()));
         }
         return services;
     }

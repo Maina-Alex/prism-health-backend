@@ -2,21 +2,21 @@ server:
   port: 8081
 spring:
   mail:
-   host: smtp.gmail.com
-   port: 587
-   username: "prismhealth658@gmail.com"
-   password: "ohcrgcdxmfdnyevv"
-   properties:
+    host: smtp.gmail.com
+    port: 587
+    username: "prismhealth658@gmail.com"
+    password: "ohcrgcdxmfdnyevv"
+    properties:
       mail:
         smtp:
           auth: true
           starttls:
-             enable: true
+            enable: true
           debug: true
   servlet:
     multipart:
-     max-file-size: 10MB
-     max-request-size: 10MB
+      max-file-size: 10MB
+      max-request-size: 10MB
   data:
     rest:
       base-path: "/api"
@@ -29,31 +29,22 @@ spring:
       host: 127.0.0.1
 uwazii:
   sender-id: Uwazii
-  sms-endpoint-url: 'https://api.uwaziimobile.com/api/v2/SendSMS'
+  sms-endpoint-url: "https://api.uwaziimobile.com/api/v2/SendSMS"
   apiKey: BcvVtJY+ApwKcY4xEw8k/s/eLZAvgcqA0M0ocY9IHJ8=
   clientId: 7f11e72b-fb3c-4b10-9d7d-41d84d770207
-
 #--services:
-  #mongodb_container:
-   # image: mongo:latest
-    #environment:
-     # MONGO_INITDB_DATABASE: UsersDb
-     # MONGO_INITDB_ROOT_USERNAME: prismhealth
-     # MONGO_INITDB_ROOT_PASSWORD: prismhealth
-    #ports:
-     # - 27017:27017
-    #volumes:
-      #- /init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-     # - mongodb_data_container:/data/UsersDb
+#mongodb_container:
+# image: mongo:latest
+#environment:
+# MONGO_INITDB_DATABASE: UsersDb
+# MONGO_INITDB_ROOT_USERNAME: prismhealth
+# MONGO_INITDB_ROOT_PASSWORD: prismhealth
+#ports:
+# - 27017:27017
+#volumes:
+#- /init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+# - mongodb_data_container:/data/UsersDb
 
 #volumes:
- #   mongodb_data_container:
+#   mongodb_data_container:
 
-logging:
-  level:
-    org:
-      springframework:
-        data:
-          mongodb:
-            core:
-              MongoTemplate: DEBUG
