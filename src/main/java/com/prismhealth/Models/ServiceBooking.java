@@ -1,23 +1,11 @@
 package com.prismhealth.Models;
 
+import lombok.Data;
+
+@Data
 public class ServiceBooking {
     private String day;
+    private int hour;
     private boolean available;
-
-    public String getDay() {
-        return day;
-    }
-
-    public void setDay(String day) {
-        this.day = day;
-    }
-
-    public boolean isAvailable() {
-        return available;
-    }
-
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
 
 }

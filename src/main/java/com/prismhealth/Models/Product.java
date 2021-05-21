@@ -2,8 +2,6 @@ package com.prismhealth.Models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.bson.types.Binary;
-import org.springframework.data.annotation.Transient;
 
 @Data
 public class Product {
@@ -34,10 +32,10 @@ public class Product {
 
 	@JsonProperty("provider")
 	private Users users;
-	/*@Transient
-	public String getPhotosImagePath() {
-		if (photos == null || user == null) return null;
-
-		return "/user-photos/" + user + "/" + photos;
-	}*/
+	/*
+	 * @Transient public String getPhotosImagePath() { if (photos == null || user ==
+	 * null) return null;
+	 * 
+	 * return "/user-photos/" + user + "/" + photos; }
+	 */
 }

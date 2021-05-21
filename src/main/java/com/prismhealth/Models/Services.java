@@ -2,11 +2,13 @@ package com.prismhealth.Models;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
+
 @Data
 @Document
 public class Services {
@@ -24,7 +26,7 @@ public class Services {
     private boolean available;
     private String type;
     private String images;
-    private List<ServiceBooking> bookings;
+    private Map<String, List<ServiceBooking>> bookings;
     private String providerId;
     private String locationName;
 
@@ -32,9 +34,11 @@ public class Services {
     private Date approvedOn;
 
     private Date timestamp;
+
     @Transient
     public String getPhotosImagePath() {
-        if (images == null || name == null) return null;
+        if (images == null || name == null)
+            return null;
 
         return "/user-photos/" + name + "/" + images;
     }

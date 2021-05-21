@@ -3,7 +3,6 @@ package com.prismhealth.Models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 
 import java.util.Date;
 import java.util.List;
@@ -40,7 +39,6 @@ public class Users {
 
 	@JsonProperty("auth")
 	private String auth;
-
 
 	@JsonProperty("rating")
 	private double rating;
@@ -83,7 +81,9 @@ public class Users {
 
 	@Override
 	public String toString() {
-		return String.format("User{password='%s', role='%s', phone='%s', firstName='%s', secondName='%s'," +
-				" email='%s',gender = '%s',Dob = '%s'}", password, roles, phone, firstName, secondName, email, gender,DateOfBirth);
+		return String.format(
+				"User{password='%s', role='%s', phone='%s', firstName='%s', secondName='%s',"
+						+ " email='%s',gender = '%s',Dob = '%s'}",
+				password, roles, phone, firstName, secondName, email, gender, DateOfBirth);
 	}
 }

@@ -51,23 +51,24 @@ public class ServiceProviderService {
     @Autowired
     private PhotoRepository photoRepository;
     @Autowired
-    private ServiceBookingService bookingsService;
+    private BookingService bookingsService;
     @Autowired
     private ServiceRepo serviceRepo;
     @Autowired
-     NotificationRepo notificationRepo;
+    NotificationRepo notificationRepo;
     @Autowired
-     MailService mailService;
+    MailService mailService;
     @Autowired
     AccountRepository accountRepository;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     public Services setServiceAvailabilityFalse(List<Bookings> bookings) {
         bookings.stream().map(b -> {
             b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
             return b;
         }).forEach(bookingsRepo::save);
         Services service = serviceRepo.findById(bookings.get(0).getServiceId()).get();
-        sendEmail(usersRepo.findOneByPhone(service.getProviderId()),"notifyProvider");
+        sendEmail(usersRepo.findOneByPhone(service.getProviderId()), "notifyProvider");
         service.setBookings(bookingsService.getServiceBookings(service.getId()));
         return service;
     }
@@ -87,7 +88,7 @@ public class ServiceProviderService {
     public List<Bookings> getAllServicesBookings(Principal principal) {
         Optional<Users> optional = usersRepo.findOneByEmail(principal.getName());
         if (optional.isPresent()) {
-            return bookingsRepo.findAllByProviderId(optional.get().getPhone(), Sort.by("timestamp").descending());
+            return bookingsRepo.findAllByServiceId(optional.get().getPhone(), Sort.by("timestamp").descending());
         }
 
         else
@@ -95,13 +96,14 @@ public class ServiceProviderService {
 
     }
 
-    public Services createService(String services, MultipartFile multipartFile,Principal principal) {
-        /*if(multipartFile==null||multipartFile.length<1){
-            throw new MultipartException("is empty");
-        }*/
+    public Services createService(String services, MultipartFile multipartFile, Principal principal) {
+        /*
+         * if(multipartFile==null||multipartFile.length<1){ throw new
+         * MultipartException("is empty"); }
+         */
         try {
             Users users = usersRepo.findOneByPhone(principal.getName());
-            Services services1 = new ObjectMapper().readValue(services,Services.class);
+            Services services1 = new ObjectMapper().readValue(services, Services.class);
             String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
             services1.setImages(fileName);
             services1.setProviderId(users.getPhone());
@@ -109,7 +111,7 @@ public class ServiceProviderService {
             services1.setPosition(users.getPosition());
             Photos photos = new Photos();
             photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
-            sendEmail(users,"createService");
+            sendEmail(users, "createService");
             services1.setImages(photoRepository.save(photos).getId());
             return serviceRepo.save(services1);
 
@@ -119,38 +121,42 @@ public class ServiceProviderService {
         return null;
     }
 
-
     public List<Services> getAllServices() {
         return serviceRepo.findAll();
     }
+
     public List<Services> getServicesByName(String serviceName) {
-        return serviceRepo.findAll().stream().filter(services -> services.getName()==serviceName).collect(Collectors.toList());
+        return serviceRepo.findAll().stream().filter(services -> services.getName() == serviceName)
+                .collect(Collectors.toList());
     }
+
     public List<Services> getServicesByProvider(String providerId) {
         return serviceRepo.findAllByProviderId(providerId);
     }
-    public List<Services> getServicesNear(Point location, Distance distance) {
-        return serviceRepo.findByPositionNear(location,distance);
-    }
-    public String sendEmail(Users users, String action){
 
-        if (users==null){
+    public List<Services> getServicesNear(Point location, Distance distance) {
+        return serviceRepo.findByPositionNear(location, distance);
+    }
+
+    public String sendEmail(Users users, String action) {
+
+        if (users == null) {
             return "User with phone number not found";
         }
         String message = null;
-        if (action.equals("createAccount")){
-            message = "Account successfully created for "+ users.getPhone();
-        }else if (action.equals("createProduct")){
-            message = "Product successfully created by "+ users.getPhone()+" "+users.getEmail();
-        }else if (action.equals("createService")){
-            message = "Service successfully created by "+ users.getPhone()+" "+users.getEmail();
-        }else if (action.equals("createBooking")){
-            message = "Booking successfully created by "+ users.getPhone()+" "+users.getEmail();
-        }else if (action.equals("notifyProvider")){
+        if (action.equals("createAccount")) {
+            message = "Account successfully created for " + users.getPhone();
+        } else if (action.equals("createProduct")) {
+            message = "Product successfully created by " + users.getPhone() + " " + users.getEmail();
+        } else if (action.equals("createService")) {
+            message = "Service successfully created by " + users.getPhone() + " " + users.getEmail();
+        } else if (action.equals("createBooking")) {
+            message = "Booking successfully created by " + users.getPhone() + " " + users.getEmail();
+        } else if (action.equals("notifyProvider")) {
             message = "Product booking made for your product";
         }
 
-        if (users!=null) {
+        if (users != null) {
             log.info(message);
             Mail mail = new Mail();
             mail.setMailFrom("prismhealth@gmail.com");
@@ -178,10 +184,11 @@ public class ServiceProviderService {
 
     public List<Users> getProvidersByServiceId(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        List<Services> servicesList = serviceRepo.findAll().stream().
-                filter(services1 -> services.get().getName().equals(services.get().getName())).collect(Collectors.toList());
+        List<Services> servicesList = serviceRepo.findAll().stream()
+                .filter(services1 -> services.get().getName().equals(services.get().getName()))
+                .collect(Collectors.toList());
         List<Users> usersList = new ArrayList<>();
-        for (Services services1: servicesList){
+        for (Services services1 : servicesList) {
             usersList.add(accountRepository.findOneByPhone(services1.getProviderId()));
         }
         return usersList;

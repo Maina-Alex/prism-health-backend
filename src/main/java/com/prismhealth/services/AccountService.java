@@ -2,7 +2,7 @@ package com.prismhealth.services;
 
 import com.auth0.jwt.JWT;
 import com.prismhealth.Models.*;
-import com.prismhealth.dto.Request.SignInRequest;
+
 import com.prismhealth.dto.Request.SignUpRequest;
 import com.prismhealth.dto.Request.phone;
 import com.prismhealth.dto.Response.SignInResponse;
@@ -10,23 +10,21 @@ import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.repository.*;
 import com.prismhealth.security.SecurityConstants;
 import com.prismhealth.util.Actions;
-import com.prismhealth.util.AppConstants;
-import com.prismhealth.util.HelperUtility;
+
 import com.prismhealth.util.LogMessage;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.asm.Advice.Return;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
+
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.User;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -34,7 +32,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
-import static java.util.Objects.nonNull;
 
 @Slf4j
 @Service
@@ -49,76 +46,81 @@ public class AccountService {
     NotificationRepo notificationRepo;
     @Autowired
     MailService mailService;
-    public AccountService(AccountRepository accountRepository, AuthService authService, UserRatingsRepo userRatingsRepo, UserRolesRepo userRolesRepo){
+
+    public AccountService(AccountRepository accountRepository, AuthService authService, UserRatingsRepo userRatingsRepo,
+            UserRolesRepo userRolesRepo) {
         this.accountRepository = accountRepository;
         this.authService = authService;
         this.userRatingsRepo = userRatingsRepo;
         this.userRolesRepo = userRolesRepo;
     }
+
     public ResponseEntity<SignUpResponse> authentication(phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
         Users users = accountRepository.findOneByPhone(phone.getPhone());
-        if (users !=null){
-            log.info("phone->"+ users.getPhone());
-             signUpResponse.setMessage("user already exists");
-             return ResponseEntity.badRequest().body(signUpResponse);
-        }else {
-        String authCode = authService.getAuthentication(phone.getPhone());
-        signUpResponse.setMessage("Create new user..");
-        signUpResponse.setAuthCode(authCode);
+        if (users != null) {
+            log.info("phone->" + users.getPhone());
+            signUpResponse.setMessage("user already exists");
+            return ResponseEntity.badRequest().body(signUpResponse);
+        } else {
+            String authCode = authService.getAuthentication(phone.getPhone());
+            signUpResponse.setMessage("Create new user..");
+            signUpResponse.setAuthCode(authCode);
         }
         return ResponseEntity.ok(signUpResponse);
     }
 
-    public ResponseEntity<SignUpResponse> signUpUser(SignUpRequest signUpRequest){
+    public ResponseEntity<SignUpResponse> signUpUser(SignUpRequest signUpRequest) {
         SignUpResponse signUpResponse = new SignUpResponse();
 
         Users thisUsers = accountRepository.findOneByPhone(signUpRequest.getPhone());
-            if (thisUsers ==null) {
-                Users users1 = new Users();
-                users1.setPassword(encoder.encode(signUpRequest.getPassword()));
-                users1.setPhone(signUpRequest.getPhone());
-                users1.setEmail(signUpRequest.getEmail());
-                users1.setFirstName(signUpRequest.getFirstName());
-                users1.setSecondName(signUpRequest.getSecondName());
-                users1.setGender(signUpRequest.getGender());
-                users1.setDateOfBirth(signUpRequest.getDateOfBirth());
-                users1.setLocationName(signUpRequest.getLocation());
-                users1.setPosition(new double[]{Double.parseDouble(signUpRequest.getLatitude()), Double.parseDouble(signUpRequest.getLongitude())});
-                users1.setEmergencyContact1(null);
-                users1.setEmergencyContact2(null);
-                users1.setAccountType("USER");
-                log.info("Registering new Mobile User:  Id:" + users1.getPhone());
+        if (thisUsers == null) {
+            Users users1 = new Users();
+            users1.setPassword(encoder.encode(signUpRequest.getPassword()));
+            users1.setPhone(signUpRequest.getPhone());
+            users1.setEmail(signUpRequest.getEmail());
+            users1.setFirstName(signUpRequest.getFirstName());
+            users1.setSecondName(signUpRequest.getSecondName());
+            users1.setGender(signUpRequest.getGender());
+            users1.setDateOfBirth(signUpRequest.getDateOfBirth());
+            users1.setLocationName(signUpRequest.getLocation());
+            users1.setPosition(new double[] { Double.parseDouble(signUpRequest.getLatitude()),
+                    Double.parseDouble(signUpRequest.getLongitude()) });
+            users1.setEmergencyContact1(null);
+            users1.setEmergencyContact2(null);
+            users1.setAccountType("USER");
+            log.info("Registering new Mobile User:  Id:" + users1.getPhone());
 
-                users1.setVerified(true);
-                users1.setBlocked(false);
-                users1.setDeleted(false);
+            users1.setVerified(true);
+            users1.setBlocked(false);
+            users1.setDeleted(false);
 
-                users1 = accountRepository.save(users1);
-                signUpResponse.setMessage("successfully created");
+            users1 = accountRepository.save(users1);
+            signUpResponse.setMessage("successfully created");
 
-                UserRoles role = new UserRoles();
-                role.setAssignedBy("DEFAULT");
-                role.setRole("ROLE_USER");// "ROLE_ADMIN", "ROLE_HELP_SUPPORT", "ROLE_SITE_CONTENT_UPDATER"));
-                role.setUserId(users1.getPhone());
-                userRolesRepo.save(role);
-                log.info("Assigned Default User Role to UserId:" + users1.getPhone());
-                sendEmail(users1,"createAccount");
-                signUpResponse.setUsers(users1);
-                return ResponseEntity.ok().body(signUpResponse);
-            } else {
+            UserRoles role = new UserRoles();
+            role.setAssignedBy("DEFAULT");
+            role.setRole("ROLE_USER");// "ROLE_ADMIN", "ROLE_HELP_SUPPORT", "ROLE_SITE_CONTENT_UPDATER"));
+            role.setUserId(users1.getPhone());
+            userRolesRepo.save(role);
+            log.info("Assigned Default User Role to UserId:" + users1.getPhone());
+            sendEmail(users1, "createAccount");
+            signUpResponse.setUsers(users1);
+            return ResponseEntity.ok().body(signUpResponse);
+        } else {
 
-                    signUpResponse.setMessage("User already exists sign in..");
-                    return ResponseEntity.badRequest().body(signUpResponse);
-                }
+            signUpResponse.setMessage("User already exists sign in..");
+            return ResponseEntity.badRequest().body(signUpResponse);
+        }
     }
 
     public ResponseEntity<?> forgotPassword(String email) {
-       //TODO implement the notification service to send the change password link.
-        log.info("Send link to email "+email);
+        // TODO implement the notification service to send the change password link.
+        log.info("Send link to email " + email);
 
-        return new ResponseEntity<>(authService.forgotPassword(email),HttpStatus.OK);
+        return new ResponseEntity<>(authService.forgotPassword(email), HttpStatus.OK);
     }
+
     public String getToken(String phone) {
         Optional<Users> users = Optional.ofNullable(accountRepository.findOneByPhone(phone));
         if (users.isPresent() && authService.checkUserValidity(users.get())) {
@@ -138,12 +140,13 @@ public class AccountService {
         Users users;
 
         users = accountRepository.findOneByPhone(phone);
-        if (users !=null){
+        if (users != null) {
             users.setPassword(password);
             return ResponseEntity.ok(accountRepository.save(users));
         }
         return ResponseEntity.badRequest().body("User does not exist");
     }
+
     public Map<String, Integer> getUserRating(String userId) {
         Map<String, Integer> crating = new HashMap<>();
         List<UserRating> ratings = userRatingsRepo.findAllByUserId(userId, Sort.unsorted()).stream()
@@ -161,6 +164,7 @@ public class AccountService {
         return crating;
 
     }
+
     public List<UserRating> addUserReview(UserRating r) {
         r.setRating(0);
         userRatingsRepo.save(r);
@@ -168,6 +172,7 @@ public class AccountService {
                 .filter(c -> c.getRating() == 0).collect(Collectors.toList());
 
     }
+
     public Map<String, Integer> addUserRatings(UserRating r) {
         if (r.getRating() > 0 && r.getRating() < 6)
             userRatingsRepo.save(r);
@@ -179,19 +184,21 @@ public class AccountService {
                 .filter(c -> c.getRating() == 0).collect(Collectors.toList());
 
     }
+
     public ResponseEntity<SignUpResponse> updateUser(EmergencyContactUpdate ecUpdateRequest) {
-        SignUpResponse signUpResponse =new SignUpResponse();
-            Users user = accountRepository.findOneByPhone(ecUpdateRequest.getPhone());
-            if (user!=null){
+        SignUpResponse signUpResponse = new SignUpResponse();
+        Users user = accountRepository.findOneByPhone(ecUpdateRequest.getPhone());
+        if (user != null) {
             user.setEmergencyContact1(ecUpdateRequest.getEmergencyContact1());
             user.setEmergencyContact2(ecUpdateRequest.getEmergencyContact2());
             signUpResponse.setMessage("successfully updated");
-            signUpResponse.setUsers( accountRepository.save(user));
+            signUpResponse.setUsers(accountRepository.save(user));
             return ResponseEntity.ok(signUpResponse);
         }
         signUpResponse.setMessage("Failed update, User not found");
         return ResponseEntity.badRequest().body(signUpResponse);
     }
+
     public ResponseEntity<?> getUsers(Principal principal) {
         SignInResponse signInResponse = new SignInResponse();
         String phone = principal.getName();
@@ -208,25 +215,26 @@ public class AccountService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(signInResponse);
         }
     }
-    public String sendEmail(Users users, String action){
 
-        if (users==null){
+    public String sendEmail(Users users, String action) {
+
+        if (users == null) {
             return "User with phone number not found";
         }
         String message = null;
-        if (action.equals("createAccount")){
-            message = "Account successfully created for "+ users.getPhone();
-        }else if (action.equals("createProduct")){
-            message = "Product successfully created by "+ users.getPhone()+" "+users.getEmail();
-        }else if (action.equals("createService")){
-            message = "Service successfully created by "+ users.getPhone()+" "+users.getEmail();
-        }else if (action.equals("createBooking")){
-            message = "Booking successfully created by "+ users.getPhone()+" "+users.getEmail();
-        }else if (action.equals("notifyProvider")){
+        if (action.equals("createAccount")) {
+            message = "Account successfully created for " + users.getPhone();
+        } else if (action.equals("createProduct")) {
+            message = "Product successfully created by " + users.getPhone() + " " + users.getEmail();
+        } else if (action.equals("createService")) {
+            message = "Service successfully created by " + users.getPhone() + " " + users.getEmail();
+        } else if (action.equals("createBooking")) {
+            message = "Booking successfully created by " + users.getPhone() + " " + users.getEmail();
+        } else if (action.equals("notifyProvider")) {
             message = "Product booking made for your product";
         }
 
-        if (users!=null) {
+        if (users != null) {
             log.info(message);
             Mail mail = new Mail();
             mail.setMailFrom("prismhealth658@gmail.com");
@@ -249,5 +257,12 @@ public class AccountService {
             log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
             return null;
         }
+    }
+
+    public ResponseEntity<?> getProviderById(String providerId) {
+        Optional<Users> provider = accountRepository.findById(providerId);
+        if (provider.isPresent())
+            return ResponseEntity.ok(provider.get());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Provider not found");
     }
 }
