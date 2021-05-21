@@ -84,7 +84,8 @@ public class AccountService {
                 users1.setGender(signUpRequest.getGender());
                 users1.setDateOfBirth(signUpRequest.getDateOfBirth());
                 users1.setLocationName(signUpRequest.getLocation());
-                users1.setPosition(new double[]{Double.parseDouble(signUpRequest.getLatitude()), Double.parseDouble(signUpRequest.getLongitude())});
+                users1.setPosition(new double[]{Double.parseDouble(signUpRequest.getLatitude()),Double.parseDouble(signUpRequest.getLongitude())});
+                users1.setPositions(signUpRequest.getPositions());
                 users1.setEmergencyContact1(null);
                 users1.setEmergencyContact2(null);
                 users1.setAccountType("USER");
@@ -179,12 +180,10 @@ public class AccountService {
                 .filter(c -> c.getRating() == 0).collect(Collectors.toList());
 
     }
-    public ResponseEntity<SignUpResponse> updateUser(EmergencyContactUpdate ecUpdateRequest) {
+    public ResponseEntity<SignUpResponse> updateUser(Users users) {
         SignUpResponse signUpResponse =new SignUpResponse();
-            Users user = accountRepository.findOneByPhone(ecUpdateRequest.getPhone());
+            Users user = accountRepository.findOneByPhone(users.getPhone());
             if (user!=null){
-            user.setEmergencyContact1(ecUpdateRequest.getEmergencyContact1());
-            user.setEmergencyContact2(ecUpdateRequest.getEmergencyContact2());
             signUpResponse.setMessage("successfully updated");
             signUpResponse.setUsers( accountRepository.save(user));
             return ResponseEntity.ok(signUpResponse);
@@ -249,5 +248,18 @@ public class AccountService {
             log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
             return null;
         }
+    }
+
+    public ResponseEntity<?> getProviderById(String providerId) {
+        try{
+        return new ResponseEntity<Users>(accountRepository.findOneByPhone(providerId), HttpStatus.FOUND);
+        }catch (Exception e){
+            try {
+                throw new ChangeSetPersister.NotFoundException();
+            } catch (ChangeSetPersister.NotFoundException notFoundException) {
+                notFoundException.printStackTrace();
+            }
+        }
+        return null;
     }
 }

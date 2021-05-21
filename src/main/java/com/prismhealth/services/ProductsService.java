@@ -80,9 +80,13 @@ public class ProductsService {
 
     public List<Product> productByName(String productName) {
         //TODO marshal up a response for when product does not exists
-        return productsRepository.findAll()
+        List<Product> products = productsRepository.findAll()
                 .stream().filter(r -> r.getProductName().contains(productName))
                 .collect(Collectors.toList());
+        for (Product product: products){
+            product.setUsers(accountRepository.findOneByPhone(product.getUser()));
+        }
+        return products;
     }
 
     public List<SubCategory> subCategoryByName(String subCategoryName) {
@@ -179,7 +183,9 @@ public class ProductsService {
             product.setPhotos(photoRepository.save(photos).getId());
             product.setUser(users.getPhone());
             sendEmail(users,"createProduct");
-            return productsRepository.save(product);
+            Product product1 = productsRepository.save(product);
+                product1.setUsers(accountRepository.findOneByPhone(product.getUser()));
+                return product1;
              } catch (IOException e) {
                 e.printStackTrace();
             }

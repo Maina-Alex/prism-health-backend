@@ -106,6 +106,7 @@ public class ServiceProviderService {
             services1.setImages(fileName);
             services1.setProviderId(users.getPhone());
             services1.setLocationName(users.getLocationName());
+            services1.setPositions(users.getPositions());
             services1.setPosition(users.getPosition());
             Photos photos = new Photos();
             photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
@@ -121,7 +122,11 @@ public class ServiceProviderService {
 
 
     public List<Services> getAllServices() {
-        return serviceRepo.findAll();
+        List<Services> services = serviceRepo.findAll();
+        for (Services services1: services){
+            services1.setUsers(accountRepository.findOneByPhone(services1.getProviderId()));
+        }
+        return services;
     }
     public List<Services> getServicesByName(String serviceName) {
         return serviceRepo.findAll().stream().filter(services -> services.getName()==serviceName).collect(Collectors.toList());

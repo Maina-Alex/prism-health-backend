@@ -44,8 +44,8 @@ public class AccountController {
     @ApiOperation(value = "update user")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PutMapping("/update")
-    public ResponseEntity<SignUpResponse> updateUser(@RequestBody EmergencyContactUpdate ecUpdateRequest){
-        return accountService.updateUser(ecUpdateRequest);
+    public ResponseEntity<SignUpResponse> updateUser(@RequestBody Users users){
+        return accountService.updateUser(users);
     }
     @ApiOperation(value = "Authenticate phone by sending otp")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User already exists") })

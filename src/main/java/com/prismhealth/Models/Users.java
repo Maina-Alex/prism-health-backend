@@ -48,6 +48,8 @@ public class Users {
 	private String locationName;
 	@JsonProperty("position")
 	private double[] position;
+	@JsonProperty("positions")
+	private Positions positions;
 	@JsonProperty("username")
 	private String username;
 	@JsonProperty("accountType")

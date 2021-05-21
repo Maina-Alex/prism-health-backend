@@ -1,6 +1,7 @@
 package com.prismhealth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.prismhealth.Models.Positions;
 import com.prismhealth.Models.Users;
 import com.prismhealth.Models.UserRoles;
 import com.prismhealth.repository.AccountRepository;
@@ -78,12 +79,17 @@ private AccountRepository accountRepository;
 	public void run(ApplicationArguments args) throws Exception {
 		if (!accountRepository.existsByPhone("+254711111111")){
 		Users users1 = new Users();
+			Positions positions = new Positions();
+			positions.setLongitude(Double.parseDouble("24.345"));
+			positions.setLatitude(Double.parseDouble("-1.2345"));
+			positions.setLocationName("location");
 		users1.setPassword(passwordEncoder().encode("password"));
 		users1.setPhone("+254711111111");
 		users1.setEmail("joshuajoe12561@gmail.com");
 		users1.setFirstName("Admin");
 		users1.setLocationName("Location");
 		users1.setPosition(new double[]{Double.parseDouble("-1.2345"), Double.parseDouble("24.345")});
+		users1.setPositions(positions);
 		users1.setEmergencyContact1(null);
 		users1.setEmergencyContact2(null);
 		users1.setAccountType("ADMIN");
