@@ -108,13 +108,13 @@ public class ServiceProviderService {
             services1.setImages(fileName);
             services1.setProviderId(users.getPhone());
             services1.setLocationName(users.getLocationName());
+            services1.setPositions(users.getPositions());
             services1.setPosition(users.getPosition());
             Photos photos = new Photos();
             photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
             sendEmail(users, "createService");
             services1.setImages(photoRepository.save(photos).getId());
             return serviceRepo.save(services1);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -122,7 +122,11 @@ public class ServiceProviderService {
     }
 
     public List<Services> getAllServices() {
-        return serviceRepo.findAll();
+        List<Services> services = serviceRepo.findAll();
+        for (Services services1: services){
+            services1.setUsers(accountRepository.findOneByPhone(services1.getProviderId()));
+        }
+        return services;
     }
 
     public List<Services> getServicesByName(String serviceName) {
@@ -159,7 +163,7 @@ public class ServiceProviderService {
         if (users != null) {
             log.info(message);
             Mail mail = new Mail();
-            mail.setMailFrom("prismhealth@gmail.com");
+            mail.setMailFrom("prismhealth658@gmail.com");
             mail.setMailTo(users.getEmail());
             mail.setMailSubject("Prism-health Notification services");
             mail.setMailContent(message);

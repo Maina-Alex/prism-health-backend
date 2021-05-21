@@ -1,8 +1,10 @@
 package com.prismhealth.dto.Request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.prismhealth.Models.Positions;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 
 import java.util.List;
 
@@ -42,6 +44,14 @@ public class SignUpRequest {
 
 	@JsonProperty("longitude")
 	private String longitude;
+	 @Transient
+	 public Positions getPositions(){
+	 	Positions positions = new Positions();
+	 	positions.setLatitude(Double.parseDouble(latitude));
+	 	positions.setLongitude(Double.parseDouble(longitude));
+	 	positions.setLocationName(location);
+	 	return positions;
+	 }
 
 	@Override
  	public String toString(){

@@ -80,9 +80,13 @@ public class ProductsService {
 
     public List<Product> productByName(String productName) {
         //TODO marshal up a response for when product does not exists
-        return productsRepository.findAll()
+        List<Product> products = productsRepository.findAll()
                 .stream().filter(r -> r.getProductName().contains(productName))
                 .collect(Collectors.toList());
+        for (Product product: products){
+            product.setUsers(accountRepository.findOneByPhone(product.getUser()));
+        }
+        return products;
     }
 
     public List<SubCategory> subCategoryByName(String subCategoryName) {
@@ -115,9 +119,6 @@ public class ProductsService {
                 try {
                     photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
                     category1.setPhotos(photoRepository.save(photos).getId());
-                    //category1.setPhotos(fileName);
-                    //String uploadDir = "user-photos/" + category1.getCategoryName();
-                    //saveFile(uploadDir, fileName, multipartFile);
                     return categoryRepository.save(category1);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -136,7 +137,7 @@ public class ProductsService {
 
         try {
             SubCategory subCategory = new ObjectMapper().readValue(subCategory1, SubCategory.class);
-            if (!categoryByName(subCategory.getCategory()).isEmpty()) {
+            if (categoryByName(subCategory.getCategory()).isEmpty()) {
                 String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
                 Photos photos = new Photos();
                 try {
@@ -170,16 +171,15 @@ public class ProductsService {
             if (variantByName(product.getProductVariant()).isEmpty())
                 variantRepository.save(variant);
             String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-            //String uploadDir = "user-photos/" + users.getPhone();
-
-            //saveFile(uploadDir, fileName, multipartFile);
             try {
              Photos photos = new Photos();
             photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
             product.setPhotos(photoRepository.save(photos).getId());
             product.setUser(users.getPhone());
             sendEmail(users,"createProduct");
-            return productsRepository.save(product);
+            Product product1 = productsRepository.save(product);
+                product1.setUsers(accountRepository.findOneByPhone(product.getUser()));
+                return product1;
              } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -270,7 +270,7 @@ public class ProductsService {
         if (users!=null) {
             log.info(message);
             Mail mail = new Mail();
-            mail.setMailFrom("prismhealth@gmail.com");
+            mail.setMailFrom("prismhealth658@gmail.com");
             mail.setMailTo(users.getEmail());
             mail.setMailSubject("Prism-health Notification services");
             mail.setMailContent(message);

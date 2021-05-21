@@ -17,6 +17,7 @@ public class Services {
     private String name;
     private String description;
     private double[] position;
+    private Positions positions;
     private int charges;
     private double rating;
     private long ratingsCount;
@@ -29,7 +30,7 @@ public class Services {
     private Map<String, List<ServiceBooking>> bookings;
     private String providerId;
     private String locationName;
-
+    private Users users;
     private String approvedBy;
     private Date approvedOn;
 
