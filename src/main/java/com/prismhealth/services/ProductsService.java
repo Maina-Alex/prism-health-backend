@@ -4,8 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prismhealth.Models.*;
 import com.prismhealth.repository.*;
+import com.prismhealth.util.Actions;
+import com.prismhealth.util.LogMessage;
 import org.bson.BsonBinarySubType;
 import org.bson.types.Binary;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,18 +18,17 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.prismhealth.util.HelperUtility.saveFile;
+import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
+
 
 @Service
 public class ProductsService {
@@ -35,17 +38,21 @@ public class ProductsService {
     private final ProductsRepository productsRepository;
     private final PhotoRepository photoRepository;
     private final AccountRepository accountRepository;
+    private final MailService mailService;
+    private final NotificationRepo notificationRepo;
 
     public ProductsService(VariantRepository variantRepository, CategoryRepository categoryRepository1,
-                           SubCategoriesRepository subCategoriesRepository1, ProductsRepository productsRepository, PhotoRepository photoRepository, AccountRepository accountRepository) {
+                           SubCategoriesRepository subCategoriesRepository1, ProductsRepository productsRepository, PhotoRepository photoRepository, AccountRepository accountRepository, MailService mailService, NotificationRepo notificationRepo) {
         this.variantRepository = variantRepository;
         this.categoryRepository = categoryRepository1;
         this.subCategoriesRepository = subCategoriesRepository1;
         this.productsRepository = productsRepository;
         this.photoRepository = photoRepository;
         this.accountRepository = accountRepository;
+        this.mailService = mailService;
+        this.notificationRepo = notificationRepo;
     }
-
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
     public List<SubCategory> getSubcategoriesByName(String categoryName) {
         //TODO marshal up a response for when sub category does not exists
         return subCategoriesRepository.findAll()
@@ -60,9 +67,13 @@ public class ProductsService {
 
     public List<Product> getAllProducts(String subCategoryName) {
         //TODO marshal up a response for when products do not exists
-        return productsRepository.findAll()
+        List<Product> products = productsRepository.findAll()
                 .stream().filter(r -> r.getSubCategory().equals(subCategoryName))
                 .collect(Collectors.toList());
+        for (Product product: products){
+            product.setUsers(accountRepository.findOneByPhone(product.getUser()));
+        }
+        return products;
     }
 
     /* getting product subCategory and category by name*/
@@ -167,6 +178,7 @@ public class ProductsService {
             photos.setPhoto(new Binary(BsonBinarySubType.BINARY, multipartFile.getBytes()));
             product.setPhotos(photoRepository.save(photos).getId());
             product.setUser(users.getPhone());
+            sendEmail(users,"createProduct");
             return productsRepository.save(product);
              } catch (IOException e) {
                 e.printStackTrace();
@@ -236,5 +248,48 @@ public class ProductsService {
 
         productsRepository.save(product);
         return ResponseEntity.ok().body(product.getProductName() + " Successfully deleted");
+    }
+    public String sendEmail(Users users, String action){
+
+        if (users==null){
+            return "User with phone number not found";
+        }
+        String message = null;
+        if (action.equals("createAccount")){
+            message = "Account successfully created for "+ users.getPhone();
+        }else if (action.equals("createProduct")){
+            message = "Product successfully created by "+ users.getPhone()+" "+users.getEmail();
+        }else if (action.equals("createService")){
+            message = "Service successfully created by "+ users.getPhone()+" "+users.getEmail();
+        }else if (action.equals("createBooking")){
+            message = "Booking successfully created by "+ users.getPhone()+" "+users.getEmail();
+        }else if (action.equals("notifyProvider")){
+            message = "Product booking made for your product";
+        }
+
+        if (users!=null) {
+            log.info(message);
+            Mail mail = new Mail();
+            mail.setMailFrom("prismhealth@gmail.com");
+            mail.setMailTo(users.getEmail());
+            mail.setMailSubject("Prism-health Notification services");
+            mail.setMailContent(message);
+
+            mailService.sendEmail(mail);
+                Notification notification = new Notification();
+                notification.setEmail(users.getEmail());
+                notification.setUserId(users.getPhone());
+                notification.setMessage(message);
+                notification.setAction(Actions.RESET_PASSSWORD);
+                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+                notificationRepo.save(notification);
+                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+                return "Notification sent to : " + users.getEmail();
+
+        } else {
+            log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
+            return null;
+        }
+
     }
 }

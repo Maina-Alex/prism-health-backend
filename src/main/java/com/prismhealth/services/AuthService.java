@@ -2,6 +2,7 @@ package com.prismhealth.services;
 
 import com.auth0.jwt.JWT;
 import com.prismhealth.Models.AccountDetails;
+import com.prismhealth.Models.Mail;
 import com.prismhealth.Models.Notification;
 import com.prismhealth.Models.Users;
 import com.prismhealth.config.UwaziiConfig;
@@ -16,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.MailService;
 import com.prismhealth.repository.NotificationRepo;
 import com.prismhealth.security.SecurityConstants;
 import com.prismhealth.util.Actions;
@@ -41,14 +43,14 @@ public class AuthService {
 
     private final AccountRepository usersRepo;
     private final BCryptPasswordEncoder encoder;
-    private final RestTemplate restTemplate;
+    private final MailService mailService;
     private final NotificationRepo notificationRepo;
     private final UwaziiConfig uwaziiConfig;
     public AuthService(AccountRepository usersRepo, BCryptPasswordEncoder encoder,
-                       RestTemplate restTemplate, NotificationRepo notificationRepo, UwaziiConfig uwaziiConfig){
+                       MailService mailService, NotificationRepo notificationRepo, UwaziiConfig uwaziiConfig){
         this.usersRepo = usersRepo;
         this.encoder = encoder;
-        this.restTemplate = restTemplate;
+        this.mailService = mailService;
         this.notificationRepo = notificationRepo;
         this.uwaziiConfig = uwaziiConfig;
     }
@@ -122,32 +124,25 @@ public class AuthService {
             details.setAccesstoken(token);
             details.setEmail(users.get().getEmail());
             details.setUsername(users.get().getPhone());
+            Mail mail = new Mail();
+            mail.setMailFrom("prismhealth@gmail.com");
+            mail.setMailTo(users.get().getEmail());
+            mail.setMailSubject("Prism-health Notification services");
+            mail.setMailContent("Click on the link to change your password\n");
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
-
-            HttpEntity<AccountDetails> entity = new HttpEntity<>(details, headers);
-            ResponseEntity<String> responseEntity = restTemplate
-                    .postForEntity(AppConstants.notificationUrl + "/changePassword/"+phone, entity, String.class);
-
-            if (responseEntity.getStatusCode().is2xxSuccessful()) {
-                Notification notification = new Notification();
-                notification.setEmail(users.get().getEmail());
-                notification.setUserId(users.get().getPhone());
-                notification.setMessage("Password reset request");
-                notification.setAction(Actions.RESET_PASSSWORD);
-                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-                notificationRepo.save(notification);
-                log.info("Sent Password reset token to : " + users.get().getEmail() + " " + LogMessage.SUCCESS);
-                return "Password reset sent to : " + users.get().getEmail();
-            } else {
-                log.info("Sending password reset to " + users.get().getEmail() + " " + LogMessage.FAILED);
-                return null;
-
-            }
+            mailService.sendEmail(mail);
+            Notification notification = new Notification();
+            notification.setEmail(users.get().getEmail());
+            notification.setUserId(users.get().getPhone());
+            notification.setMessage("User"+"\n"+details+"Click on the link to change your password");
+            notification.setAction(Actions.RESET_PASSSWORD);
+            notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            notificationRepo.save(notification);
+            log.info("Sent notification to : " + users.get().getEmail() + " " + LogMessage.SUCCESS);
+            return "Notification sent to : " + users.get().getEmail();
 
         } else {
-            log.info("Sending password reset  " + LogMessage.FAILED + " User does not exist");
+            log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
             return null;
         }
 

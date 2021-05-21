@@ -3,6 +3,6 @@ package com.prismhealth.util;
 public class AppConstants {
     public static final String notificationUrl = "http://nameless-shelf-21991.herokuapp.com/api";
     public static final String paymentUrl = "http://localhost:5000/api";
-    public static final String pushNotificationUrl = "http://Prism_health.com:8086/api";
+    public static final String pushNotificationUrl = "http://172.105.167.182:8086/api/push/send";
 
 }

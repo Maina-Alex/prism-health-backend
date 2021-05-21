@@ -1,6 +1,18 @@
 server:
   port: 8081
 spring:
+  mail:
+   host: smtp.gmail.com
+   port: 587
+   username: "prismhealth658@gmail.com"
+   password: "prismhealth1!"
+   properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+             enable: true
+          debug: true
   servlet:
     multipart:
      max-file-size: 10MB

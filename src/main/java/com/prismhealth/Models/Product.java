@@ -31,6 +31,9 @@ public class Product {
 
 	@JsonProperty("photos")
 	private String photos;
+
+	@JsonProperty("provider")
+	private Users users;
 	/*@Transient
 	public String getPhotosImagePath() {
 		if (photos == null || user == null) return null;

@@ -6,8 +6,10 @@ import java.util.List;
 
 import com.prismhealth.Models.Bookings;
 import com.prismhealth.Models.Services;
+import com.prismhealth.Models.Users;
 import com.prismhealth.services.ServiceBookingService;
 import com.prismhealth.services.ServiceProviderService;
+import com.prismhealth.util.HelperUtility;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
@@ -41,6 +43,10 @@ public class ServiceProviderController {
     @PostMapping("/providers/services")
     public Services createService(@RequestParam String services, @RequestParam MultipartFile multipartFile,Principal principal){
         return serviceProviderService.createService(services,multipartFile,principal);
+    }
+    @GetMapping("/getServiceProviders")
+    public List<Users> getServiceProviders(@RequestParam String serviceId){
+        return serviceProviderService.getProvidersByServiceId(serviceId);
     }
     @GetMapping("/users/all")
     public List<Services> getAllService(){

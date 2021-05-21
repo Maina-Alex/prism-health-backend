@@ -1,31 +1,35 @@
 package com.prismhealth.services;
 
 import com.auth0.jwt.JWT;
-import com.prismhealth.Models.EmergencyContactUpdate;
-import com.prismhealth.Models.Users;
-import com.prismhealth.Models.UserRating;
-import com.prismhealth.Models.UserRoles;
+import com.prismhealth.Models.*;
 import com.prismhealth.dto.Request.SignInRequest;
 import com.prismhealth.dto.Request.SignUpRequest;
 import com.prismhealth.dto.Request.phone;
 import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
-import com.prismhealth.repository.AccountRepository;
-import com.prismhealth.repository.UserRatingsRepo;
-import com.prismhealth.repository.UserRolesRepo;
+import com.prismhealth.repository.*;
 import com.prismhealth.security.SecurityConstants;
+import com.prismhealth.util.Actions;
+import com.prismhealth.util.AppConstants;
+import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,8 +45,10 @@ public class AccountService {
     private final UserRolesRepo userRolesRepo;
     @Autowired
     private BCryptPasswordEncoder encoder;
-
-
+    @Autowired
+    NotificationRepo notificationRepo;
+    @Autowired
+    MailService mailService;
     public AccountService(AccountRepository accountRepository, AuthService authService, UserRatingsRepo userRatingsRepo, UserRolesRepo userRolesRepo){
         this.accountRepository = accountRepository;
         this.authService = authService;
@@ -97,7 +103,7 @@ public class AccountService {
                 role.setUserId(users1.getPhone());
                 userRolesRepo.save(role);
                 log.info("Assigned Default User Role to UserId:" + users1.getPhone());
-
+                sendEmail(users1,"createAccount");
                 signUpResponse.setUsers(users1);
                 return ResponseEntity.ok().body(signUpResponse);
             } else {
@@ -173,21 +179,6 @@ public class AccountService {
                 .filter(c -> c.getRating() == 0).collect(Collectors.toList());
 
     }
-    private String extractIp(HttpServletRequest request) {
-        String clientIp;
-        String clientXForwardedForIp = request
-                .getHeader("x-forwarded-for");
-        if (nonNull(clientXForwardedForIp)) {
-            clientIp = parseXForwardedHeader(clientXForwardedForIp);
-        } else {
-            clientIp = request.getRemoteAddr();
-        }
-        return clientIp;
-    }
-    private String parseXForwardedHeader(String header) {
-        return header.split(" *, *")[0];
-    }
-
     public ResponseEntity<SignUpResponse> updateUser(EmergencyContactUpdate ecUpdateRequest) {
         SignUpResponse signUpResponse =new SignUpResponse();
             Users user = accountRepository.findOneByPhone(ecUpdateRequest.getPhone());
@@ -217,37 +208,46 @@ public class AccountService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(signInResponse);
         }
     }
-    /*
-    public Product setCarAvailabilityFalse(List<Bookings> bookings) {
-        bookings.stream().map(b -> {
-            b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            return b;
-        }).forEach(bookingsRepo::save);
-        Product product = poductRepository.findById(bookings.get(0).getCarId()).get();
-        product.setBookings(bookingsService.getProductBookings(product.getId()));
-        return product;
-    }
+    public String sendEmail(Users users, String action){
 
-    public Product setCarAvailabilityTrue(List<Bookings> bookings) {
-        bookings.forEach(b -> {
-            b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            b.setCancelled(true);
-            bookingsRepo.save(b);
-        });
-
-        Car car = carRepo.findById(bookings.get(0).getCarId()).get();
-        car.setBookings(bookingsService.getCarBookings(car.getId()));
-        return car;
-    }
-
-    public List<Bookings> getAllCarBookings(Principal principal) {
-        User user = accountRepository.findOneByPhone(principal.getName());
-        if (user!=null) {
-            return bookingsRepo.findAllByOwnerId(user.getPhone(), Sort.by("timestamp").descending());
+        if (users==null){
+            return "User with phone number not found";
+        }
+        String message = null;
+        if (action.equals("createAccount")){
+            message = "Account successfully created for "+ users.getPhone();
+        }else if (action.equals("createProduct")){
+            message = "Product successfully created by "+ users.getPhone()+" "+users.getEmail();
+        }else if (action.equals("createService")){
+            message = "Service successfully created by "+ users.getPhone()+" "+users.getEmail();
+        }else if (action.equals("createBooking")){
+            message = "Booking successfully created by "+ users.getPhone()+" "+users.getEmail();
+        }else if (action.equals("notifyProvider")){
+            message = "Product booking made for your product";
         }
 
-        else
-            return new ArrayList<Bookings>();
+        if (users!=null) {
+            log.info(message);
+            Mail mail = new Mail();
+            mail.setMailFrom("prismhealth658@gmail.com");
+            mail.setMailTo(users.getEmail());
+            mail.setMailSubject("Prism-health Notification services");
+            mail.setMailContent(message);
 
-    }*/
+            mailService.sendEmail(mail);
+            Notification notification = new Notification();
+            notification.setEmail(users.getEmail());
+            notification.setUserId(users.getPhone());
+            notification.setMessage(message);
+            notification.setAction(Actions.RESET_PASSSWORD);
+            notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            notificationRepo.save(notification);
+            log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+            return "Notification sent to : " + users.getEmail();
+
+        } else {
+            log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
+            return null;
+        }
+    }
 }
