@@ -113,7 +113,6 @@ public class ServiceProviderService {
             sendEmail(users,"createService");
             services1.setImages(photoRepository.save(photos).getId());
             return serviceRepo.save(services1);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -158,7 +157,7 @@ public class ServiceProviderService {
         if (users!=null) {
             log.info(message);
             Mail mail = new Mail();
-            mail.setMailFrom("prismhealth@gmail.com");
+            mail.setMailFrom("prismhealth658@gmail.com");
             mail.setMailTo(users.getEmail());
             mail.setMailSubject("Prism-health Notification services");
             mail.setMailContent(message);
