@@ -40,7 +40,6 @@ public class BookingService {
         List<ServiceBooking> bookings = new ArrayList<>();
         while (today.compareTo(future) <= 0) {
 
-            System.out.println("compare " + today.compareTo(future));
             int hour = 0;
 
             while (hour <= 24) {
