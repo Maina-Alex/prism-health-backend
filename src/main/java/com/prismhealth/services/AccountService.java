@@ -196,7 +196,7 @@ public class AccountService {
         Users user = accountRepository.findOneByPhone(users.getPhone());
         if (user != null) {
             signUpResponse.setMessage("successfully updated");
-            signUpResponse.setUsers(accountRepository.save(user));
+            signUpResponse.setUsers(accountRepository.save(users));
             return ResponseEntity.ok(signUpResponse);
         }
         signUpResponse.setMessage("Failed update, User not found");
