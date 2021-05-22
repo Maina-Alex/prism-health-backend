@@ -31,16 +31,16 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 @RequestMapping("catalog")
 @CrossOrigin
 public class ProductsController {
-    private ObjectMapper objectMapper;
+
     private final CategoryRepository categoryRepository;
-    private final SubCategoriesRepository subCategoriesRepository;
+
     private final ProductsService productsService;
 
     public ProductsController(ObjectMapper objectMapper, CategoryRepository categoryRepository,
             SubCategoriesRepository subCategoriesRepository, ProductsService productsService) {
-        this.objectMapper = objectMapper;
+
         this.categoryRepository = categoryRepository;
-        this.subCategoriesRepository = subCategoriesRepository;
+
         this.productsService = productsService;
     }
 
