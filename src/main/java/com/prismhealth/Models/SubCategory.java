@@ -2,18 +2,15 @@ package com.prismhealth.Models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.springframework.data.annotation.Transient;
-
-import java.util.List;
 
 @Data
-public class SubCategory{
+public class SubCategory {
 
 	@JsonProperty("subCategoryName")
 	private String subCategoryName;
 
-	//@JsonProperty("subCategoryProducts")
-	//List<Product> subCategoryProducts;
+	// @JsonProperty("subCategoryProducts")
+	// List<Product> subCategoryProducts;
 
 	@JsonProperty("Category")
 	String category;
@@ -24,10 +21,10 @@ public class SubCategory{
 	@JsonProperty("photos")
 	private String photos;
 
-	/*@Transient
-	public String getPhotosImagePath() {
-		if (photos == null || subCategoryName == null) return null;
-
-		return "/user-photos/" + subCategoryName + "/" + photos;
-	}*/
+	/*
+	 * @Transient public String getPhotosImagePath() { if (photos == null ||
+	 * subCategoryName == null) return null;
+	 * 
+	 * return "/user-photos/" + subCategoryName + "/" + photos; }
+	 */
 }

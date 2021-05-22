@@ -1,10 +1,19 @@
 package com.prismhealth.Models;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import lombok.Data;
 
 @Data
+@Document
 public class Product {
+	@Id
+	private String id;
 
 	@JsonProperty("productQuantity")
 	private String productQuantity;
@@ -28,7 +37,7 @@ public class Product {
 	private String productVariant;
 
 	@JsonProperty("photos")
-	private String photos;
+	private List<String> photos;
 
 	@JsonProperty("provider")
 	private Users users;

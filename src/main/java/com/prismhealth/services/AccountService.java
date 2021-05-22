@@ -129,8 +129,8 @@ public class AccountService {
 
     public String getToken(String phone) {
         Optional<Users> users = Optional.ofNullable(accountRepository.findOneByPhone(phone));
-        if (users.isPresent() && authService.checkUserValidity(users.get())) {
-            String token = JWT.create().withSubject(users.get().getEmail())
+        if (users.isPresent()) {
+            String token = JWT.create().withSubject(users.get().getPhone())
                     .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                     .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
             log.info("Getting token for firebase id " + phone + " is " + LogMessage.SUCCESS);

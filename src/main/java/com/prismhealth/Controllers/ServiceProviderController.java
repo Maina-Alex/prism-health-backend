@@ -1,6 +1,5 @@
 package com.prismhealth.Controllers;
 
-import java.awt.*;
 import java.security.Principal;
 import java.util.List;
 
@@ -13,6 +12,8 @@ import com.prismhealth.services.ServiceProviderService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
+
+import org.springframework.data.geo.Metrics;
 import org.springframework.data.geo.Point;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,9 +65,10 @@ public class ServiceProviderController {
     }
 
     @GetMapping("/users/near")
-    public List<Services> getAllServiceNear() {
-        Distance distance = new Distance(0);
-        Point point = new Point(1.0, 23.9);
+    public List<Services> getAllServiceNear(@RequestParam("longitude") double longitude,
+            @RequestParam("latitude") double latitude, @RequestParam("radious") double radious) {
+        Distance distance = new Distance(radious, Metrics.KILOMETERS);
+        Point point = new Point(longitude, latitude);
         return serviceProviderService.getServicesNear(point, distance);
     }
 

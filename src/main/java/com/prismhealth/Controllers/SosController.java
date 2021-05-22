@@ -1,11 +1,12 @@
 package com.prismhealth.Controllers;
 
+import com.prismhealth.Models.Positions;
 import com.prismhealth.services.SosService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 
@@ -19,8 +20,8 @@ public class SosController {
     }
 
     @PostMapping("/send")
-    public ResponseEntity<String> sendSos(@RequestParam String[] position, Principal principal){
-        return sosService.sendSos(position,principal);
+    public ResponseEntity<String> sendSos(@RequestBody Positions postion, Principal principal) {
+        return sosService.sendSos(postion, principal);
     }
 
 }

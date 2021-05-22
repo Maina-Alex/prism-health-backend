@@ -1,5 +1,6 @@
 package com.prismhealth.services;
 
+import com.prismhealth.Models.Positions;
 import com.prismhealth.Models.Users;
 import com.prismhealth.config.UwaziiConfig;
 import com.prismhealth.dto.Request.UwaziiSmsRequest;
@@ -25,40 +26,41 @@ public class SosService {
         this.accountRepository = accountRepository;
         this.uwaziiConfig = uwaziiConfig;
     }
-    public ResponseEntity<String> sendSos(String[] position, Principal principal){
+
+    public ResponseEntity<String> sendSos(Positions position, Principal principal) {
         Users users = accountRepository.findOneByPhone(principal.getName());
         String phone = users.getPhone();
         UwaziiSmsRequest uwaziiSmsRequest = new UwaziiSmsRequest();
         uwaziiSmsRequest.setApiKey(uwaziiConfig.getApi_Key());
         uwaziiSmsRequest.setSenderId(uwaziiConfig.getSenderId());
-        uwaziiSmsRequest.setMessage(HelperUtility.getSosTemplate(users.getFirstName()+" "+users.getSecondName(),
-                new Point(Double.parseDouble(position[0]),Double.parseDouble(position[1])),position[2]));
+        uwaziiSmsRequest.setMessage(HelperUtility.getSosTemplate(users.getFirstName() + " " + users.getSecondName(),
+                new Point(position.getLongitude(), position.getLatitude()), position.getLocationName()));
         if (phone.contains("+"))
             uwaziiSmsRequest.setMobileNumbers(phone.substring(1));
         else {
-            String phoneNumber = "254"+phone.substring(1);
+            String phoneNumber = "254" + phone.substring(1);
             uwaziiSmsRequest.setMobileNumbers(phoneNumber);
         }
         uwaziiSmsRequest.setClientId(uwaziiConfig.getClientId());
 
         MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-        RequestBody body = RequestBody.create(mediaType, Objects.requireNonNull(HelperUtility.toJson(uwaziiSmsRequest)));
+        RequestBody body = RequestBody.create(mediaType,
+                Objects.requireNonNull(HelperUtility.toJson(uwaziiSmsRequest)));
 
-        Request request = new Request.Builder()
-                .url(uwaziiConfig.getSmsEndpointUrl())
-                .post(body)
-                .addHeader("content-type", "application/json")
-                .build();
+        Request request = new Request.Builder().url(uwaziiConfig.getSmsEndpointUrl()).post(body)
+                .addHeader("content-type", "application/json").build();
 
         try {
             Response response = new OkHttpClient().newCall(request).execute();
-            if (response.code()==200){
+            if (response.code() == 200) {
                 response.close();
                 return new ResponseEntity<String>("successfully sent", HttpStatus.ACCEPTED);
             }
         } catch (IOException e) {
-            LoggerFactory.getLogger(this.getClass()).error(String.format("Could not send sms -> %s",e.getLocalizedMessage()));
+            LoggerFactory.getLogger(this.getClass())
+                    .error(String.format("Could not send sms -> %s", e.getLocalizedMessage()));
             return null;
-        }return null;
+        }
+        return null;
     }
 }

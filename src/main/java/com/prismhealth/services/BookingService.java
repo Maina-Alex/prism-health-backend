@@ -33,16 +33,14 @@ public class BookingService {
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();
-        LocalDate future = today.plusDays(2);
-
+        LocalDate future = today.plusDays(7);
         log.info("Getting bookings for service " + serviceId);
-
         List<ServiceBooking> bookings = new ArrayList<>();
         while (today.compareTo(future) <= 0) {
 
-            int hour = 0;
+            int hour = 6;
 
-            while (hour <= 24) {
+            while (hour > 5 && hour < 17) {
                 ServiceBooking b = new ServiceBooking();
                 List<Bookings> serviceB = bookingsRepo.findAllByServiceIdAndDateAndHour(serviceId, Date.valueOf(today),
                         hour);
