@@ -104,8 +104,9 @@ public class ProductsService {
 
     /* saving category,subCategory and product */
     public Category saveCategory(Category category) {
+        Optional<Category> cat = categoryRepository.findByCategoryName(category.getCategoryName());
 
-        if (categoryByName(category.getCategoryName()).isEmpty()) {
+        if (!cat.isPresent()) {
 
             return categoryRepository.save(category);
 

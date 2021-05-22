@@ -97,8 +97,7 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/categories")
-    public ResponseEntity<Category> createCategory(@RequestParam Category category,
-            @RequestParam MultipartFile multipartFile) {
+    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
         return ResponseEntity.ok(productsService.saveCategory(category));
     }
 
@@ -106,7 +105,7 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/subCategories")
-    public ResponseEntity<SubCategory> createSubCategory(@RequestParam SubCategory subCategory) {
+    public ResponseEntity<SubCategory> createSubCategory(@RequestBody SubCategory subCategory) {
         return ResponseEntity.ok(productsService.saveSubCategory(subCategory));
     }
 
