@@ -30,6 +30,7 @@ public class Users {
 
 	@JsonProperty("email")
 	private String email;
+	private String profileImage;
 
 	@JsonProperty("DateOfBirth")
 	private String DateOfBirth;

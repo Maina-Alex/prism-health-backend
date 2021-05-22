@@ -80,8 +80,8 @@ public class PrismHealthBackendApplication implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		accountRepository.deleteAll();
-		rolesRepo.deleteAll();
+		// accountRepository.deleteAll();
+		// rolesRepo.deleteAll();
 		if (!accountRepository.existsByPhone("+254711111111")) {
 			Users users1 = new Users();
 			Positions positions = new Positions();
