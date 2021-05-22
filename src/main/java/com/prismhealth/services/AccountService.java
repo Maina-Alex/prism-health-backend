@@ -29,6 +29,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
@@ -43,9 +44,11 @@ public class AccountService {
     @Autowired
     private BCryptPasswordEncoder encoder;
     @Autowired
-    NotificationRepo notificationRepo;
+    private NotificationRepo notificationRepo;
     @Autowired
-    MailService mailService;
+    private MailService mailService;
+    @Autowired
+    private ExecutorService executor;
 
     public AccountService(AccountRepository accountRepository, AuthService authService, UserRatingsRepo userRatingsRepo,
             UserRolesRepo userRolesRepo) {
@@ -105,7 +108,9 @@ public class AccountService {
             role.setUserId(users1.getPhone());
             userRolesRepo.save(role);
             log.info("Assigned Default User Role to UserId:" + users1.getPhone());
+
             sendEmail(users1, "createAccount");
+
             signUpResponse.setUsers(users1);
             return ResponseEntity.ok().body(signUpResponse);
         } else {
@@ -215,47 +220,51 @@ public class AccountService {
         }
     }
 
-    public String sendEmail(Users users, String action) {
+    public void sendEmail(Users users, String action) {
+        Runnable task = () -> {
+            if (users == null) {
+                log.info("User with phone number not found");
+            }
+            String message = null;
+            if (action.equals("createAccount")) {
+                message = "Account successfully created for " + users.getPhone();
+            } else if (action.equals("createProduct")) {
+                message = "Product successfully created by " + users.getPhone() + " " + users.getEmail();
+            } else if (action.equals("createService")) {
+                message = "Service successfully created by " + users.getPhone() + " " + users.getEmail();
+            } else if (action.equals("createBooking")) {
+                message = "Booking successfully created by " + users.getPhone() + " " + users.getEmail();
+            } else if (action.equals("notifyProvider")) {
+                message = "Product booking made for your product";
+            }
 
-        if (users == null) {
-            return "User with phone number not found";
-        }
-        String message = null;
-        if (action.equals("createAccount")) {
-            message = "Account successfully created for " + users.getPhone();
-        } else if (action.equals("createProduct")) {
-            message = "Product successfully created by " + users.getPhone() + " " + users.getEmail();
-        } else if (action.equals("createService")) {
-            message = "Service successfully created by " + users.getPhone() + " " + users.getEmail();
-        } else if (action.equals("createBooking")) {
-            message = "Booking successfully created by " + users.getPhone() + " " + users.getEmail();
-        } else if (action.equals("notifyProvider")) {
-            message = "Product booking made for your product";
-        }
+            if (users != null) {
+                log.info(message);
+                Mail mail = new Mail();
+                mail.setMailFrom("prismhealth658@gmail.com");
+                mail.setMailTo(users.getEmail());
+                mail.setMailSubject("Prism-health Notification services");
+                mail.setMailContent(message);
 
-        if (users != null) {
-            log.info(message);
-            Mail mail = new Mail();
-            mail.setMailFrom("prismhealth658@gmail.com");
-            mail.setMailTo(users.getEmail());
-            mail.setMailSubject("Prism-health Notification services");
-            mail.setMailContent(message);
+                mailService.sendEmail(mail);
+                Notification notification = new Notification();
+                notification.setEmail(users.getEmail());
+                notification.setUserId(users.getPhone());
+                notification.setMessage(message);
+                notification.setAction(Actions.RESET_PASSSWORD);
+                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+                notificationRepo.save(notification);
+                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
 
-            mailService.sendEmail(mail);
-            Notification notification = new Notification();
-            notification.setEmail(users.getEmail());
-            notification.setUserId(users.getPhone());
-            notification.setMessage(message);
-            notification.setAction(Actions.RESET_PASSSWORD);
-            notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            notificationRepo.save(notification);
-            log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-            return "Notification sent to : " + users.getEmail();
+            } else {
+                log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
 
-        } else {
-            log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
-            return null;
-        }
+            }
+
+        };
+
+        executor.submit(task);
+
     }
 
     public ResponseEntity<?> getProviderById(String providerId) {

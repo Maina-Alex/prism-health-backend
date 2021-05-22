@@ -33,84 +33,89 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 @EnableSwagger2
 @SpringBootApplication
 public class PrismHealthBackendApplication implements ApplicationRunner {
-@Autowired
-private UserRolesRepo rolesRepo;
-@Autowired
-private AccountRepository accountRepository;
+	@Autowired
+	private UserRolesRepo rolesRepo;
+	@Autowired
+	private AccountRepository accountRepository;
+
 	public static void main(String[] args) {
 		SpringApplication.run(PrismHealthBackendApplication.class, args);
 	}
+
 	@Bean
-	public RestTemplate getRestTemplate(){
-		return  new RestTemplate();
-	}
-	@Bean
-	public ExecutorService taskExecutor() {
-		ExecutorService executor = Executors.newFixedThreadPool(1);
-		return executor;
-	}
-	@Bean
-	public Docket api() {
-		return new Docket(DocumentationType.SWAGGER_2)
-				.select()
-				.apis(RequestHandlerSelectors.any())
-				.paths(PathSelectors.any())
-				.build();
+	public RestTemplate getRestTemplate() {
+		return new RestTemplate();
 	}
 
 	@Bean
-	public ObjectMapper getObjectMapper(){
+	public ExecutorService taskExecutor() {
+		ExecutorService executor = Executors.newFixedThreadPool(4);
+		return executor;
+	}
+
+	@Bean
+	public Docket api() {
+		return new Docket(DocumentationType.SWAGGER_2).select().apis(RequestHandlerSelectors.any())
+				.paths(PathSelectors.any()).build();
+	}
+
+	@Bean
+	public ObjectMapper getObjectMapper() {
 		return new ObjectMapper();
 	}
+
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+
 	@Bean
-	public OkHttpClient getOkHttpClient(){
+	public OkHttpClient getOkHttpClient() {
 		return new OkHttpClient();
 	}
 
-
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		if (!accountRepository.existsByPhone("+254711111111")){
-		Users users1 = new Users();
+		accountRepository.deleteAll();
+		rolesRepo.deleteAll();
+		if (!accountRepository.existsByPhone("+254711111111")) {
+			Users users1 = new Users();
 			Positions positions = new Positions();
 			positions.setLongitude(Double.parseDouble("24.345"));
 			positions.setLatitude(Double.parseDouble("-1.2345"));
 			positions.setLocationName("location");
-		users1.setPassword(passwordEncoder().encode("password"));
-		users1.setPhone("+254711111111");
-		users1.setEmail("joshuajoe12561@gmail.com");
-		users1.setFirstName("Admin");
-		users1.setLocationName("Location");
-		users1.setPosition(new double[]{Double.parseDouble("-1.2345"), Double.parseDouble("24.345")});
-		users1.setPositions(positions);
-		users1.setEmergencyContact1(null);
-		users1.setEmergencyContact2(null);
-		users1.setAccountType("ADMIN");
+			users1.setPassword(passwordEncoder().encode("password"));
+			users1.setPhone("+254711111111");
+			users1.setEmail("joshuajoe12561@gmail.com");
+			users1.setFirstName("Admin");
+			users1.setLocationName("Location");
+			users1.setPosition(new double[] { Double.parseDouble("-1.2345"), Double.parseDouble("24.345") });
+			users1.setPositions(positions);
+			users1.setEmergencyContact1(null);
+			users1.setEmergencyContact2(null);
+			users1.setAccountType("ADMIN");
 
-		users1.setVerified(true);
-		users1.setBlocked(false);
-		users1.setDeleted(false);
+			users1.setVerified(true);
+			users1.setBlocked(false);
+			users1.setDeleted(false);
 
-		users1 = accountRepository.save(users1);
+			users1 = accountRepository.save(users1);
 
-		UserRoles role = new UserRoles();
-		role.setAssignedBy("DEFAULT");
-		role.setRole("ROLE_ADMIN");// "ROLE_ADMIN", "ROLE_HELP_SUPPORT", "ROLE_SITE_CONTENT_UPDATER"));
-		role.setUserId(users1.getPhone());
-		rolesRepo.save(role);
+			UserRoles role = new UserRoles();
+			role.setAssignedBy("DEFAULT");
+			role.setRole("ROLE_ADMIN");// "ROLE_ADMIN", "ROLE_HELP_SUPPORT", "ROLE_SITE_CONTENT_UPDATER"));
+			role.setUserId(users1.getPhone());
+			rolesRepo.save(role);
+		}
+
 	}
 
-	}
 	@Configuration
 	public class MvcConfig implements WebMvcConfigurer {
-
 
 		@Override
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -121,11 +126,13 @@ private AccountRepository accountRepository;
 			Path uploadDir = Paths.get(dirName);
 			String uploadPath = uploadDir.toFile().getAbsolutePath();
 
-			if (dirName.startsWith("../")) dirName = dirName.replace("../", "");
+			if (dirName.startsWith("../"))
+				dirName = dirName.replace("../", "");
 
-			registry.addResourceHandler("/" + dirName + "/**").addResourceLocations("file:/"+ uploadPath + "/");
+			registry.addResourceHandler("/" + dirName + "/**").addResourceLocations("file:/" + uploadPath + "/");
 		}
 	}
+
 	@Configuration
 	public class MailConfiguration {
 
