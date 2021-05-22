@@ -57,10 +57,10 @@ public class AdminProviderService {
     }
 
     public String addUser(Users users, Principal principal) {
-        Optional<String> email = Optional.ofNullable(users.getEmail());
+        Optional<String> phone = Optional.ofNullable(users.getPhone());
 
-        if (email.isPresent()) {
-            Optional<Users> uOptional = usersRepo.findOneByEmail(email.get());
+        if (phone.isPresent()) {
+            Optional<Users> uOptional = usersRepo.findById(phone.get());
             if (uOptional.isPresent()) {
                 // handleUpdates
                 users.setPhone(uOptional.get().getPhone());
@@ -74,7 +74,7 @@ public class AdminProviderService {
             }
 
         } else
-            return "Please provide an email address";
+            return "Please provide an phone number";
 
     }
 
@@ -113,7 +113,7 @@ public class AdminProviderService {
         users.setVerified(true);
 
         users.setPassword(encoder.encode(users.getPassword()));
-        users =usersRepo.save(users);
+        users = usersRepo.save(users);
         userRolesRepo.deleteAll(userRolesRepo.findAllByUserId(users.getPhone()));
 
         for (String s : users.getRoles()) {
