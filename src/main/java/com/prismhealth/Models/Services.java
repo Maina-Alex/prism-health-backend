@@ -30,7 +30,7 @@ public class Services {
     private Map<String, List<ServiceBooking>> bookings;
     private String providerId;
     private String locationName;
-    private Users users;
+    private Users provider;
     private String approvedBy;
     private Date approvedOn;
     private Date timestamp;

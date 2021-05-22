@@ -98,7 +98,7 @@ public class ServiceProviderService {
     public List<Services> getAllServices() {
         List<Services> services = serviceRepo.findAll();
         for (Services services1 : services) {
-            services1.setUsers(accountRepository.findOneByPhone(services1.getProviderId()));
+            services1.setProvider(accountRepository.findOneByPhone(services1.getProviderId()));
             services1.setBookings(bookingsService.getServiceBookings(services1.getId()));
         }
         return services;
