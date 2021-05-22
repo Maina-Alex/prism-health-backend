@@ -54,7 +54,7 @@ public class ProductsService {
 
     public List<SubCategory> getSubcategoriesByName(String categoryName) {
         // TODO marshal up a response for when sub category does not exists
-        return subCategoriesRepository.findAll().stream().filter(r -> r.getCategory().equals(categoryName))
+        return subCategoriesRepository.findAll().stream().filter(r -> r.getCategory().equalsIgnoreCase(categoryName))
                 .collect(Collectors.toList());
     }
 
@@ -66,7 +66,7 @@ public class ProductsService {
     public List<Product> getAllProducts(String subCategoryName) {
         // TODO marshal up a response for when products do not exists
         List<Product> products = productsRepository.findAll().stream()
-                .filter(r -> r.getSubCategory().equals(subCategoryName)).collect(Collectors.toList());
+                .filter(r -> r.getSubCategory().equalsIgnoreCase(subCategoryName)).collect(Collectors.toList());
         for (Product product : products) {
             product.setUsers(accountRepository.findOneByPhone(product.getUser()));
         }
