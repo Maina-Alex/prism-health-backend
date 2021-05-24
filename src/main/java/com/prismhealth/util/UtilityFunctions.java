@@ -5,7 +5,7 @@ import java.util.Random;
 public class UtilityFunctions {
     public static String getRandomString() {
         String randomString = "";
-        final String alphabet = "0123456789ABCDE";
+        final String alphabet = "123456789abcdefghiklmnopqrstuvwxyz";
         final int N = alphabet.length();
 
         Random r = new Random();
