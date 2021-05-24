@@ -78,7 +78,7 @@ public class ServiceProviderController {
     }
 
     @PostMapping("/booking/add")
-    public ResponseEntity<?> addServiceBooking(List<Bookings> bookings, Principal principal) {
+    public ResponseEntity<?> addServiceBooking(@RequestBody List<Bookings> bookings, Principal principal) {
 
         return ResponseEntity.ok().body(bookingService.createBookings(bookings, principal));
 
