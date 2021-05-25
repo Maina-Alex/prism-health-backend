@@ -56,9 +56,9 @@ public class AccountController {
     @ApiOperation(value = "Make request to change password")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/forgotPassword")
-    public ResponseEntity<?> forgotPassword(@RequestBody String email){
+    public ResponseEntity<?> forgotPassword(@RequestBody phone phone){
 
-        return accountService.forgotPassword(email);
+        return accountService.forgotPassword(phone);
     }
     @GetMapping("/getProviderById")
     public ResponseEntity<?> getProviderById(@RequestParam String providerId){
@@ -78,12 +78,12 @@ public class AccountController {
     }
     @ApiOperation(value = "actually change password")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
-    @PutMapping("/changePassword/{phone}")
-    public ResponseEntity<?> changePassword(@PathVariable("phone") String phone, @RequestBody String password){
-        return accountService.changePassword(phone,password);
+    @PutMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestBody Users users, Principal principal){
+        return ResponseEntity.ok(accountService.changePassword(users,principal));
     }
     @GetMapping
-    public ResponseEntity<?> getUsers(Principal principal) {
+    public ResponseEntity<?> getUser(Principal principal) {
         return accountService.getUsers(principal);
     }
 

@@ -22,7 +22,7 @@ public class FileController {
         @Autowired
         private FileSystemStorageService storageService;
 
-        @GetMapping("/download/{filename:.+}")
+        @GetMapping(value = "/download/{filename:.+}")
         @CrossOrigin
         public ResponseEntity<Resource> downloadFile(@PathVariable String filename, HttpServletRequest request) {
 

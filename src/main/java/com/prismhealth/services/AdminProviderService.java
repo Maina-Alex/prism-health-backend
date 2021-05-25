@@ -63,8 +63,8 @@ public class AdminProviderService {
             Optional<Users> uOptional = usersRepo.findById(phone.get());
             if (uOptional.isPresent()) {
                 // handleUpdates
-                users.setPhone(uOptional.get().getPhone());
-                updateUser(users, principal);
+                uOptional.get().setPhone(uOptional.get().getPhone());
+                updateUser(uOptional.get(), principal);
                 return "User details updated successfully";
 
             } else {

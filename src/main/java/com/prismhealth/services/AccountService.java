@@ -120,11 +120,39 @@ public class AccountService {
         }
     }
 
-    public ResponseEntity<?> forgotPassword(String email) {
+    public ResponseEntity<?> forgotPassword(phone phone) {
         // TODO implement the notification service to send the change password link.
-        log.info("Send link to email " + email);
+        log.info("Send link to email " + phone);
+        Users users = accountRepository.findOneByPhone(phone.getPhone());
+        if (users==null){
+            return new ResponseEntity<>("User with phone number "+ phone+" not found",HttpStatus.NOT_FOUND);
+        }
 
-        return new ResponseEntity<>(authService.forgotPassword(email), HttpStatus.OK);
+        log.info("Forgot password request, user email  " + users.getEmail());
+        String token = JWT.create().withSubject(users.getPhone())
+                .withExpiresAt(
+                        new Date(System.currentTimeMillis() + SecurityConstants.PASSWORD_RESET_EXPIRATION_TIME))
+                .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
+        AccountDetails details = new AccountDetails();
+        details.setAccesstoken(token);
+        details.setEmail(users.getEmail());
+        details.setUsername(users.getPhone());
+        Mail mail = new Mail();
+        mail.setMailFrom("prismhealth658@gmail.com");
+        mail.setMailTo(users.getEmail());
+        mail.setMailSubject("Prism-health Notification services");
+        mail.setMailContent("Click on the link to change your password\n");
+
+        mailService.sendEmail(mail);
+        Notification notification = new Notification();
+        notification.setEmail(users.getEmail());
+        notification.setUserId(users.getPhone());
+        notification.setMessage("User"+"\n"+details+"Click on the link to change your password");
+        notification.setAction(Actions.RESET_PASSSWORD);
+        notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+        notificationRepo.save(notification);
+        log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+        return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
     public String getToken(String phone) {
@@ -142,15 +170,8 @@ public class AccountService {
 
     }
 
-    public ResponseEntity<?> changePassword(String phone, String password) {
-        Users users;
-
-        users = accountRepository.findOneByPhone(phone);
-        if (users != null) {
-            users.setPassword(password);
-            return ResponseEntity.ok(accountRepository.save(users));
-        }
-        return ResponseEntity.badRequest().body("User does not exist");
+    public ResponseEntity<?> changePassword(Users users, Principal principal) {
+        return ResponseEntity.ok(authService.resetPassword(principal,users));
     }
 
     public Map<String, Integer> getUserRating(String userId) {

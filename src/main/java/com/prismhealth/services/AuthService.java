@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.prismhealth.dto.Request.phone;
 import com.prismhealth.repository.AccountRepository;
 import com.prismhealth.repository.MailService;
 import com.prismhealth.repository.NotificationRepo;
@@ -108,45 +109,7 @@ public class AuthService {
 
     }
 
-    public String forgotPassword(String phone) {
-        Optional<Users> users = Optional.ofNullable(usersRepo.findOneByPhone(phone));
-        if (!users.isPresent()){
-            return "User with phone number "+ phone+" not found";
-        }
 
-        if (users.isPresent()) {
-            log.info("Forgot password request, user email  " + users.get().getEmail());
-            String token = JWT.create().withSubject(users.get().getPhone())
-                    .withExpiresAt(
-                            new Date(System.currentTimeMillis() + SecurityConstants.PASSWORD_RESET_EXPIRATION_TIME))
-                    .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
-            AccountDetails details = new AccountDetails();
-            details.setAccesstoken(token);
-            details.setEmail(users.get().getEmail());
-            details.setUsername(users.get().getPhone());
-            Mail mail = new Mail();
-            mail.setMailFrom("prismhealth@gmail.com");
-            mail.setMailTo(users.get().getEmail());
-            mail.setMailSubject("Prism-health Notification services");
-            mail.setMailContent("Click on the link to change your password\n");
-
-            mailService.sendEmail(mail);
-            Notification notification = new Notification();
-            notification.setEmail(users.get().getEmail());
-            notification.setUserId(users.get().getPhone());
-            notification.setMessage("User"+"\n"+details+"Click on the link to change your password");
-            notification.setAction(Actions.RESET_PASSSWORD);
-            notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            notificationRepo.save(notification);
-            log.info("Sent notification to : " + users.get().getEmail() + " " + LogMessage.SUCCESS);
-            return "Notification sent to : " + users.get().getEmail();
-
-        } else {
-            log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
-            return null;
-        }
-
-    }
 
     public Users resetPassword(Principal principal, Users users) {
         Optional<Users> account = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
