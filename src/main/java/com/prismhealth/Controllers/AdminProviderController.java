@@ -6,8 +6,8 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
+
 @Api(tags = "AdminProvider Apis")
 @RestController
 @RequestMapping("/admin/providers")
@@ -23,8 +23,8 @@ public class AdminProviderController {
     }
 
     @PostMapping
-    public String addUser(@RequestBody Users users, Principal principal) {
-        return providerService.addUser(users, principal);
+    public String addUser(@RequestBody Users users) {
+        return providerService.addUser(users);
     }
 
     @GetMapping

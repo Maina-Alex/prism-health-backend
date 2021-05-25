@@ -56,19 +56,17 @@ public class AdminProviderService {
             return false;
     }
 
-    public String addUser(Users users, Principal principal) {
+    public String addUser(Users users) {
         Optional<String> phone = Optional.ofNullable(users.getPhone());
 
         if (phone.isPresent()) {
             Optional<Users> uOptional = usersRepo.findById(phone.get());
             if (uOptional.isPresent()) {
-                // handleUpdates
-                uOptional.get().setPhone(uOptional.get().getPhone());
-                updateUser(uOptional.get(), principal);
-                return "User details updated successfully";
+
+                return "User already exits";
 
             } else {
-                insertUser(users, principal);
+                insertUser(users);
                 return "User added successfully";
 
             }
@@ -93,20 +91,18 @@ public class AdminProviderService {
 
         if (!u.get().getEmail().equals("admin@healthprism.com")) {
             userRolesRepo.deleteAll(userRolesRepo.findAllByUserId(users.getPhone()));
-            for (String s : users.getRoles()) {
-                UserRoles role = new UserRoles();
-                role.setAssignedBy(principal.getName());
-                role.setRole(s);
 
-                userRolesRepo.save(role);
+            UserRoles role = new UserRoles();
+            role.setAssignedBy(principal.getName());
+            role.setRole("ROLE_PROVIDER");
 
-            }
+            userRolesRepo.save(role);
 
         }
 
     }
 
-    private void insertUser(Users users, Principal principal) {
+    private void insertUser(Users users) {
         users.setAccountType("PROVIDER");
         users.setBlocked(false);
         users.setDeleted(false);
@@ -115,14 +111,11 @@ public class AdminProviderService {
         users.setPassword(encoder.encode(users.getPassword()));
         users = usersRepo.save(users);
         userRolesRepo.deleteAll(userRolesRepo.findAllByUserId(users.getPhone()));
+        UserRoles role = new UserRoles();
+        role.setAssignedBy("self");
+        role.setRole("ROLE_PROVIDER");
+        userRolesRepo.save(role);
 
-        for (String s : users.getRoles()) {
-            UserRoles role = new UserRoles();
-            role.setAssignedBy(principal.getName());
-            role.setRole(s);
-            userRolesRepo.save(role);
-
-        }
     }
 
 }
