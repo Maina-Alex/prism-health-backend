@@ -3,6 +3,7 @@ package com.prismhealth.services;
 import com.auth0.jwt.JWT;
 import com.prismhealth.Models.*;
 
+import com.prismhealth.dto.Request.Phone;
 import com.prismhealth.dto.Request.SignUpRequest;
 
 import com.prismhealth.dto.Response.SignInResponse;
