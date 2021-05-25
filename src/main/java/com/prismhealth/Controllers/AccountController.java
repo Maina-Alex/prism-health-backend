@@ -1,12 +1,11 @@
 package com.prismhealth.Controllers;
 
-import com.prismhealth.Models.EmergencyContactUpdate;
 import com.prismhealth.Models.UserRating;
 import com.prismhealth.Models.Users;
-import com.prismhealth.dto.Request.SignInRequest;
+import com.prismhealth.dto.Request.Phone;
+
 import com.prismhealth.dto.Request.SignUpRequest;
-import com.prismhealth.dto.Request.phone;
-import com.prismhealth.dto.Response.SignInResponse;
+
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.services.AccountService;
 import io.swagger.annotations.Api;
@@ -25,45 +24,56 @@ import java.util.Optional;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
+
 @Api(tags = "Account Apis")
 @RestController
 @RequestMapping("accounts")
 @CrossOrigin
 public class AccountController {
     private final AccountService accountService;
-    public AccountController(AccountService accountService){
+
+    public AccountController(AccountService accountService) {
         this.accountService = accountService;
     }
 
     @ApiOperation(value = "sign up user")
-    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
+            @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/signUp")
-    public ResponseEntity<SignUpResponse> signup(@RequestBody SignUpRequest signUpRequest){
+    public ResponseEntity<SignUpResponse> signup(@RequestBody SignUpRequest signUpRequest) {
         return accountService.signUpUser(signUpRequest);
     }
+
     @ApiOperation(value = "update user")
-    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
+            @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PutMapping("/update")
-    public ResponseEntity<SignUpResponse> updateUser(@RequestBody Users users){
+    public ResponseEntity<SignUpResponse> updateUser(@RequestBody Users users) {
         return accountService.updateUser(users);
     }
+
     @ApiOperation(value = "Authenticate phone by sending otp")
-    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User already exists") })
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
+            @ApiResponse(code = SC_BAD_REQUEST, message = "User already exists") })
     @PostMapping("/authentication")
-    public ResponseEntity<SignUpResponse> authentication(@RequestBody phone phone){
+    public ResponseEntity<SignUpResponse> authentication(@RequestBody Phone phone) {
         return accountService.authentication(phone);
     }
+
     @ApiOperation(value = "Make request to change password")
-    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
+            @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/forgotPassword")
-    public ResponseEntity<?> forgotPassword(@RequestBody phone phone){
+    public ResponseEntity<?> forgotPassword(@RequestBody Phone phone) {
 
         return accountService.forgotPassword(phone);
     }
+
     @GetMapping("/getProviderById")
-    public ResponseEntity<?> getProviderById(@RequestParam String providerId){
+    public ResponseEntity<?> getProviderById(@RequestParam String providerId) {
         return accountService.getProviderById(providerId);
     }
+
     @GetMapping("/token")
     public ResponseEntity<?> getUserToken(@RequestHeader("Authorization") String auth) {
         Optional<String> token = Optional.ofNullable(accountService.getToken(auth));
@@ -76,35 +86,40 @@ public class AccountController {
         } else
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid User");
     }
+
     @ApiOperation(value = "actually change password")
-    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
+            @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PutMapping("/changePassword")
-    public ResponseEntity<?> changePassword(@RequestBody Users users, Principal principal){
-        return ResponseEntity.ok(accountService.changePassword(users,principal));
+    public ResponseEntity<?> changePassword(@RequestBody Users users, Principal principal) {
+        return ResponseEntity.ok(accountService.changePassword(users, principal));
     }
+
     @GetMapping
     public ResponseEntity<?> getUser(Principal principal) {
         return accountService.getUsers(principal);
     }
 
-    //TODO review the security implementation
-    //TODO create an end point for admin login
-    /*Ratings and Reviews
-    * POSTS
-    * */
+    // TODO review the security implementation
+    // TODO create an end point for admin login
+    /*
+     * Ratings and Reviews POSTS
+     */
     @PostMapping("/postReviews")
-    public List<UserRating> postReview(@RequestBody UserRating userRating){
+    public List<UserRating> postReview(@RequestBody UserRating userRating) {
         return accountService.addUserReview(userRating);
     }
+
     @PostMapping("/postRating")
-    public Map<String, Integer> postRating(@RequestBody UserRating userRating){
+    public Map<String, Integer> postRating(@RequestBody UserRating userRating) {
         return accountService.addUserRatings(userRating);
     }
+
     /*
-      GETS
+     * GETS
      */
     @GetMapping("/getReviews")
-    public List<UserRating> getReviews(@RequestParam String id){
+    public List<UserRating> getReviews(@RequestParam String id) {
         return accountService.getUserReview(id);
     }
 }
