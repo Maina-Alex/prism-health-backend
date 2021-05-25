@@ -37,6 +37,7 @@ public class AppSecurity extends WebSecurityConfigurerAdapter {
                 .authenticated().antMatchers("/auth/**").authenticated().antMatchers("/help").authenticated()
                 .antMatchers(HttpMethod.POST, "/admin/providers").permitAll()
                 .antMatchers(HttpMethod.POST, "/services/booking/add").authenticated()
+                .antMatchers(HttpMethod.GET, "/services/booking/all").authenticated()
                 .antMatchers(HttpMethod.POST, "/services/users/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
                 .antMatchers(HttpMethod.PUT, "/services/users/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
                 .antMatchers(HttpMethod.POST, "/services/providers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
