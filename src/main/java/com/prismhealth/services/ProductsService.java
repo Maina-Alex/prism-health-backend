@@ -134,6 +134,7 @@ public class ProductsService {
                 variantRepository.save(variant);
 
             sendEmail(users, "createProduct");
+            product.setUser(users.getPhone());
             Product product1 = productsRepository.save(product);
             product1.setUsers(accountRepository.findOneByPhone(product.getUser()));
             return product1;
