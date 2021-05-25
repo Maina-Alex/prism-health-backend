@@ -91,8 +91,8 @@ public class AccountController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PutMapping("/changePassword")
-    public ResponseEntity<?> changePassword(@RequestBody Users users, Principal principal) {
-        return ResponseEntity.ok(accountService.changePassword(users, principal));
+    public ResponseEntity<?> changePassword(@RequestBody String password, String authCode) {
+        return ResponseEntity.ok(accountService.changePassword(password, authCode));
     }
 
     @GetMapping

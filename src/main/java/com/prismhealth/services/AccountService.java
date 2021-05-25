@@ -2,6 +2,7 @@ package com.prismhealth.services;
 
 import com.auth0.jwt.JWT;
 import com.prismhealth.Models.*;
+
 import com.prismhealth.dto.Request.Phone;
 import com.prismhealth.dto.Request.SignUpRequest;
 
@@ -11,6 +12,7 @@ import com.prismhealth.repository.*;
 import com.prismhealth.security.SecurityConstants;
 import com.prismhealth.util.Actions;
 
+import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.asm.Advice.Return;
@@ -129,11 +131,11 @@ public class AccountService {
         }
 
         log.info("Forgot password request, user email  " + users.getEmail());
-        String token = JWT.create().withSubject(users.getPhone())
-                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.PASSWORD_RESET_EXPIRATION_TIME))
-                .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
+        String authCode = HelperUtility.getConfirmCodeNumber();
+        users.setDeviceToken(authCode);
+        accountRepository.save(users);
         AccountDetails details = new AccountDetails();
-        details.setAccesstoken(token);
+        details.setAccesstoken(authCode);
         details.setEmail(users.getEmail());
         details.setUsername(users.getPhone());
         Mail mail = new Mail();
@@ -151,7 +153,7 @@ public class AccountService {
         notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
         notificationRepo.save(notification);
         log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-        return new ResponseEntity<>(token, HttpStatus.OK);
+        return new ResponseEntity<>("Ok", HttpStatus.OK);
     }
 
     public String getToken(String phone) {
@@ -169,8 +171,8 @@ public class AccountService {
 
     }
 
-    public ResponseEntity<?> changePassword(Users users, Principal principal) {
-        return ResponseEntity.ok(authService.resetPassword(principal, users));
+    public ResponseEntity<?> changePassword(String  password, String authCode) {
+        return ResponseEntity.ok(authService.resetPassword(password,authCode));
     }
 
     public Map<String, Integer> getUserRating(String userId) {
