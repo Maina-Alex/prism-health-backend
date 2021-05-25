@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -39,7 +39,7 @@ public class AppSecurity extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.PUT, "/services/users/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
                 .antMatchers(HttpMethod.POST, "/services/providers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
                 .antMatchers(HttpMethod.PUT, "/services/providers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
-                .antMatchers("").permitAll().antMatchers("/admin/**").hasAuthority("ROLE_ADMIN").and()
+                .antMatchers("/admin/**").hasAuthority("ROLE_ADMIN").and()
                 .addFilter(new JWTAuthenticationFilter(authenticationManager()))
                 .addFilter(new JWTAuthorizationFilter(userDetailsService, authenticationManager())).sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
