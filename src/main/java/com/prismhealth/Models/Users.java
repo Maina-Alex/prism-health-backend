@@ -12,7 +12,6 @@ import java.util.List;
 @Document
 public class Users {
 
-	@JsonProperty("password")
 	private String password;
 	@Id
 	@JsonProperty("phone")

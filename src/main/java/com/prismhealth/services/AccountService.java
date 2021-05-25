@@ -4,7 +4,7 @@ import com.auth0.jwt.JWT;
 import com.prismhealth.Models.*;
 
 import com.prismhealth.dto.Request.SignUpRequest;
-import com.prismhealth.dto.Request.phone;
+
 import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.repository.*;
@@ -59,7 +59,7 @@ public class AccountService {
         this.userRolesRepo = userRolesRepo;
     }
 
-    public ResponseEntity<SignUpResponse> authentication(phone phone) {
+    public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
         Users users = accountRepository.findOneByPhone(phone.getPhone());
         if (users != null) {
@@ -121,12 +121,12 @@ public class AccountService {
         }
     }
 
-    public ResponseEntity<?> forgotPassword(phone phone) {
+    public ResponseEntity<?> forgotPassword(Phone phone) {
         // TODO implement the notification service to send the change password link.
         log.info("Send link to email " + phone);
         Users users = accountRepository.findOneByPhone(phone.getPhone());
-        if (users==null){
-            return new ResponseEntity<>("User with phone number "+ phone+" not found",HttpStatus.NOT_FOUND);
+        if (users == null) {
+            return new ResponseEntity<>("User with phone number " + phone + " not found", HttpStatus.NOT_FOUND);
         }
 
         log.info("Forgot password request, user email  " + users.getEmail());
@@ -147,7 +147,7 @@ public class AccountService {
         Notification notification = new Notification();
         notification.setEmail(users.getEmail());
         notification.setUserId(users.getPhone());
-        notification.setMessage("User"+"\n"+details+"Click on the link to change your password");
+        notification.setMessage("User" + "\n" + details + "Click on the link to change your password");
         notification.setAction(Actions.RESET_PASSSWORD);
         notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
         notificationRepo.save(notification);

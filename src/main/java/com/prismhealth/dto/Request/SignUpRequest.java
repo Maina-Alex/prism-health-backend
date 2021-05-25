@@ -3,19 +3,15 @@ package com.prismhealth.dto.Request;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prismhealth.Models.Positions;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 
-import java.util.List;
+import org.springframework.data.annotation.Transient;
 
 @Data
 public class SignUpRequest {
 
-
 	@JsonProperty("password")
 	private String password;
 
-	@JsonProperty("roles")
 	private String roles;
 
 	@JsonProperty("phone")
@@ -44,20 +40,21 @@ public class SignUpRequest {
 
 	@JsonProperty("longitude")
 	private String longitude;
-	 @Transient
-	 public Positions getPositions(){
-	 	Positions positions = new Positions();
-	 	positions.setLatitude(Double.parseDouble(latitude));
-	 	positions.setLongitude(Double.parseDouble(longitude));
-	 	positions.setLocationName(location);
-	 	return positions;
-	 }
+
+	@Transient
+	public Positions getPositions() {
+		Positions positions = new Positions();
+		positions.setLatitude(Double.parseDouble(latitude));
+		positions.setLongitude(Double.parseDouble(longitude));
+		positions.setLocationName(location);
+		return positions;
+	}
 
 	@Override
- 	public String toString(){
-		return
-				String.format("SignUpRequest{password = '%s',role = '%s',phone = '%s'," +
-						"name = '%s',email = '%s',gender = '%s',Dob = '%s'}", password, roles, phone,
-						firstName+" "+secondName, email, gender,DateOfBirth);
-		}
+	public String toString() {
+		return String.format(
+				"SignUpRequest{password = '%s',role = '%s',phone = '%s',"
+						+ "name = '%s',email = '%s',gender = '%s',Dob = '%s'}",
+				password, roles, phone, firstName + " " + secondName, email, gender, DateOfBirth);
+	}
 }

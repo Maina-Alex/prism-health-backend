@@ -13,10 +13,8 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.prismhealth.dto.Request.phone;
 import com.prismhealth.repository.AccountRepository;
@@ -49,8 +47,9 @@ public class AuthService {
     private final MailService mailService;
     private final NotificationRepo notificationRepo;
     private final UwaziiConfig uwaziiConfig;
-    public AuthService(AccountRepository usersRepo, BCryptPasswordEncoder encoder,
-                       MailService mailService, NotificationRepo notificationRepo, UwaziiConfig uwaziiConfig){
+
+    public AuthService(AccountRepository usersRepo, BCryptPasswordEncoder encoder, MailService mailService,
+            NotificationRepo notificationRepo, UwaziiConfig uwaziiConfig) {
         this.usersRepo = usersRepo;
         this.encoder = encoder;
         this.mailService = mailService;
@@ -113,15 +112,13 @@ public class AuthService {
 
 
 
-    public Users resetPassword(String password, String authCode) {
-        List<Users> accounts = usersRepo.findAll().stream().filter(users -> users.getDeviceToken()==authCode).collect(Collectors.toList());
-
-        if (!accounts.isEmpty()) {
-            Optional<Users> account= Optional.ofNullable(accounts.get(0));
+    public Users resetPassword(Principal principal, Users users) {
+        Optional<Users> account = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        if (account.isPresent()) {
 
             Users oldUsers = account.get();
-            oldUsers.setPassword(encoder.encode(password));
-            log.info("Password reset for User id:" + oldUsers.getPhone() + " " + LogMessage.SUCCESS);
+            oldUsers.setPassword(encoder.encode(users.getPassword()));
+            log.info("Password reset for User id:" + users.getPhone() + " " + LogMessage.SUCCESS);
             return usersRepo.save(oldUsers);
 
         } else

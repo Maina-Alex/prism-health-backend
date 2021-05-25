@@ -1,10 +1,9 @@
 package com.prismhealth.services;
-/*
+
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 
 import com.prismhealth.Models.Users;
 import com.prismhealth.Models.UserRoles;
@@ -114,7 +113,7 @@ public class AdminStaffService {
         users.setVerified(true);
 
         users.setPassword(encoder.encode(users.getPassword()));
-        users =usersRepo.save(users);
+        users = usersRepo.save(users);
         userRolesRepo.deleteAll(userRolesRepo.findAllByUserId(users.getPhone()));
 
         for (String s : users.getRoles()) {
@@ -127,4 +126,3 @@ public class AdminStaffService {
     }
 
 }
-*/

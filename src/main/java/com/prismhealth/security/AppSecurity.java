@@ -31,19 +31,16 @@ public class AppSecurity extends WebSecurityConfigurerAdapter {
 
         /* ROUTING SECURITY */
         http.csrf().disable() // disable csrf for our requests.
-                .cors().and().authorizeRequests().antMatchers("/auth/token").permitAll()
-                .antMatchers("/accounts/signUp").permitAll()
-                .antMatchers(HttpMethod.POST, "/auth/forgotpassword").permitAll()
-                .antMatchers(HttpMethod.POST, "/product/**").authenticated()
-                .antMatchers("/notification/**").authenticated()
-                .antMatchers("/auth/**").authenticated()
-                .antMatchers("/help").authenticated()
-                .antMatchers(HttpMethod.POST, "/help/issues/addreply").hasAnyAuthority("ROLE_ADMIN", "ROLE_HELP_SUPPORT")
-                .antMatchers(HttpMethod.GET, "/help/issues").hasAnyAuthority("ROLE_ADMIN", "ROLE_HELP_SUPPORT")
-                .antMatchers("/services/providers/*").authenticated()
-                .antMatchers("/services/users/*").permitAll()
-                .antMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                .and().addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                .cors().and().authorizeRequests().antMatchers("/auth/token").permitAll().antMatchers("/accounts/signUp")
+                .permitAll().antMatchers(HttpMethod.POST, "/auth/forgotpassword").permitAll()
+                .antMatchers(HttpMethod.POST, "/product/**").authenticated().antMatchers("/notification/**")
+                .authenticated().antMatchers("/auth/**").authenticated().antMatchers("/help").authenticated()
+                .antMatchers(HttpMethod.POST, "/services/users/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
+                .antMatchers(HttpMethod.PUT, "/services/users/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
+                .antMatchers(HttpMethod.POST, "/services/providers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
+                .antMatchers(HttpMethod.PUT, "/services/providers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
+                .antMatchers("").permitAll().antMatchers("/admin/**").hasAuthority("ROLE_ADMIN").and()
+                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
                 .addFilter(new JWTAuthorizationFilter(userDetailsService, authenticationManager())).sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
