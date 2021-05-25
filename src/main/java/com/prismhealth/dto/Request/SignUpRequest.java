@@ -1,6 +1,7 @@
 package com.prismhealth.dto.Request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
+
 import com.prismhealth.Models.Positions;
 import lombok.Data;
 
@@ -9,36 +10,26 @@ import org.springframework.data.annotation.Transient;
 @Data
 public class SignUpRequest {
 
-	@JsonProperty("password")
 	private String password;
 
 	private String roles;
 
-	@JsonProperty("phone")
 	private String phone;
 
-	@JsonProperty("firstName")
 	private String firstName;
 
-	@JsonProperty("secondName")
 	private String secondName;
 
-	@JsonProperty("email")
 	private String email;
 
-	@JsonProperty("DateOfBirth")
-	private String DateOfBirth;
+	private Date DateOfBirth;
 
-	@JsonProperty("gender")
 	private String gender;
 
-	@JsonProperty("location")
 	private String location;
 
-	@JsonProperty("latitude")
 	private String latitude;
 
-	@JsonProperty("longitude")
 	private String longitude;
 
 	@Transient
