@@ -81,7 +81,16 @@ public class ServiceProviderService {
          * if(multipartFile==null||multipartFile.length<1){ throw new
          * MultipartException("is empty"); }
          */
-
+        Positions positions = new Positions();
+        if(services.getProviderId()!=null&&services.getLocationName()!=null&&services.getPosition()!=null){
+            positions.setLocationName(services.getLocationName());
+            if (services.getPosition().length>=2) {
+                positions.setLatitude(services.getPosition()[0]);
+                positions.setLongitude(services.getPosition()[1]);
+                services.setPositions(positions);
+            }
+            return serviceRepo.save(services);
+        }else {
         Users users = usersRepo.findOneByPhone(principal.getName());
 
         services.setProviderId(users.getPhone());
@@ -89,10 +98,8 @@ public class ServiceProviderService {
         services.setPositions(users.getPositions());
         services.setPosition(users.getPosition());
 
-        // (users, "createService");
-
         return serviceRepo.save(services);
-
+        }
     }
 
     public List<Services> getAllServices() {
@@ -107,6 +114,9 @@ public class ServiceProviderService {
     public List<Services> getServicesByName(String serviceName) {
         return serviceRepo.findAll().stream().filter(services -> services.getName() == serviceName)
                 .collect(Collectors.toList());
+    }
+    public Optional<Services> getServicesById(String serviceId) {
+        return serviceRepo.findById(serviceId);
     }
 
     public List<Services> getServicesByProvider(String providerId) {

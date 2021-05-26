@@ -2,6 +2,7 @@ package com.prismhealth.Controllers;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import com.prismhealth.Models.Bookings;
 import com.prismhealth.Models.Services;
@@ -52,6 +53,10 @@ public class ServiceProviderController {
     @GetMapping("/getServiceProviders/{serviceId}")
     public List<Users> getServiceProviders(@PathVariable String serviceId) {
         return serviceProviderService.getProvidersByServiceId(serviceId);
+    }
+    @GetMapping("/getServiceById/{serviceId}")
+    public Optional<Services> getServiceById(@PathVariable String serviceId) {
+        return serviceProviderService.getServicesById(serviceId);
     }
 
     @GetMapping("/users/all")

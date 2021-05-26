@@ -20,8 +20,8 @@ public class SosController {
     }
 
     @PostMapping("/send")
-    public ResponseEntity<String> sendSos(@RequestBody Positions postion, Principal principal) {
-        return sosService.sendSos(postion, principal);
+    public ResponseEntity<String> sendSos(@RequestBody Positions position, Principal principal) {
+        return sosService.sendSos(position, principal);
     }
 
 }

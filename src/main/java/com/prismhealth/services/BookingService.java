@@ -80,7 +80,7 @@ public class BookingService {
         if (optional.isPresent()) {
             bookings.forEach(b -> {
                 if (!bookingsRepo.existsByServiceIdAndDateAndHour(b.getServiceId(), b.getDate(), b.getHour())) {
-
+                    log.info("create this booking "+b.getServiceId());
                     b.setUserId(optional.get().getPhone());
                     b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                     bookingsRepo.save(b);

@@ -217,6 +217,18 @@ public class AccountService {
         SignUpResponse signUpResponse = new SignUpResponse();
         Users user = accountRepository.findOneByPhone(users.getPhone());
         if (user != null) {
+            Positions positions = new Positions();
+            if (user.getPosition().length>=2){
+            positions.setLatitude(users.getPosition()[0]);
+            positions.setLongitude(users.getPosition()[1]);
+            positions.setLocationName(users.getLocationName());
+            users.setPositions(positions);
+            }else {
+                users.setPositions(user.getPositions());
+            }
+            users.setRoles(user.getRoles());
+            users.setRating(user.getRating());
+            users.setPassword(user.getPassword());
             signUpResponse.setMessage("successfully updated");
             signUpResponse.setUsers(accountRepository.save(users));
             return ResponseEntity.ok(signUpResponse);
