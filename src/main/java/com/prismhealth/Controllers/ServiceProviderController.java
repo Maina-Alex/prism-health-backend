@@ -55,7 +55,7 @@ public class ServiceProviderController {
         return serviceProviderService.getProvidersByServiceId(serviceId);
     }
     @GetMapping("/getServiceById/{serviceId}")
-    public Optional<Services> getServiceById(@PathVariable String serviceId) {
+    public Services getServiceById(@PathVariable String serviceId) {
         return serviceProviderService.getServicesById(serviceId);
     }
 

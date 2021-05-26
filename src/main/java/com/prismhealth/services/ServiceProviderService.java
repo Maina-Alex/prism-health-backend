@@ -115,8 +115,10 @@ public class ServiceProviderService {
         return serviceRepo.findAll().stream().filter(services -> services.getName() == serviceName)
                 .collect(Collectors.toList());
     }
-    public Optional<Services> getServicesById(String serviceId) {
-        return serviceRepo.findById(serviceId);
+    public Services getServicesById(String serviceId) {
+        Optional<Services> services = serviceRepo.findById(serviceId);
+        services.get().setProvider(accountRepository.findOneByPhone(services.get().getProviderId()));
+        return services.orElse(null);
     }
 
     public List<Services> getServicesByProvider(String providerId) {
