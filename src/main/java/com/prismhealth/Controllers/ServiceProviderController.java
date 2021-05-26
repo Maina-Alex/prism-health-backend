@@ -49,8 +49,8 @@ public class ServiceProviderController {
         return serviceProviderService.createService(services, principal);
     }
 
-    @GetMapping("/getServiceProviders")
-    public List<Users> getServiceProviders(@RequestParam String serviceId) {
+    @GetMapping("/getServiceProviders/{serviceId}")
+    public List<Users> getServiceProviders(@PathVariable String serviceId) {
         return serviceProviderService.getProvidersByServiceId(serviceId);
     }
 
@@ -72,7 +72,7 @@ public class ServiceProviderController {
         return serviceProviderService.getServicesNear(point, distance);
     }
 
-    @GetMapping("/users/{serviceName}")
+    @GetMapping("/users/serviceName/{serviceName}")
     public List<Services> getAllServiceByName(@PathVariable String serviceName) {
         return serviceProviderService.getServicesByName(serviceName);
     }

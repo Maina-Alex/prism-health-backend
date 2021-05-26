@@ -31,14 +31,14 @@ public class AppSecurity extends WebSecurityConfigurerAdapter {
 
         /* ROUTING SECURITY */
         http.csrf().disable() // disable csrf for our requests.
-                .cors().and().authorizeRequests().antMatchers("/auth/token").permitAll().antMatchers("/accounts/signUp")
+                .cors().and().authorizeRequests().antMatchers("/auth/token")
+                .permitAll().antMatchers("/accounts/signUp")
                 .permitAll().antMatchers(HttpMethod.POST, "/auth/forgotpassword").permitAll()
                 .antMatchers(HttpMethod.POST, "/product/**").authenticated().antMatchers("/notification/**")
                 .authenticated().antMatchers("/auth/**").authenticated().antMatchers("/help").authenticated()
                 .antMatchers(HttpMethod.POST, "/admin/providers").permitAll()
                 .antMatchers(HttpMethod.POST, "/services/booking/add").authenticated()
-                .antMatchers(HttpMethod.POST, "/services/users/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
-                .antMatchers(HttpMethod.PUT, "/services/users/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
+                .antMatchers(HttpMethod.PUT, "/services/users/**").permitAll()
                 .antMatchers(HttpMethod.POST, "/services/providers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
                 .antMatchers(HttpMethod.PUT, "/services/providers/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_PROVIDER")
                 .antMatchers("/admin/**").hasAuthority("ROLE_ADMIN").and()
