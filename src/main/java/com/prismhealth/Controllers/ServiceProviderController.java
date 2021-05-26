@@ -83,4 +83,11 @@ public class ServiceProviderController {
         return ResponseEntity.ok().body(bookingService.createBookings(bookings, principal));
 
     }
+
+    @GetMapping("/booking/all")
+    public ResponseEntity<?> getBookingHistory(Principal principal) {
+
+        return ResponseEntity.ok().body(bookingService.getBookingsHistory(principal));
+
+    }
 }

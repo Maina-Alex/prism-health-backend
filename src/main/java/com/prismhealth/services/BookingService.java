@@ -20,7 +20,7 @@ import com.prismhealth.repository.BookingsRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -90,5 +90,18 @@ public class BookingService {
 
         }
         return this.getServiceBookings(bookings.get(0).getServiceId());
+    }
+
+    public Map<String, List<Bookings>> getBookingsHistory(Principal principal) {
+        Optional<Users> optional = accountRepository.findById(principal.getName());
+        if (optional.isPresent()) {
+            Map<String, List<Bookings>> bookings = bookingsRepo
+                    .findAllByUserId(optional.get().getPhone(), Sort.by("date").descending()).stream()
+                    .collect(Collectors.groupingBy(Bookings::getServiceId));
+
+            return bookings;
+        }
+        return null;
+
     }
 }
