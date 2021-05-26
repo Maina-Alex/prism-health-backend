@@ -22,7 +22,7 @@ public class AdminProviderController {
 
     }
 
-    @PostMapping
+    @PostMapping("/providers")
     public String addUser(@RequestBody Users users) {
         return providerService.addUser(users);
     }

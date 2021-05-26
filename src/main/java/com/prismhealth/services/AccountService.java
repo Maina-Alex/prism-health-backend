@@ -24,6 +24,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +40,7 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 @Slf4j
 @Service
+@EnableAsync
 public class AccountService {
     private final AccountRepository accountRepository;
     private final AuthService authService;
@@ -59,7 +62,7 @@ public class AccountService {
         this.userRatingsRepo = userRatingsRepo;
         this.userRolesRepo = userRolesRepo;
     }
-
+    @Async
     public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
         Users users = accountRepository.findOneByPhone(phone.getPhone());
@@ -128,7 +131,7 @@ public class AccountService {
         Users users = accountRepository.findOneByPhone(phone.getPhone());
         if (users == null) {
             return new ResponseEntity<>("User with phone number " + phone + " not found", HttpStatus.NOT_FOUND);
-        }
+        }else {
 
         log.info("Forgot password request, user email  " + users.getEmail());
         String authCode = HelperUtility.getConfirmCodeNumber();
@@ -142,7 +145,8 @@ public class AccountService {
         mail.setMailFrom("prismhealth658@gmail.com");
         mail.setMailTo(users.getEmail());
         mail.setMailSubject("Prism-health Notification services");
-        mail.setMailContent("Click on the link to change your password\n");
+        mail.setMailContent("" +
+                "Here is your authentication code \n"+authCode+"\nUse to change your password. ");
 
         mailService.sendEmail(mail);
         Notification notification = new Notification();
@@ -154,6 +158,7 @@ public class AccountService {
         notificationRepo.save(notification);
         log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
         return new ResponseEntity<>("Ok", HttpStatus.OK);
+        }
     }
 
     public String getToken(String phone) {
