@@ -171,15 +171,10 @@ public class ServiceProviderService {
 
     }
 
-    public List<Users> getProvidersByServiceId(String serviceId) {
+    public Users getProvidersByServiceId(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        List<Services> servicesList = serviceRepo.findAll().stream()
-                .filter(services1 -> services.get().getName().equals(services.get().getName()))
-                .collect(Collectors.toList());
-        List<Users> usersList = new ArrayList<>();
-        for (Services services1 : servicesList) {
-            usersList.add(accountRepository.findOneByPhone(services1.getProviderId()));
-        }
-        return usersList;
+        if (services.isPresent())
+            return accountRepository.findOneByPhone(services.get().getProviderId());
+            return null;
     }
 }
