@@ -1,5 +1,6 @@
 package com.prismhealth.files;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -79,18 +80,24 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public Resource loadAsResource(String filename) {
+    public byte[] loadAsResource(String filename) {
         try {
             Path file = load(filename);
             Resource resource = new UrlResource(file.toUri());
+
             if (resource.exists() || resource.isReadable()) {
-                return resource;
+                try {
+                    return IOUtils.toByteArray(resource.getURI());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else {
                 throw new FileNotFoundException("Could not read file: " + filename);
             }
         } catch (MalformedURLException e) {
             throw new FileNotFoundException("Could not read file: " + filename, e);
         }
+        return null;
     }
 
     @Override

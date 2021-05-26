@@ -1,6 +1,5 @@
 package com.prismhealth.files;
 
-import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;
@@ -15,7 +14,7 @@ public interface StorageService {
 
     Path load(String filename);
 
-    Resource loadAsResource(String filename);
+    byte[] loadAsResource(String filename);
 
     void deleteAll();
 }

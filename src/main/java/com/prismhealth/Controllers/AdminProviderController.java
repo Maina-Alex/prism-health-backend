@@ -10,13 +10,13 @@ import java.util.List;
 
 @Api(tags = "AdminProvider Apis")
 @RestController
-@RequestMapping("/admin/providers")
+@RequestMapping("/admin")
 @CrossOrigin
 public class AdminProviderController {
     @Autowired
     private AdminProviderService providerService;
 
-    @GetMapping("/id/{id}")
+    @GetMapping("/providers/id/{id}")
     public Users getProviderById(@PathVariable("id") String id) {
         return providerService.getProviderById(id);
 
@@ -27,14 +27,14 @@ public class AdminProviderController {
         return providerService.addUser(users);
     }
 
-    @GetMapping
+    @GetMapping("/providers")
     public List<Users> getAllProviders() {
         return providerService.getAllProviders();
 
     }
 
     @CrossOrigin
-    @PostMapping("/delete")
+    @PostMapping("/providers/delete")
     public boolean deleteProvider(@RequestBody Users users) {
         return providerService.deleteProvider(users.getPhone());
     }

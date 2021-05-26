@@ -125,6 +125,7 @@ public class ProductsService {
     public Product saveProduct(Product product, Principal principal) {
 
         Users users = accountRepository.findOneByPhone(principal.getName());
+        if (users!=null){
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
         variant.setSubCategory(product.getSubCategory());
@@ -138,6 +139,8 @@ public class ProductsService {
             Product product1 = productsRepository.save(product);
             product1.setUsers(accountRepository.findOneByPhone(product.getUser()));
             return product1;
+        }
+        return null;
 
         }
         // TODO marshal up a response for when subCategory does not exists
