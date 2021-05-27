@@ -95,6 +95,10 @@ public class ProductsController {
     public ResponseEntity<List<Product>> getAllProducts(){
         return ResponseEntity.ok(productsService.getAllAvailableProducts());
     }
+    @GetMapping("/productByProviderId/{providerId}")
+    public ResponseEntity<List<Product>> getProductByProviderId(@PathVariable String providerId){
+        return ResponseEntity.ok(productsService.getProductsByProviderId(providerId));
+    }
 
     /* POST_MAPPINGS */
     @ApiOperation(value = "Post a category")

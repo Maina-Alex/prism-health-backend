@@ -10,13 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
-import com.prismhealth.Models.Bookings;
-import com.prismhealth.Models.ServiceBooking;
-import com.prismhealth.Models.Users;
+
+import com.prismhealth.Models.*;
 import com.prismhealth.repository.AccountRepository;
 import com.prismhealth.repository.BookingsRepo;
+import com.prismhealth.repository.MailService;
+import com.prismhealth.repository.NotificationRepo;
+import com.prismhealth.util.Actions;
+import com.prismhealth.util.LogMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +34,12 @@ public class BookingService {
     private BookingsRepo bookingsRepo;
     @Autowired
     AccountRepository accountRepository;
+    @Autowired
+    MailService mailService;
+    @Autowired
+    NotificationRepo notificationRepo;
+    @Autowired
+    ExecutorService executor;
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();
@@ -87,6 +97,7 @@ public class BookingService {
                 }
 
             });
+            sendEmail(optional.get(),bookings);
 
         }
         return this.getServiceBookings(bookings.get(0).getServiceId());
@@ -102,6 +113,41 @@ public class BookingService {
             return bookings;
         }
         return null;
+
+    }
+    public void sendEmail(Users users, List<Bookings> bookings) {
+        Runnable task = () -> {
+            if (users == null) {
+                log.info("User with phone number not found");
+            }
+            String message = "Booking for service \n"+bookings+" made successfully for "+ users.getEmail();
+
+            if (users != null) {
+                log.info(message);
+                Mail mail = new Mail();
+                mail.setMailFrom("prismhealth658@gmail.com");
+                mail.setMailTo(users.getEmail());
+                mail.setMailSubject("Prism-health Notification services");
+                mail.setMailContent(message);
+
+                mailService.sendEmail(mail);
+                Notification notification = new Notification();
+                notification.setEmail(users.getEmail());
+                notification.setUserId(users.getPhone());
+                notification.setMessage(message);
+                notification.setAction(Actions.RESET_PASSSWORD);
+                notification.setTimestamp(java.util.Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+                notificationRepo.save(notification);
+                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+
+            } else {
+                log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
+
+            }
+
+        };
+
+        executor.submit(task);
 
     }
 }

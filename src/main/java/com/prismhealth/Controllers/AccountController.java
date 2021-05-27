@@ -73,7 +73,7 @@ public class AccountController {
     public ResponseEntity<?> getProviderById(@RequestParam String providerId) {
         return accountService.getProviderById(providerId);
     }
-    @GetMapping("allUsers")
+    @GetMapping("/allUsers")
     public ResponseEntity<List<Users>> getAllUser(){
         return accountService.getAllUsers();
     }

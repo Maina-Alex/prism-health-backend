@@ -32,7 +32,6 @@ public class ServiceProviderController {
     @GetMapping("/providers/bookings")
     public List<Bookings> getAllBookings(Principal principal) {
         return serviceProviderService.getAllServicesBookings(principal);
-
     }
 
     @PostMapping("/users/service/availability/false")

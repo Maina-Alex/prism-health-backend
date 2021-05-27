@@ -29,7 +29,16 @@ public class SosService {
 
     public ResponseEntity<String> sendSos(Positions position, Principal principal) {
         Users users = accountRepository.findOneByPhone(principal.getName());
-        String phone = users.getPhone();
+        if (users.getEmergencyContact1()!=null&&users.getEmergencyContact2()==null){
+            return execute(position,users,users.getEmergencyContact1());
+        }else if (users.getEmergencyContact1()!=null&&users.getEmergencyContact2()!=null){
+            execute(position,users,users.getEmergencyContact1());
+            return  execute(position,users,users.getEmergencyContact2());
+        }else {
+            return execute(position,users,users.getEmergencyContact2());
+        }
+    }
+    public ResponseEntity<String> execute(Positions position, Users users,String phone){
         UwaziiSmsRequest uwaziiSmsRequest = new UwaziiSmsRequest();
         uwaziiSmsRequest.setApiKey(uwaziiConfig.getApi_Key());
         uwaziiSmsRequest.setSenderId(uwaziiConfig.getSenderId());
