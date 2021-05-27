@@ -129,15 +129,16 @@ public class ProductsService {
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
         variant.setSubCategory(product.getSubCategory());
-
+        Users users1 = accountRepository.findOneByPhone(product.getUser());
         if (!subCategoryByName(product.getSubCategory()).isEmpty()) {
             if (variantByName(product.getProductVariant()).isEmpty())
                 variantRepository.save(variant);
-
+            if (product.getPosition().length<2)
+                product.setPosition(new double[]{users1.getPosition()[0],users1.getPosition()[1]});
             sendEmail(users, "createProduct");
             product.setUser(users.getPhone());
             Product product1 = productsRepository.save(product);
-            product1.setUsers(accountRepository.findOneByPhone(product.getUser()));
+            product1.setUsers(users1);
             return product1;
         }
         return null;
@@ -222,5 +223,14 @@ public class ProductsService {
 
         executor.submit(task);
 
+    }
+
+    public List<Product> getAllAvailableProducts() {
+        return productsRepository.findAll();
+    }
+    public List<Product> getProductsByProviderId(String providerId){
+        return productsRepository.findAll().stream()
+                .filter(product -> product.getUser()==providerId)
+                .collect(Collectors.toList());
     }
 }

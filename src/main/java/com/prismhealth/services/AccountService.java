@@ -33,6 +33,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,6 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 @Slf4j
 @Service
-@EnableAsync
 public class AccountService {
     private final AccountRepository accountRepository;
     private final AuthService authService;
@@ -62,7 +62,7 @@ public class AccountService {
         this.userRatingsRepo = userRatingsRepo;
         this.userRolesRepo = userRolesRepo;
     }
-    @Async
+
     public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
         Users users = accountRepository.findOneByPhone(phone.getPhone());
@@ -71,7 +71,14 @@ public class AccountService {
             signUpResponse.setMessage("user already exists");
             return ResponseEntity.badRequest().body(signUpResponse);
         } else {
-            String authCode = authService.getAuthentication(phone.getPhone());
+            String authCode = null;
+            try {
+                authCode = authService.getAuthentication(phone.getPhone()).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             signUpResponse.setMessage("Create new user..");
             signUpResponse.setAuthCode(authCode);
         }
@@ -315,5 +322,10 @@ public class AccountService {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Provider not found");
 
+    }
+
+    public ResponseEntity<List<Users>> getAllUsers() {
+        return ResponseEntity.ok(accountRepository.findAll().stream()
+                .filter(users -> users.getAccountType().equals("USER")).collect(Collectors.toList()));
     }
 }
