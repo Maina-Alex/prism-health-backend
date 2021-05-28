@@ -145,5 +145,13 @@ public class ProductsController {
     public ResponseEntity<?> deleteProduct(@PathVariable("productid") String productid) {
         return ResponseEntity.ok(productsService.deleteProduct(productid));
     }
+    @DeleteMapping("/category/{categoryName}")
+    public ResponseEntity<?> deleteCategory(@PathVariable("categoryName") String categoryName) {
+        return ResponseEntity.ok(productsService.deleteCategory(categoryName));
+    }
+    @DeleteMapping("/subCategory/{subCategoryName}")
+    public ResponseEntity<?> deleteSubCategory(@PathVariable("subCategoryName") String subCategoryName) {
+        return ResponseEntity.ok(productsService.deleteSubCategory(subCategoryName));
+    }
 
 }
