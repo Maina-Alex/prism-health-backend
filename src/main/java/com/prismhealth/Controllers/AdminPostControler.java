@@ -7,6 +7,7 @@ import com.prismhealth.Models.Users;
 import com.prismhealth.services.AdminPostService;
 import com.prismhealth.services.AdminStaffService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -20,37 +21,37 @@ public class AdminPostControler {
     private AdminPostService postService;
 
     @GetMapping()
-    public List<Post> getAllPosts(@PathVariable("phone") String phone) {
-        return staffService.getStaffById(phone);
+    public List<Post> getAllPosts() {
+        return postService.getPosts();
 
     }
 
     @PostMapping()
-    public String addPost(@RequestBody Users users, Principal principal) {
-        return staffService.addUser(users, principal);
+    public Post addPost(@RequestBody Post post) {
+        return postService.savePost(post);
     }
 
     @GetMapping("/categories")
     public List<PostCategory> getAllPostCategories() {
-        return staffService.getAllStaff();
+        return postService.getPostCategories();
 
     }
 
     @PostMapping("/categories")
-    public  void saveCategory(@RequestBody Category category) {
-        return staffService.getAllStaff();
+    public  PostCategory saveCategory(@RequestBody PostCategory category) {
+        return postService.savePostCategory(category);
 
     }
 
 
     @CrossOrigin
     @PostMapping("/delete")
-    public boolean deletePost(@PathVariable  String postId) {
-        return staffService.deleteStaff(users.getPhone());
+    public ResponseEntity deletePost(@RequestBody Post post) {
+        return postService.deletePost(post);
     }
 
     @PostMapping("categories/delete")
-    public boolean deleteCategory(@RequestBody  PostCategory category) {
+    public ResponseEntity deleteCategory(@RequestBody  PostCategory category) {
         return postService.deletePostCategory(category);
     }
 

@@ -14,7 +14,7 @@ public class Post {
     public String postTitle;
     public String postCategory;
     public  String postContent;
-    public Binary image;
+    public String imageUrl;
 
     public String getId() {
         return id;
@@ -22,6 +22,14 @@ public class Post {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getPostTitle() {
@@ -48,11 +56,4 @@ public class Post {
         this.postContent = postContent;
     }
 
-    public Binary getImage() {
-        return image;
-    }
-
-    public void setImage(Binary image) {
-        this.image = image;
-    }
 }
