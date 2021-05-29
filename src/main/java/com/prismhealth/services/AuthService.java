@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import com.prismhealth.repository.AccountRepository;
@@ -33,6 +34,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -40,6 +44,7 @@ import org.springframework.web.client.RestTemplate;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 @Service
+@EnableAsync
 public class AuthService {
 
     private final Logger log = LoggerFactory.getLogger(AuthService.class);
@@ -57,8 +62,8 @@ public class AuthService {
         this.notificationRepo = notificationRepo;
         this.uwaziiConfig = uwaziiConfig;
     }
-
-    public  String getAuthentication(String phone) {
+    @Async
+    public Future<String> getAuthentication(String phone) {
         String confirmCode = HelperUtility.getConfirmCodeNumber();
         UwaziiSmsRequest uwaziiSmsRequest = new UwaziiSmsRequest();
         uwaziiSmsRequest.setApiKey(uwaziiConfig.getApi_Key());
@@ -87,7 +92,7 @@ public class AuthService {
             if (response.code()==200){
             log.info("Uwazii sms sent successfully ..");
             response.close();
-            return confirmCode;
+            return new AsyncResult<>(confirmCode);
             }
         } catch (IOException e) {
             log.error(String.format("Could not send sms -> %s",e.getLocalizedMessage()));

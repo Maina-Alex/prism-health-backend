@@ -125,19 +125,23 @@ public class ProductsService {
     public Product saveProduct(Product product, Principal principal) {
 
         Users users = accountRepository.findOneByPhone(principal.getName());
+        if (users!=null){
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
         variant.setSubCategory(product.getSubCategory());
-
+        Users users1 = accountRepository.findOneByPhone(product.getUser());
         if (!subCategoryByName(product.getSubCategory()).isEmpty()) {
             if (variantByName(product.getProductVariant()).isEmpty())
                 variantRepository.save(variant);
-
+            if (product.getPosition().length<2)
+                product.setPosition(new double[]{users1.getPosition()[0],users1.getPosition()[1]});
             sendEmail(users, "createProduct");
             product.setUser(users.getPhone());
             Product product1 = productsRepository.save(product);
-            product1.setUsers(accountRepository.findOneByPhone(product.getUser()));
+            product1.setUsers(users1);
             return product1;
+        }
+        return null;
 
         }
         // TODO marshal up a response for when subCategory does not exists
@@ -219,5 +223,25 @@ public class ProductsService {
 
         executor.submit(task);
 
+    }
+
+    public List<Product> getAllAvailableProducts() {
+        return productsRepository.findAll();
+    }
+    public List<Product> getProductsByProviderId(String providerId){
+        return productsRepository.findAll().stream()
+                .filter(product -> product.getUser()==providerId)
+                .collect(Collectors.toList());
+    }
+
+    public ResponseEntity<?> deleteCategory(String categoryName) {
+         categoryRepository.delete(categoryRepository.findByCategoryName(categoryName).get());
+        return ResponseEntity.ok().body("Successfully deleted..");
+    }
+
+    public ResponseEntity<?> deleteSubCategory(String subCategoryName) {
+        subCategoriesRepository.deleteAll(subCategoriesRepository.findAll()
+                .stream().filter(subCategory -> subCategory.getSubCategoryName()==subCategoryName).collect(Collectors.toList()));
+        return ResponseEntity.ok("Successfully deleted");
     }
 }

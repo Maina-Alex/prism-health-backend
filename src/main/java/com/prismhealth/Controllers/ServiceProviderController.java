@@ -2,6 +2,7 @@ package com.prismhealth.Controllers;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 import com.prismhealth.Models.Bookings;
 import com.prismhealth.Models.Services;
@@ -31,7 +32,6 @@ public class ServiceProviderController {
     @GetMapping("/providers/bookings")
     public List<Bookings> getAllBookings(Principal principal) {
         return serviceProviderService.getAllServicesBookings(principal);
-
     }
 
     @PostMapping("/users/service/availability/false")
@@ -49,9 +49,13 @@ public class ServiceProviderController {
         return serviceProviderService.createService(services, principal);
     }
 
-    @GetMapping("/getServiceProviders")
-    public List<Users> getServiceProviders(@RequestParam String serviceId) {
+    @GetMapping("/getServiceProviders/{serviceId}")
+    public Users getServiceProviders(@PathVariable String serviceId) {
         return serviceProviderService.getProvidersByServiceId(serviceId);
+    }
+    @GetMapping("/getServiceById/{serviceId}")
+    public Services getServiceById(@PathVariable String serviceId) {
+        return serviceProviderService.getServicesById(serviceId);
     }
 
     @GetMapping("/users/all")
@@ -72,7 +76,7 @@ public class ServiceProviderController {
         return serviceProviderService.getServicesNear(point, distance);
     }
 
-    @GetMapping("/users/{serviceName}")
+    @GetMapping("/users/serviceName/{serviceName}")
     public List<Services> getAllServiceByName(@PathVariable String serviceName) {
         return serviceProviderService.getServicesByName(serviceName);
     }
@@ -81,6 +85,12 @@ public class ServiceProviderController {
     public ResponseEntity<?> addServiceBooking(@RequestBody List<Bookings> bookings, Principal principal) {
 
         return ResponseEntity.ok().body(bookingService.createBookings(bookings, principal));
+
+    }
+    @PutMapping("/booking/cancel")
+    public ResponseEntity<?> cancelServiceBooking(@RequestBody List<Bookings> bookings, Principal principal) {
+
+        return ResponseEntity.ok().body(bookingService.cancelBookings(bookings, principal));
 
     }
 

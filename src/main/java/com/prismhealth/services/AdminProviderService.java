@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -62,7 +63,7 @@ public class AdminProviderService {
         if (phone.isPresent()) {
             Optional<Users> uOptional = usersRepo.findById(phone.get());
             if (uOptional.isPresent()) {
-
+                updateUser(uOptional.get());
                 return "User already exits";
 
             } else {
@@ -76,14 +77,15 @@ public class AdminProviderService {
 
     }
 
-    private void updateUser(Users users, Principal principal) {
-
+    private void updateUser(Users users) {
+        Optional<Users> u = Optional.ofNullable(usersRepo.findOneByPhone(users.getPhone()));
+        users=u.get();
         users.setAccountType("PROVIDER");
         users.setBlocked(false);
         users.setDeleted(false);
         users.setVerified(true);
-        Optional<Users> u = Optional.ofNullable(usersRepo.findOneByPhone(users.getPhone()));
-        users.setPassword(u.get().getPassword());
+        users.setVerifiedOn(new Date());
+        //users.setPassword(u.get().getPassword());
         if (u.get().getEmail().equals("admin@healthprism.com"))
             users.setEmail(u.get().getEmail());
 
@@ -93,8 +95,9 @@ public class AdminProviderService {
             userRolesRepo.deleteAll(userRolesRepo.findAllByUserId(users.getPhone()));
 
             UserRoles role = new UserRoles();
-            role.setAssignedBy(principal.getName());
+            role.setAssignedBy("self");
             role.setRole("ROLE_PROVIDER");
+            role.setUserId(users.getPhone());
 
             userRolesRepo.save(role);
 
@@ -114,6 +117,7 @@ public class AdminProviderService {
         UserRoles role = new UserRoles();
         role.setAssignedBy("self");
         role.setRole("ROLE_PROVIDER");
+        role.setUserId(users.getPhone());
         userRolesRepo.save(role);
 
     }

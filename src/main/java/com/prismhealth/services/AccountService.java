@@ -24,6 +24,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +33,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
@@ -68,7 +71,14 @@ public class AccountService {
             signUpResponse.setMessage("user already exists");
             return ResponseEntity.badRequest().body(signUpResponse);
         } else {
-            String authCode = authService.getAuthentication(phone.getPhone());
+            String authCode = null;
+            try {
+                authCode = authService.getAuthentication(phone.getPhone()).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
             signUpResponse.setMessage("Create new user..");
             signUpResponse.setAuthCode(authCode);
         }
@@ -128,7 +138,7 @@ public class AccountService {
         Users users = accountRepository.findOneByPhone(phone.getPhone());
         if (users == null) {
             return new ResponseEntity<>("User with phone number " + phone + " not found", HttpStatus.NOT_FOUND);
-        }
+        }else {
 
         log.info("Forgot password request, user email  " + users.getEmail());
         String authCode = HelperUtility.getConfirmCodeNumber();
@@ -142,7 +152,8 @@ public class AccountService {
         mail.setMailFrom("prismhealth658@gmail.com");
         mail.setMailTo(users.getEmail());
         mail.setMailSubject("Prism-health Notification services");
-        mail.setMailContent("Click on the link to change your password\n");
+        mail.setMailContent("" +
+                "Here is your authentication code \n"+authCode+"\nUse to change your password. ");
 
         mailService.sendEmail(mail);
         Notification notification = new Notification();
@@ -154,6 +165,7 @@ public class AccountService {
         notificationRepo.save(notification);
         log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
         return new ResponseEntity<>("Ok", HttpStatus.OK);
+        }
     }
 
     public String getToken(String phone) {
@@ -217,6 +229,18 @@ public class AccountService {
         SignUpResponse signUpResponse = new SignUpResponse();
         Users user = accountRepository.findOneByPhone(users.getPhone());
         if (user != null) {
+            Positions positions = new Positions();
+            if (user.getPosition().length>=2){
+            positions.setLatitude(users.getPosition()[0]);
+            positions.setLongitude(users.getPosition()[1]);
+            positions.setLocationName(users.getLocationName());
+            users.setPositions(positions);
+            }else {
+                users.setPositions(user.getPositions());
+            }
+            users.setRoles(user.getRoles());
+            users.setRating(user.getRating());
+            users.setPassword(user.getPassword());
             signUpResponse.setMessage("successfully updated");
             signUpResponse.setUsers(accountRepository.save(users));
             return ResponseEntity.ok(signUpResponse);
@@ -298,5 +322,10 @@ public class AccountService {
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Provider not found");
 
+    }
+
+    public ResponseEntity<List<Users>> getAllUsers() {
+        return ResponseEntity.ok(accountRepository.findAll().stream()
+                .filter(users -> users.getAccountType().equals("USER")).collect(Collectors.toList()));
     }
 }

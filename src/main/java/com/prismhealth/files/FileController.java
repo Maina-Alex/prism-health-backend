@@ -1,8 +1,6 @@
 package com.prismhealth.files;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
@@ -22,12 +20,13 @@ public class FileController {
         @Autowired
         private FileSystemStorageService storageService;
 
-        @GetMapping(value = "/download/{filename:.+}")
+        @GetMapping(value = "/download/{filename:.+}",produces = {MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE,MediaType.IMAGE_PNG_VALUE})
         @CrossOrigin
-        public ResponseEntity<Resource> downloadFile(@PathVariable String filename, HttpServletRequest request) {
+        public ResponseEntity<byte[]> downloadFile(@PathVariable String filename, HttpServletRequest request) {
 
-                Resource resource = storageService.loadAsResource(filename);
-                String contentType = null;
+                byte[] resource = storageService.loadAsResource(filename);
+                return ResponseEntity.ok(resource);
+               /* String contentType = null;
                 try {
                         contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
                 } catch (Exception ex) {
@@ -40,7 +39,7 @@ public class FileController {
                 return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
                                 .header(HttpHeaders.CONTENT_DISPOSITION,
                                                 "attachment; filename=\"" + resource.getFilename() + "\"")
-                                .body(resource);
+                                .body(resource);*/
         }
 
         @PostMapping("/upload")

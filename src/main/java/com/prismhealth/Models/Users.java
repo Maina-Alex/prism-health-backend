@@ -25,6 +25,7 @@ public class Users {
 	private String emergencyContact2;
 
 	private String email;
+
 	private String profileImage;
 
 	private Date dateOfBirth;

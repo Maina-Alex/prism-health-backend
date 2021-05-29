@@ -39,6 +39,9 @@ public class Product {
 	@JsonProperty("photos")
 	private List<String> photos;
 
+	@JsonProperty("position")
+	private double[] position;
+
 	@JsonProperty("provider")
 	private Users users;
 	/*
