@@ -233,4 +233,15 @@ public class ProductsService {
                 .filter(product -> product.getUser()==providerId)
                 .collect(Collectors.toList());
     }
+
+    public ResponseEntity<?> deleteCategory(String categoryName) {
+         categoryRepository.delete(categoryRepository.findByCategoryName(categoryName).get());
+        return ResponseEntity.ok().body("Successfully deleted..");
+    }
+
+    public ResponseEntity<?> deleteSubCategory(String subCategoryName) {
+        subCategoriesRepository.deleteAll(subCategoriesRepository.findAll()
+                .stream().filter(subCategory -> subCategory.getSubCategoryName()==subCategoryName).collect(Collectors.toList()));
+        return ResponseEntity.ok("Successfully deleted");
+    }
 }

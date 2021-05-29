@@ -87,6 +87,12 @@ public class ServiceProviderController {
         return ResponseEntity.ok().body(bookingService.createBookings(bookings, principal));
 
     }
+    @PutMapping("/booking/cancel")
+    public ResponseEntity<?> cancelServiceBooking(@RequestBody List<Bookings> bookings, Principal principal) {
+
+        return ResponseEntity.ok().body(bookingService.cancelBookings(bookings, principal));
+
+    }
 
     @GetMapping("/booking/all")
     public ResponseEntity<?> getBookingHistory(Principal principal) {
