@@ -30,15 +30,15 @@ public class BookingService {
     @Autowired
     private BookingsRepo bookingsRepo;
     @Autowired
-    AccountRepository accountRepository;
+    private AccountRepository accountRepository;
     @Autowired
-    MailService mailService;
+    private MailService mailService;
     @Autowired
-    NotificationRepo notificationRepo;
+    private NotificationRepo notificationRepo;
     @Autowired
-    ExecutorService executor;
+    private ExecutorService executor;
     @Autowired
-    ServiceRepo serviceRepo;
+    private ServiceRepo serviceRepo;
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();
@@ -51,7 +51,7 @@ public class BookingService {
 
             while (hour > 5 && hour < 17) {
                 ServiceBooking b = new ServiceBooking();
-                List<Bookings> serviceB = bookingsRepo.findAllByServiceIdAndDateAndHour(serviceId, Date.valueOf(today),
+                List<Bookings> serviceB = bookingsRepo.findAllByServiceIdAndDateAndHour(serviceId, today.toString(),
                         hour);
                 if (serviceB.isEmpty()) {
                     b.setAvailable(true);
@@ -86,12 +86,18 @@ public class BookingService {
 
     public Map<String, List<ServiceBooking>> createBookings(List<Bookings> bookings, Principal principal) {
         Optional<Users> optional = accountRepository.findById(principal.getName());
-        if (optional.isPresent()) {
+        if (optional.isPresent())
             bookings.forEach(b -> {
                 if (!b.getServiceId().isEmpty()
                         && !bookingsRepo.existsByServiceIdAndDateAndHour(b.getServiceId(), b.getDate(), b.getHour())) {
 
-        }
+                    b.setUserId(optional.get().getPhone());
+                    b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+                    bookingsRepo.save(b);
+                }
+
+            });
+
         return this.getServiceBookings(bookings.get(0).getServiceId());
     }
 
@@ -99,11 +105,10 @@ public class BookingService {
         Optional<Users> optional = accountRepository.findById(principal.getName());
         if (optional.isPresent()) {
             bookings.forEach(b -> {
-                if (!bookingsRepo.existsByServiceIdAndDateAndHour(b.getServiceId(), b.getDate(), b.getHour())) {
-                    log.info("create this booking " + b.getServiceId());
-                    b.setUserId(optional.get().getPhone());
-                    b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-                    b.isCancelled();
+                if (Optional.ofNullable(b.getId()).isPresent() && bookingsRepo.existsById(b.getId())) {
+                    log.info("calcel booking for sercice " + b.getServiceId());
+
+                    b.setCancelled(true);
                     bookingsRepo.save(b);
                 }
 
@@ -117,16 +122,23 @@ public class BookingService {
     public Map<String, List<Bookings>> getBookingsHistory(Principal principal) {
         Optional<Users> optional = accountRepository.findById(principal.getName());
         if (optional.isPresent()) {
-            Map<String, List<Bookings>> bookings = bookingsRepo
-                    .findAllByUserId(optional.get().getPhone(), Sort.by("date").descending()).stream().map(b -> {
+            if (optional.get().getAccountType().equals("PROVIDER")) {
 
-                        LocalDate date = Instant.ofEpochMilli(b.getDate().getTime()).atZone(ZoneId.systemDefault())
-                                .toLocalDate();
-                        b.setFormatedDate(date.toString());
-                        return b;
-                    }).collect(Collectors.groupingBy(Bookings::getServiceId));
+                List<Bookings> bookings = new ArrayList<>();
+                List<Services> services = serviceRepo.findAllByProviderId(optional.get().getPhone());
+                services.forEach(s -> bookings
+                        .addAll(bookingsRepo.findAllByServiceId(s.getId(), Sort.by("timestamp").descending())));
 
-            return bookings;
+                return bookings.stream().collect(Collectors.groupingBy(Bookings::getServiceId));
+
+            } else {
+
+                Map<String, List<Bookings>> bookings = bookingsRepo
+                        .findAllByUserId(optional.get().getPhone(), Sort.by("date").descending()).stream()
+                        .collect(Collectors.groupingBy(Bookings::getServiceId));
+
+                return bookings;
+            }
         }
         return null;
 

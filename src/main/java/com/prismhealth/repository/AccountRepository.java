@@ -10,11 +10,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-
-public interface AccountRepository extends MongoRepository<Users,String> {
+public interface AccountRepository extends MongoRepository<Users, String> {
     Users findOneByPhone(String phone);
-boolean existsByPhone(String phone);
+
+    boolean existsByPhone(String phone);
+
     Optional<Users> findOneByEmail(String s);
+
+    Optional<Users> findOneByDeviceToken(String deviceToken);
 
     List<Users> findByPositionNear(Point location, Distance distance);
 

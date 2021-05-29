@@ -13,10 +13,11 @@ public class Bookings {
     private String id;
     private String serviceId;
     private String userId;
-    private Date date;
+    private String date;
     private int hour;
     private boolean cancelled;
     private Date timestamp;
-    private String formatedDate;
+    private Users user;
+    private Services service;
 
 }
