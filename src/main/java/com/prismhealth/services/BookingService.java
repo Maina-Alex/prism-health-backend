@@ -2,6 +2,7 @@ package com.prismhealth.services;
 
 import java.security.Principal;
 import java.sql.Date;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -79,7 +80,8 @@ public class BookingService {
         Optional<Users> optional = accountRepository.findById(principal.getName());
         if (optional.isPresent()) {
             bookings.forEach(b -> {
-                if (!bookingsRepo.existsByServiceIdAndDateAndHour(b.getServiceId(), b.getDate(), b.getHour())) {
+                if (!b.getServiceId().isEmpty()
+                        && !bookingsRepo.existsByServiceIdAndDateAndHour(b.getServiceId(), b.getDate(), b.getHour())) {
 
                     b.setUserId(optional.get().getPhone());
                     b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
@@ -96,8 +98,13 @@ public class BookingService {
         Optional<Users> optional = accountRepository.findById(principal.getName());
         if (optional.isPresent()) {
             Map<String, List<Bookings>> bookings = bookingsRepo
-                    .findAllByUserId(optional.get().getPhone(), Sort.by("date").descending()).stream()
-                    .collect(Collectors.groupingBy(Bookings::getServiceId));
+                    .findAllByUserId(optional.get().getPhone(), Sort.by("date").descending()).stream().map(b -> {
+
+                        LocalDate date = Instant.ofEpochMilli(b.getDate().getTime()).atZone(ZoneId.systemDefault())
+                                .toLocalDate();
+                        b.setFormatedDate(date.toString());
+                        return b;
+                    }).collect(Collectors.groupingBy(Bookings::getServiceId));
 
             return bookings;
         }

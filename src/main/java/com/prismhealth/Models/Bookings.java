@@ -17,5 +17,6 @@ public class Bookings {
     private int hour;
     private boolean cancelled;
     private Date timestamp;
+    private String formatedDate;
 
 }
