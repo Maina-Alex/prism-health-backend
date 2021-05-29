@@ -129,7 +129,11 @@ public class BookingService {
                 services.forEach(s -> bookings
                         .addAll(bookingsRepo.findAllByServiceId(s.getId(), Sort.by("timestamp").descending())));
 
-                return bookings.stream().collect(Collectors.groupingBy(Bookings::getServiceId));
+                return bookings.stream().map(b -> {
+                    Optional<Users> u = accountRepository.findById(b.getUserId());
+                    b.setUser(u.orElse(null));
+                    return b;
+                }).collect(Collectors.groupingBy(Bookings::getServiceId));
 
             } else {
 
