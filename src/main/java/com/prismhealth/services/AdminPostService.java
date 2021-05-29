@@ -69,4 +69,16 @@ public class AdminPostService {
         return ResponseEntity.ok("Post Successfully Deleted.");
     }
 
+    public Post getPost(String id) {
+        return postRepository.findById(id).get();
+    }
+
+    public PostCategory getPostCategory(String id) {
+        return postCategoryRepository.findById(id).get();
+    }
+
+    public List<Post> getPostsByCategory(String id) {
+
+        return postRepository.findByPostCategoryId(id).get();
+    }
 }

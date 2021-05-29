@@ -12,7 +12,7 @@ public class Post {
     @Id
     public String id;
     public String postTitle;
-    public String postCategory;
+    public String postCategoryId;
     public  String postContent;
     public String imageUrl;
 
@@ -41,11 +41,11 @@ public class Post {
     }
 
     public String getPostCategory() {
-        return postCategory;
+        return postCategoryId;
     }
 
-    public void setPostCategory(String postCategory) {
-        this.postCategory = postCategory;
+    public void setPostCategory(String postCategoryId) {
+        this.postCategoryId = postCategoryId;
     }
 
     public String getPostContent() {

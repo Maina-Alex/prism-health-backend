@@ -37,6 +37,24 @@ public class AdminPostControler {
 
     }
 
+    @GetMapping("/{id}")
+    public Post getPostById(@PathVariable String id) {
+        return postService.getPost(id);
+
+    }
+
+    @GetMapping("/categorypost/{categoryId}")
+    public List<Post> getPostsByCategoryId(@PathVariable String categoryId) {
+        return postService.getPostsByCategory(categoryId);
+
+    }
+
+    @GetMapping("/categories/{id}")
+    public PostCategory getPostCategoryById(@PathVariable String id) {
+        return postService.getPostCategory(id);
+
+    }
+
     @PostMapping("/categories")
     public  PostCategory saveCategory(@RequestBody PostCategory category) {
         return postService.savePostCategory(category);

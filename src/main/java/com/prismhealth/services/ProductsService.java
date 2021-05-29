@@ -61,7 +61,7 @@ public class ProductsService {
     public List<SubCategory> getAllSubcategories() {
         // TODO marshal up a response for when sub category does not exists
         return new ArrayList<>(subCategoriesRepository.findAll());
-    }fi
+    }
 
     public List<Product> getAllProducts(String subCategoryName) {
         // TODO marshal up a response for when products do not exists
