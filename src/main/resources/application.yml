@@ -24,9 +24,11 @@ spring:
       #authentication-database: admin
       #username: prismhealth
       #password: prismhealth
+		
       database: UsersDb
-      port: 27017
       host: 127.0.0.1
+      port: 27017
+
 uwazii:
   sender-id: Uwazii
   sms-endpoint-url: "https://api.uwaziimobile.com/api/v2/SendSMS"
