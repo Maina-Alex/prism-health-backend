@@ -125,31 +125,29 @@ public class BookingService {
     }
 
     public Map<String, List<Bookings>> getBookingsHistory(Principal principal) {
-        Optional<Users> optional = accountRepository.findById(principal.getName());
-        if (optional.isPresent()) {
-            if (optional.get().getAccountType().equals("PROVIDER")) {
+        Users optional = accountRepository.findOneByPhone(principal.getName());
 
-                List<Bookings> bookings = new ArrayList<>();
-                List<Services> services = serviceRepo.findAllByProviderId(optional.get().getPhone());
-                services.forEach(s -> bookings
-                        .addAll(bookingsRepo.findAllByServiceId(s.getId(), Sort.by("timestamp").descending())));
+        if (optional.getAccountType().equals("PROVIDER")) {
 
-                return bookings.stream().map(b -> {
-                    Optional<Users> u = accountRepository.findById(b.getUserId());
-                    b.setUser(u.orElse(null));
-                    return b;
-                }).collect(Collectors.groupingBy(Bookings::getServiceId));
+            List<Bookings> bookings = new ArrayList<>();
+            List<Services> services = serviceRepo.findAllByProviderId(optional.getPhone());
+            services.forEach(s -> bookings
+                    .addAll(bookingsRepo.findAllByServiceId(s.getId(), Sort.by("timestamp").descending())));
 
-            } else {
+            return bookings.stream().map(b -> {
+                Optional<Users> u = accountRepository.findById(b.getUserId());
+                b.setUser(u.orElse(null));
+                return b;
+            }).collect(Collectors.groupingBy(Bookings::getServiceId));
 
-                Map<String, List<Bookings>> bookings = bookingsRepo
-                        .findAllByUserId(optional.get().getPhone(), Sort.by("date").descending()).stream()
-                        .collect(Collectors.groupingBy(Bookings::getServiceId));
+        } else {
 
-                return bookings;
-            }
+            Map<String, List<Bookings>> bookings = bookingsRepo
+                    .findAllByUserId(optional.getPhone(), Sort.by("date").descending()).stream()
+                    .collect(Collectors.groupingBy(Bookings::getServiceId));
+
+            return bookings;
         }
-        return null;
 
     }
 
