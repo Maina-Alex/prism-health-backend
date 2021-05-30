@@ -2,7 +2,6 @@ package com.prismhealth.Controllers;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
 
 import com.prismhealth.Models.Bookings;
 import com.prismhealth.Models.Services;
@@ -53,6 +52,7 @@ public class ServiceProviderController {
     public Users getServiceProviders(@PathVariable String serviceId) {
         return serviceProviderService.getProvidersByServiceId(serviceId);
     }
+
     @GetMapping("/getServiceById/{serviceId}")
     public Services getServiceById(@PathVariable String serviceId) {
         return serviceProviderService.getServicesById(serviceId);
@@ -87,8 +87,9 @@ public class ServiceProviderController {
         return ResponseEntity.ok().body(bookingService.createBookings(bookings, principal));
 
     }
+
     @PutMapping("/booking/cancel")
-    public ResponseEntity<?> cancelServiceBooking(@RequestBody List<Bookings> bookings, Principal principal) {
+    public ResponseEntity<?> cancelServiceBooking(@RequestBody String bookings, Principal principal) {
 
         return ResponseEntity.ok().body(bookingService.cancelBookings(bookings, principal));
 

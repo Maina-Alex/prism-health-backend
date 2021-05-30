@@ -1,5 +1,6 @@
 package com.prismhealth.Controllers;
 
+import com.prismhealth.Models.PasswordReset;
 import com.prismhealth.Models.UserRating;
 import com.prismhealth.Models.Users;
 import com.prismhealth.dto.Request.Phone;
@@ -73,8 +74,9 @@ public class AccountController {
     public ResponseEntity<?> getProviderById(@RequestParam String providerId) {
         return accountService.getProviderById(providerId);
     }
+
     @GetMapping("/allUsers")
-    public ResponseEntity<List<Users>> getAllUser(){
+    public ResponseEntity<List<Users>> getAllUser() {
         return accountService.getAllUsers();
     }
 
@@ -94,9 +96,10 @@ public class AccountController {
     @ApiOperation(value = "actually change password")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
-    @PutMapping("/changePassword")
-    public ResponseEntity<?> changePassword(@RequestBody String password, String authCode) {
-        return ResponseEntity.ok(accountService.changePassword(password, authCode));
+    @PostMapping("/changePassword")
+    public ResponseEntity<?> changePassword(@RequestBody PasswordReset password) {
+        return accountService.changePassword(password);
+
     }
 
     @GetMapping

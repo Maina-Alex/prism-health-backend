@@ -99,9 +99,11 @@ public class AccountService {
             users1.setGender(signUpRequest.getGender());
             users1.setDateOfBirth(signUpRequest.getDateOfBirth());
             users1.setLocationName(signUpRequest.getLocation());
-            users1.setPosition(new double[] { Double.parseDouble(signUpRequest.getLatitude()),
-                    Double.parseDouble(signUpRequest.getLongitude()) });
+
             users1.setPositions(signUpRequest.getPositions());
+
+            users1.setPosition(
+                    new double[] { users1.getPositions().getLatitude(), users1.getPositions().getLongitude() });
             users1.setEmergencyContact1(null);
             users1.setEmergencyContact2(null);
             users1.setAccountType("USER");
@@ -138,33 +140,39 @@ public class AccountService {
         Users users = accountRepository.findOneByPhone(phone.getPhone());
         if (users == null) {
             return new ResponseEntity<>("User with phone number " + phone + " not found", HttpStatus.NOT_FOUND);
-        }else {
+        } else {
 
-        log.info("Forgot password request, user email  " + users.getEmail());
-        String authCode = HelperUtility.getConfirmCodeNumber();
-        users.setDeviceToken(authCode);
-        accountRepository.save(users);
-        AccountDetails details = new AccountDetails();
-        details.setAccesstoken(authCode);
-        details.setEmail(users.getEmail());
-        details.setUsername(users.getPhone());
-        Mail mail = new Mail();
-        mail.setMailFrom("prismhealth658@gmail.com");
-        mail.setMailTo(users.getEmail());
-        mail.setMailSubject("Prism-health Notification services");
-        mail.setMailContent("" +
-                "Here is your authentication code \n"+authCode+"\nUse to change your password. ");
+            log.info("Forgot password request, user email  " + users.getEmail());
+            String authCode = HelperUtility.getConfirmCodeNumber();
+            users.setDeviceToken(authCode);
+            accountRepository.save(users);
+            AccountDetails details = new AccountDetails();
+            details.setAccesstoken(authCode);
+            details.setEmail(users.getEmail());
+            details.setUsername(users.getPhone());
+            Runnable task = () -> {
 
-        mailService.sendEmail(mail);
-        Notification notification = new Notification();
-        notification.setEmail(users.getEmail());
-        notification.setUserId(users.getPhone());
-        notification.setMessage("User" + "\n" + details + "Click on the link to change your password");
-        notification.setAction(Actions.RESET_PASSSWORD);
-        notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-        notificationRepo.save(notification);
-        log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-        return new ResponseEntity<>("Ok", HttpStatus.OK);
+                Mail mail = new Mail();
+                mail.setMailFrom("prismhealth658@gmail.com");
+                mail.setMailTo(users.getEmail());
+                mail.setMailSubject("Prism-health Notification services");
+                mail.setMailContent(
+                        "" + "Here is your authentication code \n" + authCode + "\nUse to change your password. ");
+
+                mailService.sendEmail(mail);
+                Notification notification = new Notification();
+                notification.setEmail(users.getEmail());
+                notification.setUserId(users.getPhone());
+                notification.setDetails(details);
+
+                notification.setMessage("Click on the link to change your password");
+                notification.setAction(Actions.RESET_PASSSWORD);
+                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+                notificationRepo.save(notification);
+                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+            };
+            executor.submit(task);
+            return new ResponseEntity<>("Ok", HttpStatus.OK);
         }
     }
 
@@ -183,8 +191,8 @@ public class AccountService {
 
     }
 
-    public ResponseEntity<?> changePassword(String  password, String authCode) {
-        return ResponseEntity.ok(authService.resetPassword(password,authCode));
+    public ResponseEntity<?> changePassword(PasswordReset reset) {
+        return ResponseEntity.ok(authService.resetPassword(reset.getPassword(), reset.getAuthCode()));
     }
 
     public Map<String, Integer> getUserRating(String userId) {
@@ -230,12 +238,12 @@ public class AccountService {
         Users user = accountRepository.findOneByPhone(users.getPhone());
         if (user != null) {
             Positions positions = new Positions();
-            if (user.getPosition().length>=2){
-            positions.setLatitude(users.getPosition()[0]);
-            positions.setLongitude(users.getPosition()[1]);
-            positions.setLocationName(users.getLocationName());
-            users.setPositions(positions);
-            }else {
+            if (user.getPosition().length >= 2) {
+                positions.setLatitude(users.getPosition()[0]);
+                positions.setLongitude(users.getPosition()[1]);
+                positions.setLocationName(users.getLocationName());
+                users.setPositions(positions);
+            } else {
                 users.setPositions(user.getPositions());
             }
             users.setRoles(user.getRoles());

@@ -1,13 +1,14 @@
 package com.prismhealth.services;
 
 import java.security.Principal;
-import java.sql.Date;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -101,22 +102,26 @@ public class BookingService {
         return this.getServiceBookings(bookings.get(0).getServiceId());
     }
 
-    public Map<String, List<ServiceBooking>> cancelBookings(List<Bookings> bookings, Principal principal) {
+    public Map<String, List<Bookings>> cancelBookings(String id, Principal principal) {
         Optional<Users> optional = accountRepository.findById(principal.getName());
         if (optional.isPresent()) {
-            bookings.forEach(b -> {
-                if (Optional.ofNullable(b.getId()).isPresent() && bookingsRepo.existsById(b.getId())) {
-                    log.info("calcel booking for sercice " + b.getServiceId());
+            Optional<Bookings> bOptional = bookingsRepo.findById(id);
 
-                    b.setCancelled(true);
-                    bookingsRepo.save(b);
-                }
+            if (bOptional.isPresent()) {
+                Bookings b = bOptional.get();
 
-            });
-            sendEmail(optional.get(), bookings, "cancelled");
+                log.info("calcel booking for sercice " + b.getServiceId());
+
+                b.setCancelled(true);
+                bookingsRepo.save(b);
+                Optional<Services> sOptional = serviceRepo.findById(b.getServiceId());
+                if (sOptional.isPresent())
+
+                    sendEmail(optional.get(), sOptional.get(), "cancelled");
+            }
 
         }
-        return this.getServiceBookings(bookings.get(0).getServiceId());
+        return this.getBookingsHistory(principal);
     }
 
     public Map<String, List<Bookings>> getBookingsHistory(Principal principal) {
@@ -148,7 +153,7 @@ public class BookingService {
 
     }
 
-    public void sendEmail(Users users, List<Bookings> bookings, String action) {
+    public void sendEmail(Users users, Services services, String action) {
         Runnable task = () -> {
             if (users == null) {
                 log.info("User with phone number not found");
@@ -156,10 +161,9 @@ public class BookingService {
             String message = null;
 
             if (action.equals("create")) {
-                message = "Booking for service \n" + bookings + " made successfully for " + users.getEmail();
+                message = "Booking for service, " + services.getName() + " made successfully for " + users.getEmail();
             } else if (action.equals("cancelled")) {
-                message = String.format("Booking for service \n%s cancelled successfully for %s", bookings,
-                        users.getEmail());
+                message = "Booking for service " + services.getName() + " cancelled successfully";
             }
 
             if (users != null) {
@@ -170,23 +174,21 @@ public class BookingService {
                 mail.setMailSubject("Prism-health Notification services");
                 mail.setMailContent(message);
                 Mail providerMail = new Mail();
-                for (Bookings bookings1 : bookings) {
-                    providerMail.setMailFrom("prismhealth658@gmail.com");
-                    providerMail.setMailTo(accountRepository
-                            .findOneByPhone(serviceRepo.findById(bookings1.getServiceId()).get().getProviderId())
-                            .getEmail());
-                    providerMail.setMailSubject("Prism-health Notification services");
-                    providerMail.setMailContent(message);
 
-                    mailService.sendEmail(mail);
-                }
+                providerMail.setMailFrom("prismhealth658@gmail.com");
+                providerMail.setMailTo(accountRepository
+                        .findOneByPhone(serviceRepo.findById(services.getId()).get().getProviderId()).getEmail());
+                providerMail.setMailSubject("Prism-health Notification services");
+                providerMail.setMailContent(message);
+
+                mailService.sendEmail(mail);
+
                 Notification notification = new Notification();
                 notification.setEmail(users.getEmail());
                 notification.setUserId(users.getPhone());
                 notification.setMessage(message);
                 notification.setAction(Actions.RESET_PASSSWORD);
-                notification.setTimestamp(
-                        java.util.Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                 notificationRepo.save(notification);
                 log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
 

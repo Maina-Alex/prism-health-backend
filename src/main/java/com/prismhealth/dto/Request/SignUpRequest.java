@@ -35,8 +35,20 @@ public class SignUpRequest {
 	@Transient
 	public Positions getPositions() {
 		Positions positions = new Positions();
-		positions.setLatitude(Double.parseDouble(latitude));
-		positions.setLongitude(Double.parseDouble(longitude));
+
+		Double lat = 0.0;
+		Double lDouble = 0.0;
+		try {
+			lat = Double.valueOf(latitude);
+			lDouble = Double.valueOf(longitude);
+
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		positions.setLatitude(lat);
+		positions.setLongitude(lDouble);
+
 		positions.setLocationName(location);
 		return positions;
 	}
