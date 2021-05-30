@@ -1,16 +1,14 @@
 package com.prismhealth.Controllers;
 
-import com.prismhealth.Models.Category;
 import com.prismhealth.Models.Post;
 import com.prismhealth.Models.PostCategory;
-import com.prismhealth.Models.Users;
+
 import com.prismhealth.services.AdminPostService;
-import com.prismhealth.services.AdminStaffService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -56,20 +54,19 @@ public class AdminPostControler {
     }
 
     @PostMapping("/categories")
-    public  PostCategory saveCategory(@RequestBody PostCategory category) {
+    public PostCategory saveCategory(@RequestBody PostCategory category) {
         return postService.savePostCategory(category);
 
     }
 
-
     @CrossOrigin
     @PostMapping("/delete")
-    public ResponseEntity deletePost(@RequestBody Post post) {
+    public ResponseEntity<?> deletePost(@RequestBody Post post) {
         return postService.deletePost(post);
     }
 
     @PostMapping("categories/delete")
-    public ResponseEntity deleteCategory(@RequestBody  PostCategory category) {
+    public ResponseEntity<?> deleteCategory(@RequestBody PostCategory category) {
         return postService.deletePostCategory(category);
     }
 
