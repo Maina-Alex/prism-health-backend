@@ -24,7 +24,6 @@ spring:
       #authentication-database: admin
       #username: prismhealth
       #password: prismhealth
-		
       database: UsersDb
       host: 127.0.0.1
       port: 27017
