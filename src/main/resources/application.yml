@@ -3,15 +3,12 @@ server:
 spring:
   mail:
     host: smtp.gmail.com
-    port: 5872
+    port: 587
     username: "prismhealth658@gmail.com"
     password: "ohcrgcdxmfdnyevv"
     properties:
       mail:
         smtp:
-          auth: true
-          starttls:
-            enable: true
           debug: true
   servlet:
     multipart:
