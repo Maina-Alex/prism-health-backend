@@ -13,7 +13,7 @@ spring:
             enable: false
           auth: true
           socketFactory:
-            port: 587
+            port: 465
           starttls:
             enable: true
           debug: true
