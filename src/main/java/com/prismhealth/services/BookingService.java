@@ -120,6 +120,8 @@ public class BookingService {
                 if (sOptional.isPresent())
 
                     sendEmail(optional.get(), sOptional.get(), "cancelled");
+            }else {
+                log.error("booking with id "+id+" does not exist");
             }
 
         }
