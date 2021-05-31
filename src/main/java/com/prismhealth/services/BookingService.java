@@ -105,7 +105,7 @@ public class BookingService {
     }
 
     public Map<String, List<Bookings>> cancelBookings(String id, Principal principal) {
-        Optional<Users> optional = accountRepository.findById(principal.getName());
+        Optional<Users> optional = Optional.ofNullable(accountRepository.findOneByPhone(principal.getName()));
         if (optional.isPresent()) {
             Optional<Bookings> bOptional = bookingsRepo.findById(id);
 
