@@ -275,7 +275,7 @@ public class AccountService {
     }
 
     public void sendEmail(Users users, String action) {
-        Runnable task = () -> {
+        //Runnable task = () -> {
             if (users == null) {
                 log.info("User with phone number not found");
             }
@@ -314,11 +314,8 @@ public class AccountService {
                 log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
 
             }
-
-        };
-
-        executor.submit(task);
-
+       // };
+       // executor.submit(task);
     }
 
     public ResponseEntity<?> getProviderById(String providerId) {

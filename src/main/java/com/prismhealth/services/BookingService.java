@@ -28,7 +28,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 @Service
-@EnableAsync
 public class BookingService {
     private final Logger log = LoggerFactory.getLogger(BookingService.class);
     @Autowired
@@ -97,9 +96,8 @@ public class BookingService {
 
                     b.setUserId(optional.get().getPhone());
                     b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-
-                    sendEmail(optional.get(),serviceRepo.findById(b.getServiceId()).get(), "notifyProvider");
                     bookingsRepo.save(b);
+                    sendEmail(optional.get(),serviceRepo.findById(b.getServiceId()).get(), "notifyProvider");
                 }
 
             });
@@ -158,7 +156,6 @@ public class BookingService {
 
     }
 
-    @Async
     public void sendEmail(Users users, Services services, String action) {
 
             if (users == null) {
@@ -176,6 +173,15 @@ public class BookingService {
 
             if (users != null) {
                 log.info(message);
+
+                Notification notification = new Notification();
+                notification.setEmail(users.getEmail());
+                notification.setUserId(users.getPhone());
+                notification.setMessage(message);
+                notification.setAction(null);
+                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+                notificationRepo.save(notification);
+                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
                 Mail mail = new Mail();
                 mail.setMailFrom("prismhealth658@gmail.com");
                 mail.setMailTo(users.getEmail());
@@ -191,14 +197,6 @@ public class BookingService {
 
                 mailService.sendEmail(mail);
 
-                Notification notification = new Notification();
-                notification.setEmail(users.getEmail());
-                notification.setUserId(users.getPhone());
-                notification.setMessage(message);
-                notification.setAction(null);
-                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-                notificationRepo.save(notification);
-                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
 
             } else {
                 log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");

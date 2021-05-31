@@ -150,6 +150,14 @@ public class ServiceProviderService {
 
         if (users != null) {
             log.info(message);
+            Notification notification = new Notification();
+            notification.setEmail(users.getEmail());
+            notification.setUserId(users.getPhone());
+            notification.setMessage(message);
+            notification.setAction(null);
+            notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            notificationRepo.save(notification);
+            log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
             Mail mail = new Mail();
             mail.setMailFrom("prismhealth658@gmail.com");
             mail.setMailTo(users.getEmail());
@@ -157,14 +165,7 @@ public class ServiceProviderService {
             mail.setMailContent(message);
 
             mailService.sendEmail(mail);
-            Notification notification = new Notification();
-            notification.setEmail(users.getEmail());
-            notification.setUserId(users.getPhone());
-            notification.setMessage(message);
-            notification.setAction(Actions.RESET_PASSSWORD);
-            notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            notificationRepo.save(notification);
-            log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+
             return "Notification sent to : " + users.getEmail();
 
         } else {
