@@ -67,7 +67,7 @@ public class ServiceProviderService {
     public List<Bookings> getAllServicesBookings(Principal principal) {
         Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         if (optional.isPresent()) {
-            return bookingsRepo.findAllByServiceId(optional.get().getPhone(), Sort.by("timestamp").descending());
+            return bookingsRepo.findAllByUserId(optional.get().getPhone(), Sort.by("timestamp").descending());
         }
 
         else
