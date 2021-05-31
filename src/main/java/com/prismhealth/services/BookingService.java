@@ -23,9 +23,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 @Service
+@EnableAsync
 public class BookingService {
     private final Logger log = LoggerFactory.getLogger(BookingService.class);
     @Autowired
@@ -155,8 +158,9 @@ public class BookingService {
 
     }
 
+    @Async
     public void sendEmail(Users users, Services services, String action) {
-        Runnable task = () -> {
+
             if (users == null) {
                 log.info("User with phone number not found");
             }
@@ -191,7 +195,7 @@ public class BookingService {
                 notification.setEmail(users.getEmail());
                 notification.setUserId(users.getPhone());
                 notification.setMessage(message);
-                notification.setAction(Actions.RESET_PASSSWORD);
+                notification.setAction(null);
                 notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                 notificationRepo.save(notification);
                 log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
@@ -200,10 +204,5 @@ public class BookingService {
                 log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
 
             }
-
-        };
-
-        executor.submit(task);
-
     }
 }

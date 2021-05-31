@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
@@ -23,6 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 @Service
+@EnableAsync
 public class ProductsService {
     private final VariantRepository variantRepository;
     private final CategoryRepository categoryRepository;
@@ -180,8 +183,9 @@ public class ProductsService {
         return ResponseEntity.ok().body(product.getProductName() + " Successfully deleted");
     }
 
+    @Async
     public void sendEmail(Users users, String action) {
-        Runnable task = () -> {
+
             if (users == null) {
                 log.info("User with phone number not found");
             }
@@ -211,7 +215,7 @@ public class ProductsService {
                 notification.setEmail(users.getEmail());
                 notification.setUserId(users.getPhone());
                 notification.setMessage(message);
-                notification.setAction(Actions.RESET_PASSSWORD);
+                notification.setAction(null);
                 notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                 notificationRepo.save(notification);
                 log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
@@ -220,11 +224,6 @@ public class ProductsService {
                 log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
 
             }
-
-        };
-
-        executor.submit(task);
-
     }
 
     public List<Product> getAllAvailableProducts() {
