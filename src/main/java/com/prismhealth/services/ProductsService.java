@@ -140,7 +140,7 @@ public class ProductsService {
                 variantRepository.save(variant);
             if (product.getPosition().length<2)
                 product.setPosition(new double[]{users1.getPosition()[0],users1.getPosition()[1]});
-            //sendEmail(users, "createProduct");
+            sendEmail(users, "createProduct");
             product.setUser(users.getPhone());
             Product product1 = productsRepository.save(product);
             product1.setUsers(users1);
