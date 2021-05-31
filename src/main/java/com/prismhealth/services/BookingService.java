@@ -173,12 +173,17 @@ public class BookingService {
 
             if (users != null) {
                 log.info(message);
+                AccountDetails details = new AccountDetails();
+                details.setEmail(users.getEmail());
+                details.setAccesstoken(users.getDeviceToken());
+                details.setUsername(users.getPhone());
 
                 Notification notification = new Notification();
                 notification.setEmail(users.getEmail());
                 notification.setUserId(users.getPhone());
                 notification.setMessage(message);
                 notification.setAction(null);
+                notification.setDetails(details);
                 notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                 notificationRepo.save(notification);
                 log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
