@@ -94,6 +94,8 @@ public class BookingService {
 
                     b.setUserId(optional.get().getPhone());
                     b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+
+                    sendEmail(optional.get(),serviceRepo.findById(b.getServiceId()).get(), "notifyProvider");
                     bookingsRepo.save(b);
                 }
 
@@ -110,7 +112,7 @@ public class BookingService {
             if (bOptional.isPresent()) {
                 Bookings b = bOptional.get();
 
-                log.info("calcel booking for sercice " + b.getServiceId());
+                log.info("cancel booking for service " + b.getServiceId());
 
                 b.setCancelled(true);
                 bookingsRepo.save(b);
@@ -164,6 +166,8 @@ public class BookingService {
                 message = "Booking for service, " + services.getName() + " made successfully for " + users.getEmail();
             } else if (action.equals("cancelled")) {
                 message = "Booking for service " + services.getName() + " cancelled successfully";
+            }else if (action.equals("notifyProvider")){
+                message = "";
             }
 
             if (users != null) {
@@ -172,14 +176,14 @@ public class BookingService {
                 mail.setMailFrom("prismhealth658@gmail.com");
                 mail.setMailTo(users.getEmail());
                 mail.setMailSubject("Prism-health Notification services");
-                mail.setMailContent(message);
+                mail.setMailContent("You have successfully created booking for service "+services.getName()+ " at "+services.getTimestamp());
                 Mail providerMail = new Mail();
 
                 providerMail.setMailFrom("prismhealth658@gmail.com");
                 providerMail.setMailTo(accountRepository
                         .findOneByPhone(serviceRepo.findById(services.getId()).get().getProviderId()).getEmail());
                 providerMail.setMailSubject("Prism-health Notification services");
-                providerMail.setMailContent(message);
+                providerMail.setMailContent("You have a new booking for service "+services.getName()+ " at "+services.getTimestamp());
 
                 mailService.sendEmail(mail);
 

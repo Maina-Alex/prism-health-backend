@@ -117,15 +117,17 @@ public class ProductsService {
     }
 
     public SubCategory saveSubCategory(SubCategory subCategory) {
-
-        return subCategoriesRepository.save(subCategory);
-
+        SubCategory subCategory1 = null;
+        if (subCategoriesRepository.findAll().stream().filter(c->c.getSubCategoryName()==subCategory.getSubCategoryName()).collect(Collectors.toList()).isEmpty())
+        subCategory1 = subCategoriesRepository.save(subCategory);
+        return subCategory1;
     }
 
     public Product saveProduct(Product product, Principal principal) {
 
         Users users = accountRepository.findOneByPhone(principal.getName());
         if (users!=null){
+            
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
         variant.setSubCategory(product.getSubCategory());

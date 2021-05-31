@@ -11,11 +11,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.geo.Point;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class SosService {
@@ -29,16 +32,20 @@ public class SosService {
 
     public ResponseEntity<String> sendSos(Positions position, Principal principal) {
         Users users = accountRepository.findOneByPhone(principal.getName());
+        try {
         if (users.getEmergencyContact1()!=null&&users.getEmergencyContact2()==null){
-            return execute(position,users,users.getEmergencyContact1());
+            return execute(position,users,users.getEmergencyContact1()).get();
         }else if (users.getEmergencyContact1()!=null&&users.getEmergencyContact2()!=null){
             execute(position,users,users.getEmergencyContact1());
-            return  execute(position,users,users.getEmergencyContact2());
+            return  execute(position,users,users.getEmergencyContact2()).get();
         }else {
-            return execute(position,users,users.getEmergencyContact2());
-        }
+            return execute(position,users,users.getEmergencyContact2()).get();
+        }} catch (ExecutionException e) {
+            e.printStackTrace();
+        }return  null;
     }
-    public ResponseEntity<String> execute(Positions position, Users users,String phone){
+    @Async
+    public AsyncResult<ResponseEntity<String>> execute(Positions position, Users users, String phone){
         UwaziiSmsRequest uwaziiSmsRequest = new UwaziiSmsRequest();
         uwaziiSmsRequest.setApiKey(uwaziiConfig.getApi_Key());
         uwaziiSmsRequest.setSenderId(uwaziiConfig.getSenderId());
@@ -63,7 +70,7 @@ public class SosService {
             Response response = new OkHttpClient().newCall(request).execute();
             if (response.code() == 200) {
                 response.close();
-                return new ResponseEntity<String>("successfully sent", HttpStatus.ACCEPTED);
+                return new AsyncResult<ResponseEntity<String>>( new ResponseEntity<String>("successfully sent", HttpStatus.ACCEPTED));
             }
         } catch (IOException e) {
             LoggerFactory.getLogger(this.getClass())

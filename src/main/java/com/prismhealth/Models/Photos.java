@@ -1,12 +1,12 @@
-package com.prismhealth.Models
+package com.prismhealth.Models;
 
-import lombok.Data
-import org.bson.types.Binary
-import org.springframework.data.annotation.Id
+import lombok.Data;
+import org.bson.types.Binary;
+import org.springframework.data.annotation.Id;
 
 @Data
-class Photos {
+public class Photos {
     @Id
-    var id: String? = null
-    var photo: Binary? = null
+    String id;
+    Binary photo;
 }

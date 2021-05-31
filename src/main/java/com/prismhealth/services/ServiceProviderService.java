@@ -48,7 +48,6 @@ public class ServiceProviderService {
             return b;
         }).forEach(bookingsRepo::save);
         Services service = serviceRepo.findById(bookings.get(0).getServiceId()).get();
-        sendEmail(usersRepo.findOneByPhone(service.getProviderId()), "notifyProvider");
         service.setBookings(bookingsService.getServiceBookings(service.getId()));
         return service;
     }
@@ -66,7 +65,7 @@ public class ServiceProviderService {
     }
 
     public List<Bookings> getAllServicesBookings(Principal principal) {
-        Optional<Users> optional = usersRepo.findOneByEmail(principal.getName());
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         if (optional.isPresent()) {
             return bookingsRepo.findAllByServiceId(optional.get().getPhone(), Sort.by("timestamp").descending());
         }
@@ -89,6 +88,7 @@ public class ServiceProviderService {
                 positions.setLongitude(services.getPosition()[1]);
                 services.setPositions(positions);
             }
+            sendEmail(accountRepository.findOneByPhone(services.getProviderId()),"createService");
             return serviceRepo.save(services);
         }else {
         Users users = usersRepo.findOneByPhone(principal.getName());
@@ -98,6 +98,7 @@ public class ServiceProviderService {
         services.setPositions(users.getPositions());
         services.setPosition(users.getPosition());
 
+        sendEmail(users,"createService");
         return serviceRepo.save(services);
         }
     }
