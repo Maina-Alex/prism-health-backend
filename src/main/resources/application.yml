@@ -9,11 +9,7 @@ spring:
     properties:
       mail:
         smtp:
-          ssl:
-            enable: false
           auth: true
-          socketFactory:
-            port: 465
           starttls:
             enable: true
           debug: true
