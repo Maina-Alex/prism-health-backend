@@ -3,7 +3,7 @@ server:
 spring:
   mail:
     host: smtp.gmail.com
-    port: 587
+    port: 5872
     username: "prismhealth658@gmail.com"
     password: "ohcrgcdxmfdnyevv"
     properties:
