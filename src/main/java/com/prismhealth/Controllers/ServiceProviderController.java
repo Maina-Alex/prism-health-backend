@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 
 import com.prismhealth.Models.Bookings;
+import com.prismhealth.Models.CancelBooking;
 import com.prismhealth.Models.Services;
 import com.prismhealth.Models.Users;
 import com.prismhealth.services.BookingService;
@@ -89,9 +90,9 @@ public class ServiceProviderController {
     }
 
     @PutMapping("/booking/cancel")
-    public ResponseEntity<?> cancelServiceBooking(@RequestBody String bookings, Principal principal) {
+    public ResponseEntity<?> cancelServiceBooking(@RequestBody CancelBooking bookings, Principal principal) {
 
-        return ResponseEntity.ok().body(bookingService.cancelBookings(bookings, principal));
+        return ResponseEntity.ok().body(bookingService.cancelBookings(bookings.getBookingId(), principal));
 
     }
 
