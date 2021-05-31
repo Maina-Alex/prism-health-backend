@@ -9,6 +9,13 @@ spring:
     properties:
       mail:
         smtp:
+          ssl:
+            enable: false
+          auth: true
+          socketFactory:
+            port: 587
+          starttls:
+            enable: true
           debug: true
   servlet:
     multipart:
