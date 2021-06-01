@@ -116,48 +116,5 @@ public class PrismHealthBackendApplication implements ApplicationRunner {
 
 	}
 
-	@Configuration
-	public class MvcConfig implements WebMvcConfigurer {
 
-		@Override
-		public void addResourceHandlers(ResourceHandlerRegistry registry) {
-			exposeDirectory("user-photos", registry);
-		}
-
-		private void exposeDirectory(String dirName, ResourceHandlerRegistry registry) {
-			Path uploadDir = Paths.get(dirName);
-			String uploadPath = uploadDir.toFile().getAbsolutePath();
-
-			if (dirName.startsWith("../"))
-				dirName = dirName.replace("../", "");
-
-			registry.addResourceHandler("/" + dirName + "/**").addResourceLocations("file:/" + uploadPath + "/");
-		}
-	}
-
-	@Configuration
-	public class MailConfiguration {
-
-		@Autowired
-		private Environment env;
-
-		@Bean
-		public JavaMailSender getMailSender() {
-			JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-
-			mailSender.setHost(env.getProperty("spring.mail.host"));
-			mailSender.setPort(Integer.valueOf(env.getProperty("spring.mail.port")));
-			mailSender.setUsername(env.getProperty("spring.mail.username"));
-			mailSender.setPassword(env.getProperty("spring.mail.password"));
-
-			Properties javaMailProperties = new Properties();
-			javaMailProperties.put("mail.smtp.starttls.enable", "true");
-			javaMailProperties.put("mail.smtp.auth", "true");
-			javaMailProperties.put("mail.transport.protocol", "smtp");
-			javaMailProperties.put("mail.debug", "true");
-
-			mailSender.setJavaMailProperties(javaMailProperties);
-			return mailSender;
-		}
-	}
 }
