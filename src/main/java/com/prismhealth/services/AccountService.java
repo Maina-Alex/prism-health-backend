@@ -169,16 +169,9 @@ public class AccountService {
 
     public String getToken(String phone) {
         Optional<Users> users = Optional.ofNullable(accountRepository.findOneByPhone(phone));
-        if (users.isPresent()) {
-            String token = JWT.create().withSubject(users.get().getPhone())
-                    .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-                    .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
-            log.info("Getting token for firebase id " + phone + " is " + LogMessage.SUCCESS);
-            return token;
-        } else {
-            log.info("Getting token for firebase id " + phone + "  " + LogMessage.FAILED);
-            return null;
-        }
+        return users.map(value -> JWT.create().withSubject(value.getPhone())
+                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
+                .sign(HMAC512(SecurityConstants.SECRET.getBytes()))).orElse(null);
 
     }
 
