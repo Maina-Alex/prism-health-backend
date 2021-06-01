@@ -37,7 +37,7 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 public class AccountController {
     private final AccountService accountService;
 
-    @GetMapping("/accounts")
+    @GetMapping("/")
     public ResponseEntity<?> getUser(Principal principal){
         return accountService.getUsers(principal);
     }
