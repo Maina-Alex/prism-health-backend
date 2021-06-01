@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,10 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 public class AccountController {
     private final AccountService accountService;
 
+    @GetMapping("/accounts")
+    public ResponseEntity<?> getUser(Principal principal){
+        return accountService.getUsers(principal);
+    }
 
     @ApiOperation(value = "sign up user")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
