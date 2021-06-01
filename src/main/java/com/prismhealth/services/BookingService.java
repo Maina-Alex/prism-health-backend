@@ -97,7 +97,7 @@ public class BookingService {
                     b.setUserId(optional.get().getPhone());
                     b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                     bookingsRepo.save(b);
-                   // sendEmail(optional.get(),serviceRepo.findById(b.getServiceId()).get(), "notifyProvider");
+                    sendEmail(optional.get(),serviceRepo.findById(b.getServiceId()).get(), "notifyProvider");
                 }
 
             });
@@ -118,9 +118,9 @@ public class BookingService {
                 b.setCancelled(true);
                 bookingsRepo.save(b);
                 Optional<Services> sOptional = serviceRepo.findById(b.getServiceId());
-                //if (sOptional.isPresent())
+                if (sOptional.isPresent())
 
-                   // sendEmail(optional.get(), sOptional.get(), "cancelled");
+                    sendEmail(optional.get(), sOptional.get(), "cancelled");
             }else {
                 log.error("booking with id "+id+" does not exist");
             }
@@ -156,8 +156,8 @@ public class BookingService {
 
     }
 
+    @Async
     public void sendEmail(Users users, Services services, String action) {
-
             if (users == null) {
                 log.info("User with phone number not found");
             }
