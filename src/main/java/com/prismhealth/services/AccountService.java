@@ -123,7 +123,7 @@ public class AccountService {
         }
     }
 
-    public ResponseEntity<?> updateForgotPassword(UpdateForgotPasswordReq req){
+    public ResponseEntity<?> updateForgotPassword(@NonNull UpdateForgotPasswordReq req){
         Users user=userRepository.findOneByPhone(req.getPhone());
         if(user==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -146,7 +146,7 @@ public class AccountService {
                if (code != null) {
                    users.setVerificationToken(code);
                    userRepository.save(users);
-                   return new ResponseEntity<>(code, HttpStatus.OK);
+                   return ResponseEntity.ok().body(code);
                }
                return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("User password not modified");
            }

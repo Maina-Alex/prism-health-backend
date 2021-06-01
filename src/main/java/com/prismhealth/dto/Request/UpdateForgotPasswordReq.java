@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 
 @JsonIgnoreProperties
@@ -13,7 +14,9 @@ import lombok.NoArgsConstructor;
 @Data
 public class UpdateForgotPasswordReq {
     @JsonProperty("phone")
+    @NonNull
     private String phone;
     @JsonProperty("password")
+    @NonNull
     private String password;
 }

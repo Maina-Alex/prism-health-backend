@@ -21,7 +21,6 @@ public class MessageSender {
     private final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     public  Future<String> sendMessage( String phone, String message){
-        String confirmCode = HelperUtility.getConfirmCodeNumber();
         UwaziiSmsRequest uwaziiSmsRequest = new UwaziiSmsRequest();
         uwaziiSmsRequest.setApiKey(uwaziiConfig.getApi_Key());
         uwaziiSmsRequest.setSenderId(uwaziiConfig.getSenderId());
@@ -46,7 +45,7 @@ public class MessageSender {
             Response response = new OkHttpClient().newCall(request).execute();
             if (response.code() == 200) {
                 response.close();
-                return new AsyncResult<>(confirmCode);
+                return new AsyncResult<>(message);
             }
         } catch (IOException e) {
             return null;
