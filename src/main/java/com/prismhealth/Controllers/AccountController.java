@@ -13,6 +13,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +31,10 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 @RestController
 @RequestMapping("accounts")
 @CrossOrigin
+@AllArgsConstructor
 public class AccountController {
     private final AccountService accountService;
 
-    public AccountController(AccountService accountService) {
-        this.accountService = accountService;
-    }
 
     @ApiOperation(value = "sign up user")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),

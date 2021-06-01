@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -36,6 +37,7 @@ import java.util.concurrent.Executors;
 
 @EnableSwagger2
 @SpringBootApplication
+@EnableAsync
 public class PrismHealthBackendApplication implements ApplicationRunner {
 	@Autowired
 	private UserRolesRepo rolesRepo;

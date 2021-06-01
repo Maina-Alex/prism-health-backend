@@ -23,6 +23,7 @@ import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
 import com.prismhealth.util.UtilityFunctions;
 
+import lombok.AllArgsConstructor;
 import okhttp3.*;
 
 import org.slf4j.Logger;

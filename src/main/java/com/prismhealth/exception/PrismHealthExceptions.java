@@ -1,6 +1,5 @@
 package com.prismhealth.exception;
 
-import com.prismhealth.config.PropertiesConfig;
 import com.prismhealth.util.EntityType;
 import com.prismhealth.util.ExceptionType;
 import org.springframework.stereotype.Component;

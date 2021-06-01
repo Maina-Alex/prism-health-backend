@@ -14,6 +14,7 @@ import com.prismhealth.util.Actions;
 
 import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.asm.Advice.Return;
 
@@ -41,27 +42,17 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class AccountService {
     private final AccountRepository accountRepository;
     private final AuthService authService;
     private final UserRatingsRepo userRatingsRepo;
     private final UserRolesRepo userRolesRepo;
-    @Autowired
-    private BCryptPasswordEncoder encoder;
-    @Autowired
-    private NotificationRepo notificationRepo;
-    @Autowired
-    private MailService mailService;
-    @Autowired
-    private ExecutorService executor;
+    private final BCryptPasswordEncoder encoder;
+    private final  NotificationRepo notificationRepo;
+    private final MailService mailService;
+    private final ExecutorService executor;
 
-    public AccountService(AccountRepository accountRepository, AuthService authService, UserRatingsRepo userRatingsRepo,
-            UserRolesRepo userRolesRepo) {
-        this.accountRepository = accountRepository;
-        this.authService = authService;
-        this.userRatingsRepo = userRatingsRepo;
-        this.userRolesRepo = userRolesRepo;
-    }
 
     public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
@@ -74,9 +65,7 @@ public class AccountService {
             String authCode = null;
             try {
                 authCode = authService.getAuthentication(phone.getPhone()).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
             signUpResponse.setMessage("Create new user..");
@@ -150,30 +139,31 @@ public class AccountService {
             details.setAccesstoken(authCode);
             details.setEmail(users.getEmail());
             details.setUsername(users.getPhone());
-            Runnable task = () -> {
-
-                Mail mail = new Mail();
-                mail.setMailFrom("prismhealth658@gmail.com");
-                mail.setMailTo(users.getEmail());
-                mail.setMailSubject("Prism-health Notification services");
-                mail.setMailContent(
-                        "" + "Here is your authentication code \n" + authCode + "\nUse to change your password. ");
-
-                mailService.sendEmail(mail);
-                Notification notification = new Notification();
-                notification.setEmail(users.getEmail());
-                notification.setUserId(users.getPhone());
-                notification.setDetails(details);
-
-                notification.setMessage("Click on the link to change your password");
-                notification.setAction(Actions.RESET_PASSSWORD);
-                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-                notificationRepo.save(notification);
-                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-            };
-            executor.submit(task);
+            forgotPasswordMail(users,authCode,details);
             return new ResponseEntity<>("Ok", HttpStatus.OK);
         }
+    }
+
+    @Async
+    private void forgotPasswordMail(Users users, String authCode,AccountDetails details){
+        Mail mail = new Mail();
+        mail.setMailFrom("prismhealth658@gmail.com");
+        mail.setMailTo(users.getEmail());
+        mail.setMailSubject("Prism-health Notification services");
+        mail.setMailContent(
+                "" + "Here is your authentication code \n" + authCode + "\nUse to change your password. ");
+
+        mailService.sendEmail(mail);
+        Notification notification = new Notification();
+        notification.setEmail(users.getEmail());
+        notification.setUserId(users.getPhone());
+        notification.setDetails(details);
+
+        notification.setMessage("Click on the link to change your password");
+        notification.setAction(Actions.RESET_PASSSWORD);
+        notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+        notificationRepo.save(notification);
+        log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
     }
 
     public String getToken(String phone) {
@@ -201,7 +191,7 @@ public class AccountService {
                 .filter(c -> c.getRating() > 0).collect(Collectors.toList());
         if (!ratings.isEmpty()) {
 
-            int sum = ratings.stream().map(UserRating::getRating).reduce(0, (a, b) -> a + b);
+            int sum = ratings.stream().map(UserRating::getRating).reduce(0, Integer::sum);
             int rating = sum / ratings.size();
             crating.put("count", ratings.size());
             crating.put("rating", rating);
@@ -274,8 +264,8 @@ public class AccountService {
         }
     }
 
+    @Async
     public void sendEmail(Users users, String action) {
-        //Runnable task = () -> {
             if (users == null) {
                 log.info("User with phone number not found");
             }
@@ -314,8 +304,7 @@ public class AccountService {
                 log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
 
             }
-       // };
-       // executor.submit(task);
+
     }
 
     public ResponseEntity<?> getProviderById(String providerId) {
