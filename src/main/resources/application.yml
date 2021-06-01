@@ -2,10 +2,11 @@ server:
   port: 8081
 spring:
   mail:
+    protocol: smtp
     host: smtp.gmail.com
     port: 587
     username: "maina.alex2010@gmail.com"
-    password: "32451031Aa?"
+    password: "ipdlvtqziqwglsno"
     properties:
       mail:
         smtp:
