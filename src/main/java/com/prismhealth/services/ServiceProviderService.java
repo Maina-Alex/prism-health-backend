@@ -10,8 +10,6 @@ import com.prismhealth.Models.*;
 import com.prismhealth.config.Constants;
 import com.prismhealth.repository.*;
 
-import com.prismhealth.util.Actions;
-
 import com.prismhealth.util.LogMessage;
 
 import org.slf4j.Logger;
@@ -131,10 +129,10 @@ public class ServiceProviderService {
         return serviceRepo.findByPositionNear(location, distance);
     }
 
-    public String sendEmail(Users users, String action) {
+    public void sendEmail(Users users, String action) {
 
         if (users == null) {
-            return "User with phone number not found";
+            return;
         }
         String message = null;
         if (action.equals("createAccount")) {
@@ -149,37 +147,27 @@ public class ServiceProviderService {
             message = "Product booking made for your product";
         }
 
-        if (users != null) {
-            log.info(message);
-            Notification notification = new Notification();
-            notification.setEmail(users.getEmail());
-            notification.setUserId(users.getPhone());
-            notification.setMessage(message);
-            notification.setAction(null);
-            notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            notificationRepo.save(notification);
-            log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-            Mail mail = new Mail();
-            mail.setMailFrom(Constants.email);
-            mail.setMailTo(users.getEmail());
-            mail.setMailSubject("Prism-health Notification services");
-            mail.setMailContent(message);
+        log.info(message);
+        Notification notification = new Notification();
+        notification.setEmail(users.getEmail());
+        notification.setUserId(users.getPhone());
+        notification.setMessage(message);
+        notification.setAction(null);
+        notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+        notificationRepo.save(notification);
+        log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+        Mail mail = new Mail();
+        mail.setMailFrom(Constants.email);
+        mail.setMailTo(users.getEmail());
+        mail.setMailSubject("Prism-health Notification services");
+        mail.setMailContent(message);
 
-            mailService.sendEmail(mail);
-
-            return "Notification sent to : " + users.getEmail();
-
-        } else {
-            log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
-            return null;
-        }
+        mailService.sendEmail(mail);
 
     }
 
     public Users getProvidersByServiceId(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        if (services.isPresent())
-            return accountRepository.findOneByPhone(services.get().getProviderId());
-            return null;
+        return services.map(value -> accountRepository.findOneByPhone(value.getProviderId())).orElse(null);
     }
 }

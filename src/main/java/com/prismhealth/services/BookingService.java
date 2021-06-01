@@ -46,7 +46,7 @@ public class BookingService {
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();
-        LocalDate future = today.plusDays(7);
+        LocalDate future = today.plusDays(30);
         log.info("Getting bookings for service " + serviceId);
         List<ServiceBooking> bookings = new ArrayList<>();
         while (today.compareTo(future) <= 0) {
