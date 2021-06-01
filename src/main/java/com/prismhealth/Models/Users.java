@@ -48,7 +48,7 @@ public class Users {
 
 	private boolean verified;
 
-	private String deviceToken;
+	private String verificationToken;
 
 	private Date verifiedOn;
 
@@ -226,12 +226,12 @@ public class Users {
 		this.verified = verified;
 	}
 
-	public String getDeviceToken() {
-		return deviceToken;
+	public String getVerificationToken() {
+		return verificationToken;
 	}
 
-	public void setDeviceToken(String deviceToken) {
-		this.deviceToken = deviceToken;
+	public void setVerificationToken(String verificationToken) {
+		this.verificationToken = verificationToken;
 	}
 
 	public Date getVerifiedOn() {

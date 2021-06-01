@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 public class ServiceProviderService {
 
     @Autowired
-    private AccountRepository usersRepo;
+    private UserRepository usersRepo;
     @Autowired
     private BookingsRepo bookingsRepo;
 
@@ -38,7 +38,7 @@ public class ServiceProviderService {
     @Autowired
     MailService mailService;
     @Autowired
-    AccountRepository accountRepository;
+    UserRepository userRepository;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public Services setServiceAvailabilityFalse(List<Bookings> bookings) {
@@ -87,7 +87,7 @@ public class ServiceProviderService {
                 positions.setLongitude(services.getPosition()[1]);
                 services.setPositions(positions);
             }
-            sendEmail(accountRepository.findOneByPhone(services.getProviderId()),"createService");
+            sendEmail(userRepository.findOneByPhone(services.getProviderId()),"createService");
             return serviceRepo.save(services);
         }else {
         Users users = usersRepo.findOneByPhone(principal.getName());
@@ -105,7 +105,7 @@ public class ServiceProviderService {
     public List<Services> getAllServices() {
         List<Services> services = serviceRepo.findAll();
         for (Services services1 : services) {
-            services1.setProvider(accountRepository.findOneByPhone(services1.getProviderId()));
+            services1.setProvider(userRepository.findOneByPhone(services1.getProviderId()));
             services1.setBookings(bookingsService.getServiceBookings(services1.getId()));
         }
         return services;
@@ -117,7 +117,7 @@ public class ServiceProviderService {
     }
     public Services getServicesById(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        services.get().setProvider(accountRepository.findOneByPhone(services.get().getProviderId()));
+        services.get().setProvider(userRepository.findOneByPhone(services.get().getProviderId()));
         return services.orElse(null);
     }
 
@@ -168,6 +168,6 @@ public class ServiceProviderService {
 
     public Users getProvidersByServiceId(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        return services.map(value -> accountRepository.findOneByPhone(value.getProviderId())).orElse(null);
+        return services.map(value -> userRepository.findOneByPhone(value.getProviderId())).orElse(null);
     }
 }

@@ -4,49 +4,41 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prismhealth.Models.Positions;
 import com.prismhealth.Models.Users;
 import com.prismhealth.Models.UserRoles;
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.UserRolesRepo;
+import com.prismhealth.services.MailServiceImpl;
+import lombok.AllArgsConstructor;
 import okhttp3.OkHttpClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
 import springfox.documentation.spi.DocumentationType;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @EnableSwagger2
 @SpringBootApplication
 @EnableAsync
+@AllArgsConstructor
 public class PrismHealthBackendApplication implements ApplicationRunner {
-	@Autowired
-	private UserRolesRepo rolesRepo;
-	@Autowired
-	private AccountRepository accountRepository;
+	private final UserRolesRepo rolesRepo;
+	private final UserRepository userRepository;
+	private final MailServiceImpl mailService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(PrismHealthBackendApplication.class, args);
 	}
+
 
 	@Bean
 	public RestTemplate getRestTemplate() {
@@ -82,9 +74,9 @@ public class PrismHealthBackendApplication implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		// accountRepository.deleteAll();
+		// userRepository.deleteAll();
 		// rolesRepo.deleteAll();
-		if (!accountRepository.existsByPhone("+254711111111")) {
+		if (!userRepository.existsByPhone("+254711111111")) {
 			Users users1 = new Users();
 			Positions positions = new Positions();
 			positions.setLongitude(Double.parseDouble("24.345"));
@@ -105,7 +97,7 @@ public class PrismHealthBackendApplication implements ApplicationRunner {
 			users1.setBlocked(false);
 			users1.setDeleted(false);
 
-			users1 = accountRepository.save(users1);
+			users1 = userRepository.save(users1);
 
 			UserRoles role = new UserRoles();
 			role.setAssignedBy("DEFAULT");

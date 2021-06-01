@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.prismhealth.Models.Users;
 import com.prismhealth.Models.UserRoles;
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.UserRolesRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,7 +19,7 @@ public class AdminStaffService {
     @Autowired
     private BCryptPasswordEncoder encoder;
     @Autowired
-    private AccountRepository usersRepo;
+    private UserRepository usersRepo;
     @Autowired
     private UserRolesRepo userRolesRepo;
 

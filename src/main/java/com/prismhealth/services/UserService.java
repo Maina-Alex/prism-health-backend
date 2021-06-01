@@ -14,7 +14,7 @@ import com.prismhealth.Models.BlockedUser;
 import com.prismhealth.Models.PushContent;
 import com.prismhealth.Models.Users;
 import com.prismhealth.Models.UserRating;
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.BlockedUserRepo;
 import com.prismhealth.repository.UserRatingsRepo;
 import org.springframework.data.domain.Sort;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-    private final AccountRepository usersRepo;
+    private final UserRepository usersRepo;
 
     private final BlockedUserRepo blockedUserRepo;
 
@@ -33,8 +33,8 @@ public class UserService {
 
     private final UserRatingsRepo userRatingsRepo;
 
-    public UserService(AccountRepository usersRepo, BlockedUserRepo blockedUserRepo, AuthService authService,
-                       NotificationService notificationService, UserRatingsRepo userRatingsRepo, AccountRepository usersRepo1, BlockedUserRepo blockedUserRepo1, AuthService authService1, NotificationService notificationService1, UserRatingsRepo userRatingsRepo1){
+    public UserService(UserRepository usersRepo, BlockedUserRepo blockedUserRepo, AuthService authService,
+                       NotificationService notificationService, UserRatingsRepo userRatingsRepo, UserRepository usersRepo1, BlockedUserRepo blockedUserRepo1, AuthService authService1, NotificationService notificationService1, UserRatingsRepo userRatingsRepo1){
 
         this.usersRepo = usersRepo1;
         this.blockedUserRepo = blockedUserRepo1;
@@ -98,7 +98,7 @@ public class UserService {
         Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
         if (optional.isPresent()) {
             Users users = optional.get();
-            users.setDeviceToken(token);
+            users.setVerificationToken(token);
             return usersRepo.save(users);
         } else
             return null;

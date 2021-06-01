@@ -14,7 +14,7 @@ import com.prismhealth.Models.Help;
 import com.prismhealth.Models.Issues;
 import com.prismhealth.Models.PushContent;
 import com.prismhealth.Models.Users;
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.HelpRepo;
 import com.prismhealth.repository.IssuesRepo;
 import com.prismhealth.util.HelpStatus;
@@ -29,7 +29,7 @@ public class HelpService {
     @Autowired
     HelpRepo helpRepo;
     @Autowired
-    AccountRepository usersRepo;
+    UserRepository usersRepo;
     @Autowired
     private IssuesRepo issuesRepo;
     @Autowired

@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.NotificationRepo;
 import com.prismhealth.repository.ProductsRepository;
 import com.prismhealth.util.AppConstants;
@@ -30,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class NotificationService {
     private final NotificationRepo notificationRepo;
-    private final AccountRepository usersRepo;
+    private final UserRepository usersRepo;
     private final ProductsRepository productsRepository;
     @Autowired
     private RestTemplate restTemplate;
@@ -39,7 +39,7 @@ public class NotificationService {
 
     private final ExecutorService executorService;
 
-    public NotificationService(NotificationRepo notificationRepo, AccountRepository usersRepo,
+    public NotificationService(NotificationRepo notificationRepo, UserRepository usersRepo,
             ProductsRepository productsRepository, ExecutorService executorService) {
         this.notificationRepo = notificationRepo;
         this.usersRepo = usersRepo;
@@ -108,47 +108,6 @@ public class NotificationService {
         }
 
     }
-    /*
-     * public void sendPickCarConfirmEmail(EmailData emailData) { Runnable task = ()
-     * -> { sendEmailNotification(AppConstants.notificationUrl +
-     * "/product/confirm/pick", emailData);
-     * 
-     * };
-     * 
-     * executorService.execute(task);
-     * 
-     * }
-     * 
-     * public void sendReturnCarEmail(EmailData emailData) { Runnable task = () -> {
-     * sendEmailNotification(AppConstants.notificationUrl + "/product/return",
-     * emailData);
-     * 
-     * };
-     * 
-     * executorService.execute(task);
-     * 
-     * }
-     * 
-     * public void sendPickUpLocationEmail(EmailData emailData) { Runnable task = ()
-     * -> { sendEmailNotification(AppConstants.notificationUrl + "/product/pickup",
-     * emailData);
-     * 
-     * };
-     * 
-     * executorService.execute(task);
-     * 
-     * }
-     * 
-     * public void sendPaymentSuccessEmail(EmailData emailData) { Runnable task = ()
-     * -> { sendEmailNotification(AppConstants.notificationUrl + "/payment/success",
-     * emailData);
-     * 
-     * };
-     * 
-     * executorService.execute(task);
-     * 
-     * }
-     */
 
     public void addHelpNotification(String userid) {
         Runnable task = () -> {
@@ -200,38 +159,6 @@ public class NotificationService {
 
     }
 
-    /*
-     * public String sendSupportMessage(SupportMail mail) { HttpHeaders headers =
-     * new HttpHeaders(); headers.setContentType(MediaType.APPLICATION_JSON);
-     * 
-     * HttpEntity<SupportMail> requestEntity = new HttpEntity<>(mail, headers);
-     * ResponseEntity<String> responseEntity =
-     * restTemplate.postForEntity(AppConstants.notificationUrl + "/support",
-     * requestEntity, String.class); return responseEntity.getBody();
-     * 
-     * }
-     * 
-     * public void carReviewNotification(CarRating carRating) { Runnable task = ()
-     * -> { Car car = carRepo.findById(carRating.getCarId()).get(); Users owner =
-     * usersRepo.findById(car.getOwnerId()).get(); Optional<String> deviceToken =
-     * Optional.ofNullable(owner.getDeviceToken()); if (deviceToken.isPresent()) {
-     * PushNotification notification = new PushNotification();
-     * notification.setDeviceToken(deviceToken.get());
-     * notification.setNotification(new PushContent("M-Gari",
-     * "Your car has a new Review")); Notification n = new Notification();
-     * n.setAction("Push Notification");
-     * n.setMessage(notification.getNotification().getBody());
-     * n.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).
-     * toInstant())); n.setTitle(notification.getNotification().getTitle());
-     * n.setUserId(owner.getId()); notificationRepo.save(n);
-     * this.sendPushNotification(notification); }
-     * 
-     * };
-     * 
-     * executorService.execute(task);
-     * 
-     * }
-     */
     public boolean deleteNotification(String id, Principal principal) {
         Optional<Notification> optional = notificationRepo.findById(id);
 
@@ -250,7 +177,7 @@ public class NotificationService {
             List<Users> owner = usersRepo.findAll().stream().filter(user -> user.getPhone().equals(product.getUser()))
                     .collect(Collectors.toList());
             if (!owner.isEmpty()) {
-                Optional<String> deviceToken = Optional.ofNullable(owner.get(0).getDeviceToken());
+                Optional<String> deviceToken = Optional.ofNullable(owner.get(0).getVerificationToken());
                 if (deviceToken.isPresent()) {
                     PushNotification notification = new PushNotification();
                     notification.setDeviceToken(deviceToken.get());
@@ -273,49 +200,4 @@ public class NotificationService {
 
     }
 
-    /*
-     * public void addOrderNotification(Order order) { Runnable task = () -> { Users
-     * owner = usersRepo.findById(order.getUserId()).get(); Optional<String>
-     * deviceToken = Optional.ofNullable(owner.getDeviceToken()); if
-     * (deviceToken.isPresent()) { PushNotification notification = new
-     * PushNotification(); notification.setDeviceToken(deviceToken.get());
-     * notification.setNotification(new PushContent("M-Gari Bookings",
-     * "Bookings placed successfuly, Total cost : " + order.getTotalCost()));
-     * Notification n = new Notification(); n.setAction("Push Notification");
-     * n.setMessage(notification.getNotification().getBody());
-     * n.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).
-     * toInstant())); n.setTitle(notification.getNotification().getTitle());
-     * n.setUserId(owner.getId()); notificationRepo.save(n);
-     * this.sendPushNotification(notification); }
-     * 
-     * };
-     * 
-     * executorService.execute(task);
-     * 
-     * }
-     * 
-     * public void genericUserNotification(String userid, PushContent pushContent) {
-     * Runnable task = () -> { Users owner = usersRepo.findById(userid).get();
-     * Optional<String> deviceToken = Optional.ofNullable(owner.getDeviceToken());
-     * if (deviceToken.isPresent()) { PushNotification notification = new
-     * PushNotification(); notification.setDeviceToken(deviceToken.get());
-     * notification.setNotification(pushContent); Notification n = new
-     * Notification(); n.setAction("Push Notification");
-     * n.setMessage(notification.getNotification().getBody());
-     * n.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).
-     * toInstant())); n.setTitle(notification.getNotification().getTitle());
-     * n.setUserId(owner.getId()); notificationRepo.save(n);
-     * this.sendPushNotification(notification); }
-     * 
-     * };
-     * 
-     * executorService.execute(task);
-     * 
-     * }
-     * 
-     * public boolean isValidEmail(String email) { if (email.contains("@")) return
-     * true;
-     * 
-     * else return false; }
-     */
 }

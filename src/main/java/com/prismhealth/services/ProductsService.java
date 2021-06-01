@@ -3,7 +3,6 @@ package com.prismhealth.services;
 import com.prismhealth.Models.*;
 import com.prismhealth.config.Constants;
 import com.prismhealth.repository.*;
-import com.prismhealth.util.Actions;
 import com.prismhealth.util.LogMessage;
 
 import lombok.NonNull;
@@ -34,7 +33,7 @@ public class ProductsService {
     private final SubCategoriesRepository subCategoriesRepository;
     private final ProductsRepository productsRepository;
     private final PhotoRepository photoRepository;
-    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
     private final MailService mailService;
     private final NotificationRepo notificationRepo;
 
@@ -42,14 +41,14 @@ public class ProductsService {
 
     public ProductsService(ExecutorService executor, VariantRepository variantRepository,
             CategoryRepository categoryRepository1, SubCategoriesRepository subCategoriesRepository1,
-            ProductsRepository productsRepository, PhotoRepository photoRepository, AccountRepository accountRepository,
+            ProductsRepository productsRepository, PhotoRepository photoRepository, UserRepository userRepository,
             MailService mailService, NotificationRepo notificationRepo) {
         this.variantRepository = variantRepository;
         this.categoryRepository = categoryRepository1;
         this.subCategoriesRepository = subCategoriesRepository1;
         this.productsRepository = productsRepository;
         this.photoRepository = photoRepository;
-        this.accountRepository = accountRepository;
+        this.userRepository = userRepository;
         this.mailService = mailService;
         this.notificationRepo = notificationRepo;
         this.executor = executor;
@@ -73,7 +72,7 @@ public class ProductsService {
         List<Product> products = productsRepository.findAll().stream()
                 .filter(r -> r.getSubCategory().equalsIgnoreCase(subCategoryName)).collect(Collectors.toList());
         for (Product product : products) {
-            product.setUsers(accountRepository.findOneByPhone(product.getUser()));
+            product.setUsers(userRepository.findOneByPhone(product.getUser()));
         }
         return products;
     }
@@ -85,7 +84,7 @@ public class ProductsService {
         List<Product> products = productsRepository.findAll().stream()
                 .filter(r -> r.getProductName().contains(productName)).collect(Collectors.toList());
         for (Product product : products) {
-            product.setUsers(accountRepository.findOneByPhone(product.getUser()));
+            product.setUsers(userRepository.findOneByPhone(product.getUser()));
         }
         return products;
     }
@@ -130,13 +129,13 @@ public class ProductsService {
 
     public Product saveProduct(Product product, Principal principal) {
 
-        Users users = accountRepository.findOneByPhone(principal.getName());
+        Users users = userRepository.findOneByPhone(principal.getName());
         if (users!=null){
             
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
         variant.setSubCategory(product.getSubCategory());
-        Users users1 = accountRepository.findOneByPhone(product.getUser());
+        Users users1 = userRepository.findOneByPhone(product.getUser());
         if (!subCategoryByName(product.getSubCategory()).isEmpty()) {
             if (variantByName(product.getProductVariant()).isEmpty())
                 variantRepository.save(variant);
@@ -209,7 +208,7 @@ public class ProductsService {
 
         AccountDetails details = new AccountDetails();
         details.setEmail(users.getEmail());
-        details.setAccesstoken(users.getDeviceToken());
+        details.setAccesstoken(users.getVerificationToken());
         details.setUsername(users.getPhone());
 
         mailService.sendEmail(mail);

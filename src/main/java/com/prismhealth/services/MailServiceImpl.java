@@ -4,6 +4,9 @@ import com.prismhealth.Models.Mail;
 import com.prismhealth.config.Constants;
 import com.prismhealth.repository.MailService;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -14,28 +17,23 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.UnsupportedEncodingException;
 
-@Service()
+@Service
 @AllArgsConstructor
 public class MailServiceImpl implements MailService {
+    private final Logger log = LoggerFactory.getLogger(MailServiceImpl.class);
     private final JavaMailSender mailSender;
 
-    @Async
     public void sendEmail(Mail mail) {
-        MimeMessage mimeMessage = mailSender.createMimeMessage();
-
         try {
 
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-
-            mimeMessageHelper.setSubject(mail.getMailSubject());
-            mimeMessageHelper.setFrom(new InternetAddress(mail.getMailFrom(), Constants.email));
-            mimeMessageHelper.setTo(mail.getMailTo());
-            mimeMessageHelper.setText(mail.getMailContent());
-
-            mailSender.send(mimeMessageHelper.getMimeMessage());
-
-        } catch (MessagingException | UnsupportedEncodingException e) {
-            e.printStackTrace();
+            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+            simpleMailMessage.setFrom(Constants.email);
+            simpleMailMessage.setTo(mail.getMailTo());
+            simpleMailMessage.setSubject(mail.getMailSubject());
+            simpleMailMessage.setText(mail.getMailContent());
+            mailSender.send(simpleMailMessage);
+        }catch (Exception ex){
+            log.error(" mail Error " + ex);
         }
     }
 }

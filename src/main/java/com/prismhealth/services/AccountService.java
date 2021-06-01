@@ -3,10 +3,12 @@ package com.prismhealth.services;
 import com.auth0.jwt.JWT;
 import com.prismhealth.Models.*;
 
-import com.prismhealth.config.Constants;
+import com.prismhealth.config.UwaziiConfig;
 import com.prismhealth.dto.Request.Phone;
 import com.prismhealth.dto.Request.SignUpRequest;
 
+import com.prismhealth.dto.Request.UpdateForgotPasswordReq;
+import com.prismhealth.dto.Request.UwaziiSmsRequest;
 import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.repository.*;
@@ -16,10 +18,10 @@ import com.prismhealth.util.Actions;
 import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.asm.Advice.Return;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import okhttp3.*;
 
 import org.springframework.data.domain.Sort;
 
@@ -27,16 +29,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
@@ -45,19 +48,17 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 @Service
 @AllArgsConstructor
 public class AccountService {
-    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
     private final AuthService authService;
     private final UserRatingsRepo userRatingsRepo;
     private final UserRolesRepo userRolesRepo;
     private final BCryptPasswordEncoder encoder;
-    private final  NotificationRepo notificationRepo;
-    private final MailService mailService;
-    private final ExecutorService executor;
+    private final MessageSender messageSender;
 
 
     public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
-        Users users = accountRepository.findOneByPhone(phone.getPhone());
+        Users users = userRepository.findOneByPhone(phone.getPhone());
         if (users != null) {
             log.info("phone->" + users.getPhone());
             signUpResponse.setMessage("user already exists");
@@ -78,7 +79,7 @@ public class AccountService {
     public ResponseEntity<SignUpResponse> signUpUser(SignUpRequest signUpRequest) {
         SignUpResponse signUpResponse = new SignUpResponse();
 
-        Users thisUsers = accountRepository.findOneByPhone(signUpRequest.getPhone());
+        Users thisUsers = userRepository.findOneByPhone(signUpRequest.getPhone());
         if (thisUsers == null) {
             Users users1 = new Users();
             users1.setPassword(encoder.encode(signUpRequest.getPassword()));
@@ -103,7 +104,7 @@ public class AccountService {
             users1.setBlocked(false);
             users1.setDeleted(false);
 
-            users1 = accountRepository.save(users1);
+            users1 = userRepository.save(users1);
             signUpResponse.setMessage("successfully created");
 
             UserRoles role = new UserRoles();
@@ -112,9 +113,7 @@ public class AccountService {
             role.setUserId(users1.getPhone());
             userRolesRepo.save(role);
             log.info("Assigned Default User Role to UserId:" + users1.getPhone());
-
-            sendEmail(users1, "createAccount");
-
+            sendMessage(users1.getPhone());
             signUpResponse.setUsers(users1);
             return ResponseEntity.ok().body(signUpResponse);
         } else {
@@ -124,51 +123,47 @@ public class AccountService {
         }
     }
 
-    public ResponseEntity<?> forgotPassword(Phone phone) {
-        // TODO implement the notification service to send the change password link.
-        log.info("Send link to email " + phone);
-        Users users = accountRepository.findOneByPhone(phone.getPhone());
-        if (users == null) {
-            return new ResponseEntity<>("User with phone number " + phone + " not found", HttpStatus.NOT_FOUND);
-        } else {
-
-            log.info("Forgot password request, user email  " + users.getEmail());
-            String authCode = HelperUtility.getConfirmCodeNumber();
-            users.setDeviceToken(authCode);
-            accountRepository.save(users);
-            AccountDetails details = new AccountDetails();
-            details.setAccesstoken(authCode);
-            details.setEmail(users.getEmail());
-            details.setUsername(users.getPhone());
-            forgotPasswordMail(users,authCode,details);
-            return new ResponseEntity<>("Ok", HttpStatus.OK);
+    public ResponseEntity<?> updateForgotPassword(UpdateForgotPasswordReq req){
+        Users user=userRepository.findOneByPhone(req.getPhone());
+        if(user==null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
+        user.setPassword(encoder.encode(req.getPassword()));
+        user.setVerificationToken("");
+        userRepository.save(user);
+        return ResponseEntity.ok().body("User password successfully updated");
     }
 
-    @Async
-    private void forgotPasswordMail(Users users, String authCode,AccountDetails details){
-        Mail mail = new Mail();
-        mail.setMailFrom(Constants.email);
-        mail.setMailTo(users.getEmail());
-        mail.setMailSubject("Prism-health Notification services");
-        mail.setMailContent(
-                "" + "Here is your authentication code \n" + authCode + "\nUse to change your password. ");
+    public ResponseEntity<?> forgotPassword(@NonNull Phone phone)  {
 
-        mailService.sendEmail(mail);
-        Notification notification = new Notification();
-        notification.setEmail(users.getEmail());
-        notification.setUserId(users.getPhone());
-        notification.setDetails(details);
-
-        notification.setMessage("Click on the link to change your password");
-        notification.setAction(Actions.RESET_PASSSWORD);
-        notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-        notificationRepo.save(notification);
-        log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+       try{
+           Users users = userRepository.findOneByPhone(phone.getPhone());
+           if (users == null) {
+               return new ResponseEntity<>("User with phone number " + phone + " not found", HttpStatus.NOT_FOUND);
+           } else {
+               log.info("Forgot password request, user email  " + users.getEmail());
+               String code = Objects.requireNonNull(forgotPasswordMail(phone.getPhone())).get();
+               if (code != null) {
+                   users.setVerificationToken(code);
+                   userRepository.save(users);
+                   return new ResponseEntity<>(code, HttpStatus.OK);
+               }
+               return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("User password not modified");
+           }
+       }catch (Exception ex){
+           return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("User password not modified");
+       }
     }
+
+
+    private Future<String> forgotPasswordMail(String phone){
+        String code=HelperUtility.getConfirmCodeNumber();
+       return messageSender.sendMessage(phone,code);
+    }
+
 
     public String getToken(String phone) {
-        Optional<Users> users = Optional.ofNullable(accountRepository.findOneByPhone(phone));
+        Optional<Users> users = Optional.ofNullable(userRepository.findOneByPhone(phone));
         return users.map(value -> JWT.create().withSubject(value.getPhone())
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .sign(HMAC512(SecurityConstants.SECRET.getBytes()))).orElse(null);
@@ -219,7 +214,7 @@ public class AccountService {
 
     public ResponseEntity<SignUpResponse> updateUser(Users users) {
         SignUpResponse signUpResponse = new SignUpResponse();
-        Users user = accountRepository.findOneByPhone(users.getPhone());
+        Users user = userRepository.findOneByPhone(users.getPhone());
         if (user != null) {
             Positions positions = new Positions();
             if (user.getPosition().length >= 2) {
@@ -234,7 +229,7 @@ public class AccountService {
             users.setRating(user.getRating());
             users.setPassword(user.getPassword());
             signUpResponse.setMessage("successfully updated");
-            signUpResponse.setUsers(accountRepository.save(users));
+            signUpResponse.setUsers(userRepository.save(users));
             return ResponseEntity.ok(signUpResponse);
         }
         signUpResponse.setMessage("Failed update, User not found");
@@ -244,7 +239,7 @@ public class AccountService {
     public ResponseEntity<?> getUsers(Principal principal) {
         SignInResponse signInResponse = new SignInResponse();
         String phone = principal.getName();
-        Optional<Users> users = Optional.ofNullable(accountRepository.findOneByPhone(phone));
+        Optional<Users> users = Optional.ofNullable(userRepository.findOneByPhone(phone));
         if (users.isPresent()) {
             Users u = users.get();
             u.setRoles(userRolesRepo.findAllByUserId(u.getPhone()).stream().map(UserRoles::getRole)
@@ -259,51 +254,15 @@ public class AccountService {
     }
 
     @Async
-    public void sendEmail(Users users, String action) {
-            if (users == null) {
-                log.info("User with phone number not found");
-            }
-            String message = null;
-            if (action.equals("createAccount")) {
-                message = "Account successfully created for " + users.getPhone();
-            } else if (action.equals("createProduct")) {
-                message = "Product successfully created by " + users.getPhone() + " " + users.getEmail();
-            } else if (action.equals("createService")) {
-                message = "Service successfully created by " + users.getPhone() + " " + users.getEmail();
-            } else if (action.equals("createBooking")) {
-                message = "Booking successfully created by " + users.getPhone() + " " + users.getEmail();
-            } else if (action.equals("notifyProvider")) {
-                message = "Product booking made for your product";
-            }
-
-            if (users != null) {
-                log.info(message);
-                Mail mail = new Mail();
-                mail.setMailFrom(Constants.email);
-                mail.setMailTo(users.getEmail());
-                mail.setMailSubject("Prism-health Notification services");
-                mail.setMailContent(message);
-
-                mailService.sendEmail(mail);
-                Notification notification = new Notification();
-                notification.setEmail(users.getEmail());
-                notification.setUserId(users.getPhone());
-                notification.setMessage(message);
-                notification.setAction(Actions.RESET_PASSSWORD);
-                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-                notificationRepo.save(notification);
-                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-
-            } else {
-                log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
-
-            }
-
+    public void sendMessage(@NonNull String phone) {
+            String message = "Your account has been successfully created for the following phone number " + phone;
+            messageSender.sendMessage(phone, message);
     }
+
 
     public ResponseEntity<?> getProviderById(String providerId) {
 
-        Optional<Users> user = accountRepository.findById(providerId);
+        Optional<Users> user = userRepository.findById(providerId);
         if (user.isPresent()) {
             return ResponseEntity.ok().body(user.get());
 
@@ -313,7 +272,7 @@ public class AccountService {
     }
 
     public ResponseEntity<List<Users>> getAllUsers() {
-        return ResponseEntity.ok(accountRepository.findAll().stream()
+        return ResponseEntity.ok(userRepository.findAll().stream()
                 .filter(users -> users.getAccountType().equals("USER")).collect(Collectors.toList()));
     }
 }

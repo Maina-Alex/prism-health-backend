@@ -4,7 +4,7 @@ import java.util.List;
 
 import java.util.stream.Collectors;
 import com.prismhealth.Models.Users;
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class AdminService {
     private AuthService authService;
 
     @Autowired
-    private AccountRepository usersRepo;
+    private UserRepository usersRepo;
 
     public List<Users> getAllUsers() {
         log.info("Admin: GET all Verified Users.");

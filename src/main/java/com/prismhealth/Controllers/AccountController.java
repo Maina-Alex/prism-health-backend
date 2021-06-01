@@ -7,6 +7,7 @@ import com.prismhealth.dto.Request.Phone;
 
 import com.prismhealth.dto.Request.SignUpRequest;
 
+import com.prismhealth.dto.Request.UpdateForgotPasswordReq;
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.services.AccountService;
 import io.swagger.annotations.Api;
@@ -68,6 +69,14 @@ public class AccountController {
 
         return accountService.forgotPassword(phone);
     }
+    @ApiOperation(value = "Make request to update password after receiving code")
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
+            @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
+    @PostMapping("/updatePassword")
+
+    public ResponseEntity<?> updatePassword(@RequestBody UpdateForgotPasswordReq req){
+        return accountService.updateForgotPassword(req);
+    }
 
     @GetMapping("/getProviderById")
     public ResponseEntity<?> getProviderById(@RequestParam String providerId) {
@@ -101,16 +110,6 @@ public class AccountController {
 
     }
 
-    @GetMapping
-    public ResponseEntity<?> getUser(Principal principal) {
-        return accountService.getUsers(principal);
-    }
-
-    // TODO review the security implementation
-    // TODO create an end point for admin login
-    /*
-     * Ratings and Reviews POSTS
-     */
     @PostMapping("/postReviews")
     public List<UserRating> postReview(@RequestBody UserRating userRating) {
         return accountService.addUserReview(userRating);

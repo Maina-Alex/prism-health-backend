@@ -4,7 +4,7 @@ import com.prismhealth.Models.Positions;
 import com.prismhealth.Models.Users;
 import com.prismhealth.config.UwaziiConfig;
 import com.prismhealth.dto.Request.UwaziiSmsRequest;
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.util.HelperUtility;
 import okhttp3.*;
 import org.slf4j.LoggerFactory;
@@ -22,16 +22,16 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class SosService {
-    private final AccountRepository accountRepository;
+    private final UserRepository userRepository;
     private final UwaziiConfig uwaziiConfig;
 
-    public SosService(AccountRepository accountRepository, UwaziiConfig uwaziiConfig) {
-        this.accountRepository = accountRepository;
+    public SosService(UserRepository userRepository, UwaziiConfig uwaziiConfig) {
+        this.userRepository = userRepository;
         this.uwaziiConfig = uwaziiConfig;
     }
 
     public ResponseEntity<String> sendSos(Positions position, Principal principal) {
-        Users users = accountRepository.findOneByPhone(principal.getName());
+        Users users = userRepository.findOneByPhone(principal.getName());
         try {
         if (users.getEmergencyContact1()!=null&&users.getEmergencyContact2()==null){
             return execute(position,users,users.getEmergencyContact1()).get();

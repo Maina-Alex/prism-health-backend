@@ -2,12 +2,10 @@ package com.prismhealth.services;
 
 import java.security.Principal;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -18,14 +16,12 @@ import java.util.stream.Collectors;
 import com.prismhealth.Models.*;
 import com.prismhealth.config.Constants;
 import com.prismhealth.repository.*;
-import com.prismhealth.util.Actions;
 import com.prismhealth.util.LogMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -34,7 +30,7 @@ public class BookingService {
     @Autowired
     private BookingsRepo bookingsRepo;
     @Autowired
-    private AccountRepository accountRepository;
+    private UserRepository userRepository;
     @Autowired
     private MailService mailService;
     @Autowired
@@ -89,7 +85,7 @@ public class BookingService {
     }
 
     public Map<String, List<ServiceBooking>> createBookings(List<Bookings> bookings, Principal principal) {
-        Optional<Users> optional = accountRepository.findById(principal.getName());
+        Optional<Users> optional = userRepository.findById(principal.getName());
         if (optional.isPresent())
             bookings.forEach(b -> {
                 if (!b.getServiceId().isEmpty()
@@ -107,7 +103,7 @@ public class BookingService {
     }
 
     public Map<String, List<Bookings>> cancelBookings(String id, Principal principal) {
-        Optional<Users> optional = Optional.ofNullable(accountRepository.findOneByPhone(principal.getName()));
+        Optional<Users> optional = Optional.ofNullable(userRepository.findOneByPhone(principal.getName()));
         if (optional.isPresent()) {
             Optional<Bookings> bOptional = bookingsRepo.findById(id);
 
@@ -131,7 +127,7 @@ public class BookingService {
     }
 
     public Map<String, List<Bookings>> getBookingsHistory(Principal principal) {
-        Users optional = accountRepository.findOneByPhone(principal.getName());
+        Users optional = userRepository.findOneByPhone(principal.getName());
 
         if (optional.getAccountType().equals("PROVIDER")) {
 
@@ -141,7 +137,7 @@ public class BookingService {
                     .addAll(bookingsRepo.findAllByServiceId(s.getId(), Sort.by("timestamp").descending())));
 
             return bookings.stream().map(b -> {
-                Optional<Users> u = accountRepository.findById(b.getUserId());
+                Optional<Users> u = userRepository.findById(b.getUserId());
                 b.setUser(u.orElse(null));
                 return b;
             }).collect(Collectors.groupingBy(Bookings::getServiceId));
@@ -176,7 +172,7 @@ public class BookingService {
                 log.info(message);
                 AccountDetails details = new AccountDetails();
                 details.setEmail(users.getEmail());
-                details.setAccesstoken(users.getDeviceToken());
+                details.setAccesstoken(users.getVerificationToken());
                 details.setUsername(users.getPhone());
 
                 Notification notification = new Notification();
@@ -196,7 +192,7 @@ public class BookingService {
                 Mail providerMail = new Mail();
 
                 providerMail.setMailFrom(Constants.email);
-                providerMail.setMailTo(accountRepository
+                providerMail.setMailTo(userRepository
                         .findOneByPhone(serviceRepo.findById(services.getId()).get().getProviderId()).getEmail());
                 providerMail.setMailSubject("Prism-health Notification services");
                 providerMail.setMailContent("You have a new booking for service "+services.getName()+ " at "+services.getTimestamp());

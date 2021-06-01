@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.prismhealth.Models.UserRoles;
 import com.prismhealth.Models.Users;
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.UserRolesRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
-    private AccountRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
     private UserRolesRepo roleRepo;
 

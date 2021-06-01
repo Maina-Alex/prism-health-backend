@@ -1,29 +1,23 @@
 package com.prismhealth.services;
 
-import com.auth0.jwt.JWT;
-
 import com.prismhealth.Models.Users;
 import com.prismhealth.config.UwaziiConfig;
 import com.prismhealth.dto.Request.UwaziiSmsRequest;
 
 import java.io.IOException;
 
-import java.util.Date;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Future;
 
-import com.prismhealth.repository.AccountRepository;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.MailService;
 import com.prismhealth.repository.NotificationRepo;
-import com.prismhealth.security.SecurityConstants;
 
 import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
 import com.prismhealth.util.UtilityFunctions;
 
-import lombok.AllArgsConstructor;
 import okhttp3.*;
 
 import org.slf4j.Logger;
@@ -43,14 +37,14 @@ public class AuthService {
 
     private final Logger log = LoggerFactory.getLogger(AuthService.class);
 
-    private final AccountRepository usersRepo;
+    private final UserRepository usersRepo;
     private final BCryptPasswordEncoder encoder;
     private final MailService mailService;
     private final NotificationRepo notificationRepo;
     private final UwaziiConfig uwaziiConfig;
 
-    public AuthService(AccountRepository usersRepo, BCryptPasswordEncoder encoder, MailService mailService,
-            NotificationRepo notificationRepo, UwaziiConfig uwaziiConfig) {
+    public AuthService(UserRepository usersRepo, BCryptPasswordEncoder encoder, MailService mailService,
+                       NotificationRepo notificationRepo, UwaziiConfig uwaziiConfig) {
         this.usersRepo = usersRepo;
         this.encoder = encoder;
         this.mailService = mailService;
@@ -95,31 +89,12 @@ public class AuthService {
         return null;
     }
 
-    public String getToken(String phone) {
-        Optional<Users> users = Optional.ofNullable(usersRepo.findOneByPhone(phone));
-        if (users.isPresent() && checkUserValidity(users.get())) {
-            String token = JWT.create().withSubject(users.get().getPhone())
-                    .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-                    .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
-            log.info("Getting token for id " + phone + " is " + LogMessage.SUCCESS);
-            return token;
-        } else {
-            log.info("Getting token for firebase id " + phone + "  " + LogMessage.FAILED);
-            return null;
-        }
-
-    }
-
-    public Users resetPassword(String password, String authCode) {
-        Optional<Users> accounts = usersRepo.findOneByDeviceToken(authCode);
-
-        if (accounts.isPresent()) {
-
-            Users oldUsers = accounts.get();
-            oldUsers.setPassword(encoder.encode(password));
-            oldUsers.setDeviceToken(UtilityFunctions.getRandomString());
-            log.info("Password reset for User id:" + oldUsers.getPhone() + " " + LogMessage.SUCCESS);
-            return usersRepo.save(oldUsers);
+    public Users resetPassword(String password, String phone) {
+        Users accounts = usersRepo.findOneByPhone(phone);
+        if (accounts!=null) {
+            accounts.setPassword(encoder.encode(password));
+            log.info("Password reset for User id:" + accounts.getPhone() + " " + LogMessage.SUCCESS);
+            return usersRepo.save(accounts);
 
         } else
             return null;

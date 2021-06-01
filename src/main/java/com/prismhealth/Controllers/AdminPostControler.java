@@ -3,6 +3,7 @@ package com.prismhealth.Controllers;
 import com.prismhealth.Models.Post;
 import com.prismhealth.Models.PostCategory;
 
+import com.prismhealth.dto.Request.PostCategoryReq;
 import com.prismhealth.services.AdminPostService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,8 +55,8 @@ public class AdminPostControler {
     }
 
     @PostMapping("/categories")
-    public PostCategory saveCategory(@RequestBody PostCategory category) {
-        return postService.savePostCategory(category);
+    public PostCategory saveCategory(@RequestBody PostCategoryReq req) {
+        return postService.savePostCategory(req);
 
     }
 
@@ -65,9 +66,9 @@ public class AdminPostControler {
         return postService.deletePost(post);
     }
 
-    @PostMapping("categories/delete")
-    public ResponseEntity<?> deleteCategory(@RequestBody PostCategory category) {
-        return postService.deletePostCategory(category);
+    @PostMapping("categories/delete/{id}")
+    public ResponseEntity<?> deleteCategory(@RequestParam String id) {
+        return postService.deletePostCategory(id);
     }
 
 }
