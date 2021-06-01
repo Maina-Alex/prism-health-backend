@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
+import com.prismhealth.config.Constants;
 import com.prismhealth.repository.*;
 import com.prismhealth.util.Actions;
 import com.prismhealth.util.LogMessage;
@@ -188,13 +189,13 @@ public class BookingService {
                 notificationRepo.save(notification);
                 log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
                 Mail mail = new Mail();
-                mail.setMailFrom("prismhealth658@gmail.com");
+                mail.setMailFrom(Constants.email);
                 mail.setMailTo(users.getEmail());
                 mail.setMailSubject("Prism-health Notification services");
                 mail.setMailContent("You have successfully created booking for service "+services.getName()+ " at "+services.getTimestamp());
                 Mail providerMail = new Mail();
 
-                providerMail.setMailFrom("prismhealth658@gmail.com");
+                providerMail.setMailFrom(Constants.email);
                 providerMail.setMailTo(accountRepository
                         .findOneByPhone(serviceRepo.findById(services.getId()).get().getProviderId()).getEmail());
                 providerMail.setMailSubject("Prism-health Notification services");

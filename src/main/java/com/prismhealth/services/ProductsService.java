@@ -1,10 +1,12 @@
 package com.prismhealth.services;
 
 import com.prismhealth.Models.*;
+import com.prismhealth.config.Constants;
 import com.prismhealth.repository.*;
 import com.prismhealth.util.Actions;
 import com.prismhealth.util.LogMessage;
 
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -184,52 +186,43 @@ public class ProductsService {
     }
 
     @Async
-    public void sendEmail(Users users, String action) {
-
-            if (users == null) {
-                log.info("User with phone number not found");
-            }
+    public void sendEmail(@NonNull  Users users, String action) {
             String message = null;
             if (action.equals("createAccount")) {
                 message = "Account successfully created for " + users.getPhone();
             } else if (action.equals("createProduct")) {
-                message = "Product successfully created by " + users.getPhone() + " " + users.getEmail();
+                message = "Product successfully created by " + users.getPhone();
             } else if (action.equals("createService")) {
-                message = "Service successfully created by " + users.getPhone() + " " + users.getEmail();
+                message = "Service successfully created by " + users.getPhone();
             } else if (action.equals("createBooking")) {
-                message = "Booking successfully created by " + users.getPhone() + " " + users.getEmail();
+                message = "Booking successfully created by " + users.getPhone();
             } else if (action.equals("notifyProvider")) {
                 message = "Product booking made for your product";
             }
 
-            if (users != null) {
-                log.info(message);
-                Mail mail = new Mail();
-                mail.setMailFrom("prismhealth658@gmail.com");
-                mail.setMailTo(users.getEmail());
-                mail.setMailSubject("Prism-health Notification services");
-                mail.setMailContent(message);
+        log.info(message);
+        Mail mail = new Mail();
+        mail.setMailFrom(Constants.email);
+        mail.setMailTo(users.getEmail());
+        mail.setMailSubject("Prism-health Notification services");
+        mail.setMailContent(message);
 
-                AccountDetails details = new AccountDetails();
-                details.setEmail(users.getEmail());
-                details.setAccesstoken(users.getDeviceToken());
-                details.setUsername(users.getPhone());
+        AccountDetails details = new AccountDetails();
+        details.setEmail(users.getEmail());
+        details.setAccesstoken(users.getDeviceToken());
+        details.setUsername(users.getPhone());
 
-                mailService.sendEmail(mail);
-                Notification notification = new Notification();
-                notification.setEmail(users.getEmail());
-                notification.setUserId(users.getPhone());
-                notification.setMessage(message);
-                notification.setAction(null);
-                notification.setDetails(details);
-                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-                notificationRepo.save(notification);
-                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+        mailService.sendEmail(mail);
+        Notification notification = new Notification();
+        notification.setEmail(users.getEmail());
+        notification.setUserId(users.getPhone());
+        notification.setMessage(message);
+        notification.setAction(null);
+        notification.setDetails(details);
+        notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+        notificationRepo.save(notification);
+        log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
 
-            } else {
-                log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
-
-            }
     }
 
     public List<Product> getAllAvailableProducts() {

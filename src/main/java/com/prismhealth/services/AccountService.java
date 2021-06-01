@@ -3,6 +3,7 @@ package com.prismhealth.services;
 import com.auth0.jwt.JWT;
 import com.prismhealth.Models.*;
 
+import com.prismhealth.config.Constants;
 import com.prismhealth.dto.Request.Phone;
 import com.prismhealth.dto.Request.SignUpRequest;
 
@@ -147,7 +148,7 @@ public class AccountService {
     @Async
     private void forgotPasswordMail(Users users, String authCode,AccountDetails details){
         Mail mail = new Mail();
-        mail.setMailFrom("prismhealth658@gmail.com");
+        mail.setMailFrom(Constants.email);
         mail.setMailTo(users.getEmail());
         mail.setMailSubject("Prism-health Notification services");
         mail.setMailContent(
@@ -285,7 +286,7 @@ public class AccountService {
             if (users != null) {
                 log.info(message);
                 Mail mail = new Mail();
-                mail.setMailFrom("prismhealth658@gmail.com");
+                mail.setMailFrom(Constants.email);
                 mail.setMailTo(users.getEmail());
                 mail.setMailSubject("Prism-health Notification services");
                 mail.setMailContent(message);

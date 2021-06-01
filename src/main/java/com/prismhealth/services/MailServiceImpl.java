@@ -1,6 +1,7 @@
 package com.prismhealth.services;
 
 import com.prismhealth.Models.Mail;
+import com.prismhealth.config.Constants;
 import com.prismhealth.repository.MailService;
 import lombok.AllArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -27,7 +28,7 @@ public class MailServiceImpl implements MailService {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
 
             mimeMessageHelper.setSubject(mail.getMailSubject());
-            mimeMessageHelper.setFrom(new InternetAddress(mail.getMailFrom(), "prismhealth658@gmail.com"));
+            mimeMessageHelper.setFrom(new InternetAddress(mail.getMailFrom(), Constants.email));
             mimeMessageHelper.setTo(mail.getMailTo());
             mimeMessageHelper.setText(mail.getMailContent());
 

@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
+import com.prismhealth.config.Constants;
 import com.prismhealth.repository.*;
 
 import com.prismhealth.util.Actions;
@@ -159,7 +160,7 @@ public class ServiceProviderService {
             notificationRepo.save(notification);
             log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
             Mail mail = new Mail();
-            mail.setMailFrom("prismhealth658@gmail.com");
+            mail.setMailFrom(Constants.email);
             mail.setMailTo(users.getEmail());
             mail.setMailSubject("Prism-health Notification services");
             mail.setMailContent(message);
