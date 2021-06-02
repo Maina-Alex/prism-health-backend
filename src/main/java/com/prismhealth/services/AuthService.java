@@ -7,7 +7,6 @@ import com.prismhealth.dto.Request.UwaziiSmsRequest;
 import java.io.IOException;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.Future;
 
 import com.prismhealth.repository.UserRepository;
@@ -16,7 +15,6 @@ import com.prismhealth.repository.NotificationRepo;
 
 import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
-import com.prismhealth.util.UtilityFunctions;
 
 import okhttp3.*;
 
@@ -90,7 +88,7 @@ public class AuthService {
     }
 
     public Users resetPassword(String password, String phone) {
-        Users accounts = usersRepo.findOneByPhone(phone);
+        Users accounts = usersRepo.findByPhone(phone);
         if (accounts!=null) {
             accounts.setPassword(encoder.encode(password));
             log.info("Password reset for User id:" + accounts.getPhone() + " " + LogMessage.SUCCESS);

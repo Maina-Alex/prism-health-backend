@@ -86,7 +86,7 @@ public class UserService {
 
     public Users getUserById(String phone) {
 
-        Users users = usersRepo.findOneByPhone(phone);
+        Users users = usersRepo.findByPhone(phone);
         if (users !=null)
             return users;
                     else
@@ -95,7 +95,7 @@ public class UserService {
     }
 
     public Users addUserDeviceToken(String token, Principal principal) {
-        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
         if (optional.isPresent()) {
             Users users = optional.get();
             users.setVerificationToken(token);
@@ -107,7 +107,7 @@ public class UserService {
 
 
     public boolean deleteUser(String id, Principal principal) {
-        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(id));
         if (optional.isPresent()) {
             Users users = optional.get();
             users.setDeletedBy(principal.getName());
@@ -121,7 +121,7 @@ public class UserService {
     }
 
     public boolean approveDeleteUser(String id, Principal principal) {
-        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(id));
         if (optional.isPresent()) {
             Users users = optional.get();
 
@@ -137,7 +137,7 @@ public class UserService {
     }
 
     public boolean blockUser(String id, Principal principal) {
-        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(id));
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(id));
         if (optional.isPresent()) {
             Users users = optional.get();
             users.setBlocked(true);
@@ -174,7 +174,7 @@ public class UserService {
     }
 
     public boolean verifyUser(String id, Principal principal) {
-        Users users = usersRepo.findOneByPhone(id);
+        Users users = usersRepo.findByPhone(id);
         if (users !=null) {
             users.setVerified(true);
             users.setVerifiedBy(principal.getName());

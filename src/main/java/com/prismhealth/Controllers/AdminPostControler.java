@@ -3,10 +3,15 @@ package com.prismhealth.Controllers;
 import com.prismhealth.Models.Post;
 import com.prismhealth.Models.PostCategory;
 
+import com.prismhealth.dto.Request.DeletePostReq;
+import com.prismhealth.dto.Request.GetPostRequest;
 import com.prismhealth.dto.Request.PostCategoryReq;
+import com.prismhealth.dto.Request.PostRequest;
 import com.prismhealth.services.AdminPostService;
 
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Role;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +24,7 @@ public class AdminPostControler {
     @Autowired
     private AdminPostService postService;
 
+    @ApiOperation(value = "gets all posts")
     @GetMapping()
     public List<Post> getAllPosts() {
         return postService.getPosts();
@@ -26,48 +32,43 @@ public class AdminPostControler {
     }
 
     @PostMapping()
-    public Post addPost(@RequestBody Post post) {
-        return postService.savePost(post);
+    public ResponseEntity<?> addPost(@RequestBody PostRequest req) {
+        return postService.savePost(req);
     }
 
+    @ApiOperation("gets a list of post categories title")
     @GetMapping("/categories")
-    public List<PostCategory> getAllPostCategories() {
+    public List<String> getAllPostCategories() {
         return postService.getPostCategories();
 
     }
 
-    @GetMapping("/{id}")
-    public Post getPostById(@PathVariable String id) {
-        return postService.getPost(id);
+    @GetMapping("/post")
+    public ResponseEntity<?> getPostById(@RequestBody GetPostRequest req) {
+        return postService.getPost(req);
 
     }
 
     @GetMapping("/categorypost/{categoryId}")
     public List<Post> getPostsByCategoryId(@PathVariable String categoryId) {
         return postService.getPostsByCategory(categoryId);
-
     }
 
     @GetMapping("/categories/{id}")
-    public PostCategory getPostCategoryById(@PathVariable String id) {
-        return postService.getPostCategory(id);
-
+    public ResponseEntity<?> getPostCategoryById(@PathVariable String id) {
+        return postService.getPostsCategory(id);
     }
-
     @PostMapping("/categories")
-    public PostCategory saveCategory(@RequestBody PostCategoryReq req) {
+    public ResponseEntity<?> saveCategory(@RequestBody PostCategoryReq req) {
         return postService.savePostCategory(req);
-
     }
-
-    @CrossOrigin
-    @PostMapping("/delete")
-    public ResponseEntity<?> deletePost(@RequestBody Post post) {
-        return postService.deletePost(post);
+    @PostMapping("/delete/")
+    public ResponseEntity<?> deletePost(@RequestBody DeletePostReq req) {
+        return postService.deletePost(req);
     }
 
     @PostMapping("categories/delete/{id}")
-    public ResponseEntity<?> deleteCategory(@RequestParam String id) {
+    public ResponseEntity<?> deleteCategory(@PathVariable String id) {
         return postService.deletePostCategory(id);
     }
 

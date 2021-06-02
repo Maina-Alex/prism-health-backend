@@ -9,5 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostCategoryRepository extends MongoRepository<PostCategory, String> {
+    Optional<PostCategory> findByCategoryName(String name);
+
 
 }

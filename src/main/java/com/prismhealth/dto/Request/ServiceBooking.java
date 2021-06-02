@@ -1,4 +1,4 @@
-package com.prismhealth.Models;
+package com.prismhealth.dto.Request;
 
 import lombok.Data;
 

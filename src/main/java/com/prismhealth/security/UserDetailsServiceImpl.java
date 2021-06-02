@@ -31,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
 
-        Optional<Users> phoneUser = Optional.ofNullable(userRepository.findOneByPhone(phone));
+        Optional<Users> phoneUser = Optional.ofNullable(userRepository.findByPhone(phone));
         if (phoneUser.isPresent()) {
             List<SimpleGrantedAuthority> grantedAuthorities = roleRepo.findAllByUserId(phoneUser.get().getPhone()).stream()
                     .map(UserRoles::getRole).map(SimpleGrantedAuthority::new).collect(Collectors.toList());

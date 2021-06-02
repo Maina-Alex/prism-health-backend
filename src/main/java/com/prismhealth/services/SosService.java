@@ -31,7 +31,7 @@ public class SosService {
     }
 
     public ResponseEntity<String> sendSos(Positions position, Principal principal) {
-        Users users = userRepository.findOneByPhone(principal.getName());
+        Users users = userRepository.findByPhone(principal.getName());
         try {
         if (users.getEmergencyContact1()!=null&&users.getEmergencyContact2()==null){
             return execute(position,users,users.getEmergencyContact1()).get();

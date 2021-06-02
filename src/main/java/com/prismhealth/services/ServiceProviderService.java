@@ -28,7 +28,6 @@ public class ServiceProviderService {
     private UserRepository usersRepo;
     @Autowired
     private BookingsRepo bookingsRepo;
-
     @Autowired
     private BookingService bookingsService;
     @Autowired
@@ -64,21 +63,11 @@ public class ServiceProviderService {
     }
 
     public List<Bookings> getAllServicesBookings(Principal principal) {
-        Optional<Users> optional = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
-        if (optional.isPresent()) {
-            return bookingsRepo.findAllByUserId(optional.get().getPhone(), Sort.by("timestamp").descending());
-        }
-
-        else
-            return new ArrayList<>();
-
+        Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
+        return optional.map(users -> users.getBookings().stream().sorted(Collections.reverseOrder()).collect(Collectors.toList())).orElseGet(ArrayList::new);
     }
 
     public Services createService(Services services, Principal principal) {
-        /*
-         * if(multipartFile==null||multipartFile.length<1){ throw new
-         * MultipartException("is empty"); }
-         */
         Positions positions = new Positions();
         if(services.getProviderId()!=null&&services.getLocationName()!=null&&services.getPosition()!=null){
             positions.setLocationName(services.getLocationName());
@@ -87,10 +76,10 @@ public class ServiceProviderService {
                 positions.setLongitude(services.getPosition()[1]);
                 services.setPositions(positions);
             }
-            sendEmail(userRepository.findOneByPhone(services.getProviderId()),"createService");
+            sendEmail(userRepository.findByPhone(services.getProviderId()),"createService");
             return serviceRepo.save(services);
         }else {
-        Users users = usersRepo.findOneByPhone(principal.getName());
+        Users users = usersRepo.findByPhone(principal.getName());
 
         services.setProviderId(users.getPhone());
         services.setLocationName(users.getLocationName());
@@ -105,7 +94,7 @@ public class ServiceProviderService {
     public List<Services> getAllServices() {
         List<Services> services = serviceRepo.findAll();
         for (Services services1 : services) {
-            services1.setProvider(userRepository.findOneByPhone(services1.getProviderId()));
+            services1.setProvider(userRepository.findByPhone(services1.getProviderId()));
             services1.setBookings(bookingsService.getServiceBookings(services1.getId()));
         }
         return services;
@@ -117,7 +106,7 @@ public class ServiceProviderService {
     }
     public Services getServicesById(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        services.get().setProvider(userRepository.findOneByPhone(services.get().getProviderId()));
+        services.get().setProvider(userRepository.findByPhone(services.get().getProviderId()));
         return services.orElse(null);
     }
 
@@ -168,6 +157,6 @@ public class ServiceProviderService {
 
     public Users getProvidersByServiceId(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        return services.map(value -> userRepository.findOneByPhone(value.getProviderId())).orElse(null);
+        return services.map(value -> userRepository.findByPhone(value.getProviderId())).orElse(null);
     }
 }

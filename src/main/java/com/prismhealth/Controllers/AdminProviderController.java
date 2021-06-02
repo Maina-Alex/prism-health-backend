@@ -1,9 +1,13 @@
 package com.prismhealth.Controllers;
 
 import com.prismhealth.Models.Users;
+import com.prismhealth.dto.Request.AddProviderReq;
+import com.prismhealth.dto.Request.UpdateProviderRequest;
 import com.prismhealth.services.AdminProviderService;
 import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,19 +16,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @CrossOrigin
+@AllArgsConstructor
 public class AdminProviderController {
-    @Autowired
-    private AdminProviderService providerService;
+    private final AdminProviderService providerService;
 
-    @GetMapping("/providers/id/{id}")
-    public Users getProviderById(@PathVariable("id") String id) {
-        return providerService.getProviderById(id);
-
+    @GetMapping("/providers/{phone}")
+    public ResponseEntity<?> getProviderById(@PathVariable String phone) {
+        return providerService.getProviderById(phone);
     }
 
     @PostMapping("/providers")
-    public String addUser(@RequestBody Users users) {
-        return providerService.addUser(users);
+    public ResponseEntity<?> addUser(@RequestBody AddProviderReq req) {
+        return providerService.addProvider(req);
     }
 
     @GetMapping("/providers")
@@ -32,11 +35,13 @@ public class AdminProviderController {
         return providerService.getAllProviders();
 
     }
-
-    @CrossOrigin
     @PostMapping("/providers/delete")
-    public boolean deleteProvider(@RequestBody Users users) {
+    public ResponseEntity<?> deleteProvider(@RequestBody Users users) {
         return providerService.deleteProvider(users.getPhone());
+    }
+    @PostMapping("/providers/update")
+    public ResponseEntity<?> updateProvider(@RequestBody UpdateProviderRequest request){
+        return providerService.updateProvider(request);
     }
 
 }

@@ -3,25 +3,19 @@ package com.prismhealth.services;
 import com.auth0.jwt.JWT;
 import com.prismhealth.Models.*;
 
-import com.prismhealth.config.UwaziiConfig;
 import com.prismhealth.dto.Request.Phone;
 import com.prismhealth.dto.Request.SignUpRequest;
 
 import com.prismhealth.dto.Request.UpdateForgotPasswordReq;
-import com.prismhealth.dto.Request.UwaziiSmsRequest;
 import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.repository.*;
 import com.prismhealth.security.SecurityConstants;
-import com.prismhealth.util.Actions;
 
 import com.prismhealth.util.HelperUtility;
-import com.prismhealth.util.LogMessage;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-
-import okhttp3.*;
 
 import org.springframework.data.domain.Sort;
 
@@ -29,14 +23,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -58,7 +48,7 @@ public class AccountService {
 
     public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
-        Users users = userRepository.findOneByPhone(phone.getPhone());
+        Users users = userRepository.findByPhone(phone.getPhone());
         if (users != null) {
             log.info("phone->" + users.getPhone());
             signUpResponse.setMessage("user already exists");
@@ -79,7 +69,7 @@ public class AccountService {
     public ResponseEntity<SignUpResponse> signUpUser(SignUpRequest signUpRequest) {
         SignUpResponse signUpResponse = new SignUpResponse();
 
-        Users thisUsers = userRepository.findOneByPhone(signUpRequest.getPhone());
+        Users thisUsers = userRepository.findByPhone(signUpRequest.getPhone());
         if (thisUsers == null) {
             Users users1 = new Users();
             users1.setPassword(encoder.encode(signUpRequest.getPassword()));
@@ -124,7 +114,7 @@ public class AccountService {
     }
 
     public ResponseEntity<?> updateForgotPassword(@NonNull UpdateForgotPasswordReq req){
-        Users user=userRepository.findOneByPhone(req.getPhone());
+        Users user=userRepository.findByPhone(req.getPhone());
         if(user==null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
@@ -137,7 +127,7 @@ public class AccountService {
     public ResponseEntity<?> forgotPassword(@NonNull Phone phone)  {
 
        try{
-           Users users = userRepository.findOneByPhone(phone.getPhone());
+           Users users = userRepository.findByPhone(phone.getPhone());
            if (users == null) {
                return new ResponseEntity<>("User with phone number " + phone + " not found", HttpStatus.NOT_FOUND);
            } else {
@@ -163,7 +153,7 @@ public class AccountService {
 
 
     public String getToken(String phone) {
-        Optional<Users> users = Optional.ofNullable(userRepository.findOneByPhone(phone));
+        Optional<Users> users = Optional.ofNullable(userRepository.findByPhone(phone));
         return users.map(value -> JWT.create().withSubject(value.getPhone())
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .sign(HMAC512(SecurityConstants.SECRET.getBytes()))).orElse(null);
@@ -214,7 +204,7 @@ public class AccountService {
 
     public ResponseEntity<SignUpResponse> updateUser(Users users) {
         SignUpResponse signUpResponse = new SignUpResponse();
-        Users user = userRepository.findOneByPhone(users.getPhone());
+        Users user = userRepository.findByPhone(users.getPhone());
         if (user != null) {
             Positions positions = new Positions();
             if (user.getPosition().length >= 2) {
@@ -239,7 +229,7 @@ public class AccountService {
     public ResponseEntity<?> getUsers(Principal principal) {
         SignInResponse signInResponse = new SignInResponse();
         String phone = principal.getName();
-        Optional<Users> users = Optional.ofNullable(userRepository.findOneByPhone(phone));
+        Optional<Users> users = Optional.ofNullable(userRepository.findByPhone(phone));
         if (users.isPresent()) {
             Users u = users.get();
             u.setRoles(userRolesRepo.findAllByUserId(u.getPhone()).stream().map(UserRoles::getRole)
@@ -260,12 +250,11 @@ public class AccountService {
     }
 
 
-    public ResponseEntity<?> getProviderById(String providerId) {
+    public ResponseEntity<?> getProviderByPhone(String phone) {
 
-        Optional<Users> user = userRepository.findById(providerId);
-        if (user.isPresent()) {
-            return ResponseEntity.ok().body(user.get());
-
+        Users user = userRepository.findByPhone(phone);
+        if (user!=null) {
+            return ResponseEntity.ok().body(user);
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Provider not found");
 

@@ -37,6 +37,7 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 public class AccountController {
     private final AccountService accountService;
 
+    @ApiOperation(value = "Get User Object by passing the token")
     @GetMapping
     public ResponseEntity<?> getUser(Principal principal){
         return accountService.getUsers(principal);
@@ -66,26 +67,25 @@ public class AccountController {
         return accountService.authentication(phone);
     }
 
-    @ApiOperation(value = "Make request to change password")
+    @ApiOperation(value = "Initiated when user enters phone number and")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/forgotPassword")
     public ResponseEntity<?> forgotPassword(@RequestBody Phone phone) {
-
         return accountService.forgotPassword(phone);
     }
-    @ApiOperation(value = "Make request to update password after receiving code")
+
+    @ApiOperation(value = "Make request to update password after receiving code via sms")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/updatePassword")
-
     public ResponseEntity<?> updatePassword(@RequestBody UpdateForgotPasswordReq req){
         return accountService.updateForgotPassword(req);
     }
-
+    @ApiOperation(value ="Gets provider by Id" )
     @GetMapping("/getProviderById")
-    public ResponseEntity<?> getProviderById(@RequestParam String providerId) {
-        return accountService.getProviderById(providerId);
+    public ResponseEntity<?> getProviderByPhone(@RequestBody String phone) {
+        return accountService.getProviderByPhone(phone);
     }
 
     @GetMapping("/allUsers")

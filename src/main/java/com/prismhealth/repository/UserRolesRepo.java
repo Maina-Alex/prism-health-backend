@@ -1,6 +1,7 @@
 package com.prismhealth.repository;
 
 import com.prismhealth.Models.UserRoles;
+import com.prismhealth.Models.Users;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;

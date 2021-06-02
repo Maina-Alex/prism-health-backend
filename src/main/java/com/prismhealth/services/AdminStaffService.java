@@ -24,7 +24,7 @@ public class AdminStaffService {
     private UserRolesRepo userRolesRepo;
 
     public Users getStaffById(String id) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(id));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(id));
         if (user.isPresent()) {
             Users u = user.get();
             u.setRoles(userRolesRepo.findAllByUserId(id).stream().map(UserRoles::getRole).collect(Collectors.toList()));
@@ -84,7 +84,7 @@ public class AdminStaffService {
         users.setBlocked(false);
         users.setDeleted(false);
         users.setVerified(true);
-        Optional<Users> u = Optional.ofNullable(usersRepo.findOneByPhone(users.getPhone()));
+        Optional<Users> u = Optional.ofNullable(usersRepo.findByPhone(users.getPhone()));
         users.setPassword(u.get().getPassword());
         if (u.get().getEmail().equals("admin@healthprism.com"))
             users.setEmail(u.get().getEmail());

@@ -38,7 +38,7 @@ public class HelpService {
     private Logger log = LoggerFactory.getLogger(HelpService.class);
 
     public Help addHelp(Principal principal, Help help) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
         log.info("Adding new user help");
 
         if (user.isPresent()) {
@@ -69,7 +69,7 @@ public class HelpService {
     }
 
     public List<Help> findAllUserHelp(Principal principal) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
         if (user.isPresent())
             return helpRepo.findAllByUserId(user.get().getPhone(), Sort.by("timestamp").descending());
         else

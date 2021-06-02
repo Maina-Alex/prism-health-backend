@@ -48,7 +48,7 @@ public class NotificationService {
     }
 
     public Notification addUserNotification(Principal principal, Notification notification) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
         if (user.isPresent()) {
             log.info("New user notification added for user " + user.get().getPhone());
             notification.setUserId(user.get().getPhone());
@@ -61,7 +61,7 @@ public class NotificationService {
     }
 
     public List<Notification> getAllUserNotification(Principal principal) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findOneByPhone(principal.getName()));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
         if (user.isPresent()) {
             return notificationRepo.findAllByUserId(user.get().getPhone(), Sort.by("timestamp").descending());
         } else

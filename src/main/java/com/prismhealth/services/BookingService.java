@@ -10,35 +10,29 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
 import com.prismhealth.config.Constants;
+import com.prismhealth.dto.Request.ServiceBooking;
 import com.prismhealth.repository.*;
 import com.prismhealth.util.LogMessage;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class BookingService {
     private final Logger log = LoggerFactory.getLogger(BookingService.class);
-    @Autowired
-    private BookingsRepo bookingsRepo;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private MailService mailService;
-    @Autowired
-    private NotificationRepo notificationRepo;
-    @Autowired
-    private ExecutorService executor;
-    @Autowired
-    private ServiceRepo serviceRepo;
+    private final  BookingsRepo bookingsRepo;
+    private final UserRepository userRepository;
+    private final MailService mailService;
+    private final NotificationRepo notificationRepo;
+    private final ServiceRepo serviceRepo;
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();
@@ -103,7 +97,7 @@ public class BookingService {
     }
 
     public Map<String, List<Bookings>> cancelBookings(String id, Principal principal) {
-        Optional<Users> optional = Optional.ofNullable(userRepository.findOneByPhone(principal.getName()));
+        Optional<Users> optional = Optional.ofNullable(userRepository.findByPhone(principal.getName()));
         if (optional.isPresent()) {
             Optional<Bookings> bOptional = bookingsRepo.findById(id);
 
@@ -127,7 +121,7 @@ public class BookingService {
     }
 
     public Map<String, List<Bookings>> getBookingsHistory(Principal principal) {
-        Users optional = userRepository.findOneByPhone(principal.getName());
+        Users optional = userRepository.findByPhone(principal.getName());
 
         if (optional.getAccountType().equals("PROVIDER")) {
 
@@ -193,7 +187,7 @@ public class BookingService {
 
                 providerMail.setMailFrom(Constants.email);
                 providerMail.setMailTo(userRepository
-                        .findOneByPhone(serviceRepo.findById(services.getId()).get().getProviderId()).getEmail());
+                        .findByPhone(serviceRepo.findById(services.getId()).get().getProviderId()).getEmail());
                 providerMail.setMailSubject("Prism-health Notification services");
                 providerMail.setMailContent("You have a new booking for service "+services.getName()+ " at "+services.getTimestamp());
 

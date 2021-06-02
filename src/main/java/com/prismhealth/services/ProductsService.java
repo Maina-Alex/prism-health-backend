@@ -72,7 +72,7 @@ public class ProductsService {
         List<Product> products = productsRepository.findAll().stream()
                 .filter(r -> r.getSubCategory().equalsIgnoreCase(subCategoryName)).collect(Collectors.toList());
         for (Product product : products) {
-            product.setUsers(userRepository.findOneByPhone(product.getUser()));
+            product.setUsers(userRepository.findByPhone(product.getUser()));
         }
         return products;
     }
@@ -84,7 +84,7 @@ public class ProductsService {
         List<Product> products = productsRepository.findAll().stream()
                 .filter(r -> r.getProductName().contains(productName)).collect(Collectors.toList());
         for (Product product : products) {
-            product.setUsers(userRepository.findOneByPhone(product.getUser()));
+            product.setUsers(userRepository.findByPhone(product.getUser()));
         }
         return products;
     }
@@ -129,13 +129,13 @@ public class ProductsService {
 
     public Product saveProduct(Product product, Principal principal) {
 
-        Users users = userRepository.findOneByPhone(principal.getName());
+        Users users = userRepository.findByPhone(principal.getName());
         if (users!=null){
             
         Variant variant = new Variant();
         variant.setVariantName(product.getProductVariant());
         variant.setSubCategory(product.getSubCategory());
-        Users users1 = userRepository.findOneByPhone(product.getUser());
+        Users users1 = userRepository.findByPhone(product.getUser());
         if (!subCategoryByName(product.getSubCategory()).isEmpty()) {
             if (variantByName(product.getProductVariant()).isEmpty())
                 variantRepository.save(variant);

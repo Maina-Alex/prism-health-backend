@@ -1,59 +1,25 @@
 package com.prismhealth.Models;
 
+import lombok.Data;
 import org.bson.types.Binary;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 
-@Document
+@Data
 public class Post {
+    private int id;
+    private String postTitle;
+    private String postCategoryId;
+    private String postContent;
+    private String imageUrl;
 
-    @Id
-    public String id;
-    public String postTitle;
-    public String postCategoryId;
-    public  String postContent;
-    public String imageUrl;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
+    public Post(Integer id ,String postTitle, String postCategoryId, String postContent, String imageUrl) {
+        this.id=id;
+        this.postTitle = postTitle;
+        this.postCategoryId = postCategoryId;
+        this.postContent = postContent;
         this.imageUrl = imageUrl;
     }
-
-    public String getPostTitle() {
-        return postTitle;
-    }
-
-    public void setPostTitle(String postTitle) {
-        this.postTitle = postTitle;
-    }
-
-    public String getPostCategory() {
-        return postCategoryId;
-    }
-
-    public void setPostCategory(String postCategoryId) {
-        this.postCategoryId = postCategoryId;
-    }
-
-    public String getPostContent() {
-        return postContent;
-    }
-
-    public void setPostContent(String postContent) {
-        this.postContent = postContent;
-    }
-
 }

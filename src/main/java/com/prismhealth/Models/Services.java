@@ -27,10 +27,7 @@ public class Services {
     private boolean available;
     private String type;
     private List<String> images;
-    private Map<String, List<ServiceBooking>> bookings;
     private String providerId;
-    private String locationName;
-    private Users provider;
     private String approvedBy;
     private Date approvedOn;
     private Date timestamp;

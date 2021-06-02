@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends MongoRepository<Users, String> {
-    Users findOneByPhone(String phone);
+    Users findByPhone(String phone);
 
     boolean existsByPhone(String phone);
 
