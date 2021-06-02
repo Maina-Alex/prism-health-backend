@@ -3,7 +3,7 @@ package com.prismhealth.Controllers;
 import java.security.Principal;
 import java.util.List;
 
-import com.prismhealth.Models.Notification;
+import com.prismhealth.Models.Notice;
 import com.prismhealth.Models.PushNotification;
 import com.prismhealth.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ public class NotificationController {
     private NotificationService notificationService;
 
     @GetMapping("/all")
-    public List<Notification> getAllUserNotifications(Principal principal) {
+    public List<Notice> getAllUserNotifications(Principal principal) {
         return notificationService.getAllUserNotification(principal);
     }
 
@@ -40,8 +40,8 @@ public class NotificationController {
     }
 
     @PostMapping
-    public Notification addUserNotification(Principal principal, @RequestBody Notification notification) {
-        return notificationService.addUserNotification(principal, notification);
+    public Notice addUserNotification(Principal principal, @RequestBody Notice notices) {
+        return notificationService.addUserNotification(principal, notices);
     }
 
 }

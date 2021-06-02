@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
 import com.prismhealth.config.Constants;
-import com.prismhealth.dto.Request.ServiceBooking;
+import com.prismhealth.Models.ServiceBooking;
 import com.prismhealth.repository.*;
 import com.prismhealth.util.LogMessage;
 import lombok.AllArgsConstructor;
@@ -28,11 +28,10 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class BookingService {
     private final Logger log = LoggerFactory.getLogger(BookingService.class);
-    private final  BookingsRepo bookingsRepo;
     private final UserRepository userRepository;
     private final MailService mailService;
-    private final NotificationRepo notificationRepo;
     private final ServiceRepo serviceRepo;
+    private final BookingsRepo bookingsRepo;
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();
@@ -84,7 +83,6 @@ public class BookingService {
             bookings.forEach(b -> {
                 if (!b.getServiceId().isEmpty()
                         && !bookingsRepo.existsByServiceIdAndDateAndHour(b.getServiceId(), b.getDate(), b.getHour())) {
-
                     b.setUserId(optional.get().getPhone());
                     b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                     bookingsRepo.save(b);
@@ -100,12 +98,10 @@ public class BookingService {
         Optional<Users> optional = Optional.ofNullable(userRepository.findByPhone(principal.getName()));
         if (optional.isPresent()) {
             Optional<Bookings> bOptional = bookingsRepo.findById(id);
-
             if (bOptional.isPresent()) {
                 Bookings b = bOptional.get();
 
                 log.info("cancel booking for service " + b.getServiceId());
-
                 b.setCancelled(true);
                 bookingsRepo.save(b);
                 Optional<Services> sOptional = serviceRepo.findById(b.getServiceId());
@@ -124,9 +120,8 @@ public class BookingService {
         Users optional = userRepository.findByPhone(principal.getName());
 
         if (optional.getAccountType().equals("PROVIDER")) {
-
             List<Bookings> bookings = new ArrayList<>();
-            List<Services> services = serviceRepo.findAllByProviderId(optional.getPhone());
+            List<Services> services = serviceRepo.findAllByProviderPhone(optional.getPhone());
             services.forEach(s -> bookings
                     .addAll(bookingsRepo.findAllByServiceId(s.getId(), Sort.by("timestamp").descending())));
 
@@ -169,31 +164,32 @@ public class BookingService {
                 details.setAccesstoken(users.getVerificationToken());
                 details.setUsername(users.getPhone());
 
-                Notification notification = new Notification();
-                notification.setEmail(users.getEmail());
-                notification.setUserId(users.getPhone());
-                notification.setMessage(message);
-                notification.setAction(null);
-                notification.setDetails(details);
-                notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-                notificationRepo.save(notification);
-                log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-                Mail mail = new Mail();
-                mail.setMailFrom(Constants.email);
-                mail.setMailTo(users.getEmail());
-                mail.setMailSubject("Prism-health Notification services");
-                mail.setMailContent("You have successfully created booking for service "+services.getName()+ " at "+services.getTimestamp());
+                Notice notice = new Notice();
+                notice.setEmail(users.getEmail());
+                notice.setUserId(users.getPhone());
+                notice.setMessage(message);
+                notice.setAction(null);
+                notice.setDetails(details);
+                List<Notice> noticeList=users.getNotifications().getNotices();
+                noticeList.add(notice);
+                users.getNotifications().setNotices(noticeList);
+                userRepository.save(users);
+                log.info("Sent notices to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+                if(users.getEmail()!=null&& !users.getEmail().equals("")){
+                    Mail mail = new Mail();
+                    mail.setMailFrom(Constants.email);
+                    mail.setMailTo(users.getEmail());
+                    mail.setMailSubject("Prism-health Notice services");
+                    mail.setMailContent("You have successfully created booking for service "+services.getName()+ " at "+services.getTimestamp());
+                    mailService.sendEmail(mail);
+                }
+                String email=userRepository.findByPhone(services.getProviderPhone()).getEmail();
                 Mail providerMail = new Mail();
-
                 providerMail.setMailFrom(Constants.email);
-                providerMail.setMailTo(userRepository
-                        .findByPhone(serviceRepo.findById(services.getId()).get().getProviderId()).getEmail());
-                providerMail.setMailSubject("Prism-health Notification services");
+                providerMail.setMailTo(email);
+                providerMail.setMailSubject("Prism-health Notice services");
                 providerMail.setMailContent("You have a new booking for service "+services.getName()+ " at "+services.getTimestamp());
-
-                mailService.sendEmail(mail);
-
-
+                mailService.sendEmail(providerMail);
             } else {
                 log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
 

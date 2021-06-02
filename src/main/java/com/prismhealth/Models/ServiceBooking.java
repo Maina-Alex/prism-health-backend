@@ -1,4 +1,4 @@
-package com.prismhealth.dto.Request;
+package com.prismhealth.Models;
 
 import lombok.Data;
 
@@ -10,3 +10,4 @@ public class ServiceBooking {
     private String status;
 
 }
+

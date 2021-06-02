@@ -7,7 +7,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
+@Document
 public class Bookings {
+    @Id
     private String id;
     private String serviceId;
     private String userId;

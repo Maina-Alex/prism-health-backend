@@ -8,10 +8,12 @@ import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
 import com.prismhealth.config.Constants;
+import com.prismhealth.dto.Request.CreateServiceReq;
 import com.prismhealth.repository.*;
 
 import com.prismhealth.util.LogMessage;
 
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,144 +21,99 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.Point;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class ServiceProviderService {
-
-    @Autowired
-    private UserRepository usersRepo;
-    @Autowired
-    private BookingsRepo bookingsRepo;
-    @Autowired
-    private BookingService bookingsService;
-    @Autowired
-    private ServiceRepo serviceRepo;
-    @Autowired
-    NotificationRepo notificationRepo;
-    @Autowired
+    private final UserRepository usersRepo;
+    private final ServiceRepo serviceRepo;
+    private final BookingsRepo bookingsRepo;
     MailService mailService;
-    @Autowired
     UserRepository userRepository;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public Services setServiceAvailabilityFalse(List<Bookings> bookings) {
-        bookings.stream().map(b -> {
-            b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            return b;
-        }).forEach(bookingsRepo::save);
-        Services service = serviceRepo.findById(bookings.get(0).getServiceId()).get();
-        service.setBookings(bookingsService.getServiceBookings(service.getId()));
-        return service;
-    }
-
-    public Services setServiceAvailabilityTrue(List<Bookings> bookings) {
-        bookings.forEach(b -> {
-            b.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            b.setCancelled(true);
-            bookingsRepo.save(b);
-        });
-
-        Services services = serviceRepo.findById(bookings.get(0).getServiceId()).get();
-        services.setBookings(bookingsService.getServiceBookings(services.getId()));
-        return services;
-    }
 
     public List<Bookings> getAllServicesBookings(Principal principal) {
         Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
-        return optional.map(users -> users.getBookings().stream().sorted(Collections.reverseOrder()).collect(Collectors.toList())).orElseGet(ArrayList::new);
+        if (optional.isPresent()) {
+            return bookingsRepo.findAllByUserId(optional.get().getPhone(), Sort.by("timestamp").descending());
+        }
+
+        else
+            return new ArrayList<>();
     }
 
-    public Services createService(Services services, Principal principal) {
-        Positions positions = new Positions();
-        if(services.getProviderId()!=null&&services.getLocationName()!=null&&services.getPosition()!=null){
-            positions.setLocationName(services.getLocationName());
-            if (services.getPosition().length>=2) {
-                positions.setLatitude(services.getPosition()[0]);
-                positions.setLongitude(services.getPosition()[1]);
-                services.setPositions(positions);
-            }
-            sendEmail(userRepository.findByPhone(services.getProviderId()),"createService");
-            return serviceRepo.save(services);
-        }else {
-        Users users = usersRepo.findByPhone(principal.getName());
-
-        services.setProviderId(users.getPhone());
-        services.setLocationName(users.getLocationName());
-        services.setPositions(users.getPositions());
-        services.setPosition(users.getPosition());
-
-        sendEmail(users,"createService");
-        return serviceRepo.save(services);
+    public ResponseEntity<?> createService(CreateServiceReq req, Principal principal) {
+        String providerPhone=principal.getName();
+        Services service=new Services();
+        if(req.getProviderPhone()!=null) {
+            providerPhone= req.getProviderPhone();
         }
+       Users provider=usersRepo.findByPhone(providerPhone);
+       if(provider!=null){
+           service.setProviderPhone(provider.getPhone());
+           service.setPosition(req.getPosition());
+           service.setName(req.getName());
+           service.setDescription(req.getDescription());
+           service.setCharges(req.getCharges());
+           service.setVerified(true);
+           service.setImages(req.getImages());
+           service.setSubCategory(req.getSubCategory());
+           Services saved=serviceRepo.save(service);
+           sendEmail(provider.getEmail(), service.getName());
+           List<Notice> notices=provider.getNotifications().getNotices();
+           Notice notice=new Notice();
+           notice.setEmail(provider.getEmail());
+           notice.setUserId(provider.getEmail());
+           notice.setMessage("You created a service with the name " + service.getName());
+           notices.add(notice);
+           provider.getNotifications().setNotices(notices);
+           usersRepo.save(provider);
+           return ResponseEntity.ok(saved);
+           }
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No provider registered with that number");
     }
 
     public List<Services> getAllServices() {
-        List<Services> services = serviceRepo.findAll();
-        for (Services services1 : services) {
-            services1.setProvider(userRepository.findByPhone(services1.getProviderId()));
-            services1.setBookings(bookingsService.getServiceBookings(services1.getId()));
-        }
-        return services;
+        return serviceRepo.findAll();
     }
 
-    public List<Services> getServicesByName(String serviceName) {
-        return serviceRepo.findAll().stream().filter(services -> services.getName() == serviceName)
+    public List<Services> getServiceByName(String serviceName) {
+        return serviceRepo.findAll().stream().filter(services -> services.getName().equalsIgnoreCase(serviceName))
                 .collect(Collectors.toList());
     }
-    public Services getServicesById(String serviceId) {
+    public Services getServiceById(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        services.get().setProvider(userRepository.findByPhone(services.get().getProviderId()));
         return services.orElse(null);
     }
 
-    public List<Services> getServicesByProvider(String providerId) {
-        return serviceRepo.findAllByProviderId(providerId);
+    public List<Services> getServicesByProvider(String providerPhone) {
+        return serviceRepo.findAllByProviderPhone(providerPhone);
     }
 
     public List<Services> getServicesNear(Point location, Distance distance) {
         return serviceRepo.findByPositionNear(location, distance);
     }
 
-    public void sendEmail(Users users, String action) {
-
-        if (users == null) {
-            return;
-        }
-        String message = null;
-        if (action.equals("createAccount")) {
-            message = "Account successfully created for " + users.getPhone();
-        } else if (action.equals("createProduct")) {
-            message = "Product successfully created by " + users.getPhone() + " " + users.getEmail();
-        } else if (action.equals("createService")) {
-            message = "Service successfully created by " + users.getPhone() + " " + users.getEmail();
-        } else if (action.equals("createBooking")) {
-            message = "Booking successfully created by " + users.getPhone() + " " + users.getEmail();
-        } else if (action.equals("notifyProvider")) {
-            message = "Product booking made for your product";
-        }
-
-        log.info(message);
-        Notification notification = new Notification();
-        notification.setEmail(users.getEmail());
-        notification.setUserId(users.getPhone());
-        notification.setMessage(message);
-        notification.setAction(null);
-        notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-        notificationRepo.save(notification);
-        log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-        Mail mail = new Mail();
-        mail.setMailFrom(Constants.email);
-        mail.setMailTo(users.getEmail());
-        mail.setMailSubject("Prism-health Notification services");
-        mail.setMailContent(message);
-
+    @Async
+    public void sendEmail(String email, String serviceName) {
+        Mail mail=new Mail();
+        mail.setMailTo(email);
+        mail.setMailSubject("Service Created");
+        mail.setMailContent("Great, Your are now a service provider for the following service : "+ serviceName);
         mailService.sendEmail(mail);
-
+        log.info("Sent service creation email to "+ email);
     }
 
-    public Users getProvidersByServiceId(String serviceId) {
+    public ResponseEntity<?> getProvidersByServiceId(String serviceId) {
         Optional<Services> services = serviceRepo.findById(serviceId);
-        return services.map(value -> userRepository.findByPhone(value.getProviderId())).orElse(null);
+        if(services.isPresent()){
+            return ResponseEntity.ok().body(usersRepo.findByPhone(services.get().getProviderPhone()));
+        }
+       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Provider not found");
     }
 }

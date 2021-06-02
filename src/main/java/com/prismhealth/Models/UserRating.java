@@ -7,9 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 
 @Data
-@Document
 public class UserRating {
-    @Id
     private String id;
     private String userId;
     private String review;

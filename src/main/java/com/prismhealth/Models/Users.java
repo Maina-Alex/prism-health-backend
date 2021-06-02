@@ -40,8 +40,6 @@ public class Users {
 
 	private String auth;
 
-	private double rating;
-
 	private String locationName;
 
 	private double[] position;
@@ -80,7 +78,7 @@ public class Users {
 
 	private boolean approveDelete;
 
-	private List<Bookings> bookings;
+	private Notifications notifications;
 
-	private List<Notification> notifications;
+	private ProviderRating rating;
 }

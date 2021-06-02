@@ -13,7 +13,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface ServiceRepo extends PagingAndSortingRepository<Services, String> {
 
-    List<Services> findAllByProviderId(String providerId);
+    List<Services> findAllByProviderPhone(String providerPhone);
 
     List<Services> findAll();
 

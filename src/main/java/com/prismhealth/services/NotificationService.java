@@ -47,20 +47,20 @@ public class NotificationService {
         this.executorService = executorService;
     }
 
-    public Notification addUserNotification(Principal principal, Notification notification) {
+    public Notice addUserNotification(Principal principal, Notice notices) {
         Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
         if (user.isPresent()) {
-            log.info("New user notification added for user " + user.get().getPhone());
-            notification.setUserId(user.get().getPhone());
-            notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            return notificationRepo.save(notification);
+            log.info("New user notices added for user " + user.get().getPhone());
+            notices.setUserId(user.get().getPhone());
+            notices.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+            return notificationRepo.save(notices);
 
         }
         return null;
 
     }
 
-    public List<Notification> getAllUserNotification(Principal principal) {
+    public List<Notice> getAllUserNotification(Principal principal) {
         Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
         if (user.isPresent()) {
             return notificationRepo.findAllByUserId(user.get().getPhone(), Sort.by("timestamp").descending());
@@ -118,8 +118,8 @@ public class NotificationService {
                 notification.setDeviceToken(deviceToken.get());
                 notification.setNotification(new PushContent("Prism-Health Help Request",
                         "Your Help Request has been received successfully,We will get back to you ASAP"));
-                Notification n = new Notification();
-                n.setAction("Push Notification");
+                Notice n = new Notice();
+                n.setAction("Push Notice");
                 n.setMessage(notification.getNotification().getBody());
                 n.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                 n.setTitle(notification.getNotification().getTitle());
@@ -143,8 +143,8 @@ public class NotificationService {
                 notification.setDeviceToken(deviceToken.get());
                 notification.setNotification(new PushContent("Prism-Health Help Request",
                         "You have a new message from Prism-Health support"));
-                Notification n = new Notification();
-                n.setAction("Push Notification");
+                Notice n = new Notice();
+                n.setAction("Push Notice");
                 n.setMessage(notification.getNotification().getBody());
                 n.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                 n.setTitle(notification.getNotification().getTitle());
@@ -160,7 +160,7 @@ public class NotificationService {
     }
 
     public boolean deleteNotification(String id, Principal principal) {
-        Optional<Notification> optional = notificationRepo.findById(id);
+        Optional<Notice> optional = notificationRepo.findById(id);
 
         if (optional.isPresent()) {
             notificationRepo.deleteById(id);
@@ -183,8 +183,8 @@ public class NotificationService {
                     notification.setDeviceToken(deviceToken.get());
                     notification
                             .setNotification(new PushContent("Prism-health ", "Your product was added successfully"));
-                    Notification n = new Notification();
-                    n.setAction("Push Notification");
+                    Notice n = new Notice();
+                    n.setAction("Push Notice");
                     n.setMessage(notification.getNotification().getBody());
                     n.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
                     n.setTitle(notification.getNotification().getTitle());

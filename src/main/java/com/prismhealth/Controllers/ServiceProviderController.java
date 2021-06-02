@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.prismhealth.Models.Bookings;
-import com.prismhealth.Models.CancelBooking;
 import com.prismhealth.Models.Services;
-import com.prismhealth.Models.Users;
+import com.prismhealth.dto.Request.CancelBooking;
+import com.prismhealth.dto.Request.CreateServiceReq;
 import com.prismhealth.services.BookingService;
 import com.prismhealth.services.ServiceProviderService;
 
 import io.swagger.annotations.Api;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.geo.Distance;
 
@@ -24,40 +25,30 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @CrossOrigin
 @RequestMapping("/services")
+@AllArgsConstructor
 public class ServiceProviderController {
-    @Autowired
-    private ServiceProviderService serviceProviderService;
-    @Autowired
-    BookingService bookingService;
+    private final ServiceProviderService serviceProviderService;
+    private final BookingService bookingService;
 
     @GetMapping("/providers/bookings")
     public List<Bookings> getAllBookings(Principal principal) {
         return serviceProviderService.getAllServicesBookings(principal);
     }
 
-    @PostMapping("/users/service/availability/false")
-    public Services setServiceAvailabilityFalse(@RequestBody List<Bookings> bookings) {
-        return serviceProviderService.setServiceAvailabilityFalse(bookings);
-    }
-
-    @PostMapping("/users/service/availability/true")
-    public Services setServiceAvailabilityTrue(@RequestBody List<Bookings> bookingsIds) {
-        return serviceProviderService.setServiceAvailabilityTrue(bookingsIds);
-    }
 
     @PostMapping("/providers/services")
-    public Services createService(@RequestBody Services services, Principal principal) {
-        return serviceProviderService.createService(services, principal);
+    public ResponseEntity<?> createService(@RequestBody CreateServiceReq req, Principal principal) {
+        return serviceProviderService.createService(req, principal);
     }
 
     @GetMapping("/getServiceProviders/{serviceId}")
-    public Users getServiceProviders(@PathVariable String serviceId) {
+    public ResponseEntity<?> getServiceProviders(@PathVariable String serviceId) {
         return serviceProviderService.getProvidersByServiceId(serviceId);
     }
 
     @GetMapping("/getServiceById/{serviceId}")
     public Services getServiceById(@PathVariable String serviceId) {
-        return serviceProviderService.getServicesById(serviceId);
+        return serviceProviderService.getServiceById(serviceId);
     }
 
     @GetMapping("/users/all")
@@ -80,7 +71,7 @@ public class ServiceProviderController {
 
     @GetMapping("/users/serviceName/{serviceName}")
     public List<Services> getAllServiceByName(@PathVariable String serviceName) {
-        return serviceProviderService.getServicesByName(serviceName);
+        return serviceProviderService.getServiceByName(serviceName);
     }
 
     @PostMapping("/booking/add")

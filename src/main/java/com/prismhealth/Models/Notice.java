@@ -1,5 +1,7 @@
 package com.prismhealth.Models;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 import org.springframework.data.annotation.Id;
@@ -9,9 +11,7 @@ import lombok.Data;
 
 @Document
 @Data
-public class Notification {
-
-    @Id
+public class Notice {
     private String id;
     private String userId;
     private String email;
@@ -19,7 +19,7 @@ public class Notification {
     private AccountDetails details;
     private String action;
     private String message;
-    private Date timestamp;
+    private Date timestamp=Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
     private PushNotification pushNotification;
 
 }

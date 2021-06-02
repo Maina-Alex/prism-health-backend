@@ -2,9 +2,14 @@ package com.prismhealth.services;
 
 import com.prismhealth.Models.*;
 import com.prismhealth.config.Constants;
+import com.prismhealth.dto.Request.CategoryRequest;
+import com.prismhealth.dto.Request.ProductCreateRequest;
+import com.prismhealth.dto.Request.SubCategoryRequest;
 import com.prismhealth.repository.*;
 import com.prismhealth.util.LogMessage;
 
+import com.sun.mail.iap.Response;
+import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +20,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Service;
 
+import javax.security.auth.Subject;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,49 +32,31 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 @Service
-@EnableAsync
+@AllArgsConstructor
 public class ProductsService {
     private final VariantRepository variantRepository;
     private final CategoryRepository categoryRepository;
-    private final SubCategoriesRepository subCategoriesRepository;
     private final ProductsRepository productsRepository;
     private final PhotoRepository photoRepository;
     private final UserRepository userRepository;
     private final MailService mailService;
-    private final NotificationRepo notificationRepo;
-
-    private ExecutorService executor;
-
-    public ProductsService(ExecutorService executor, VariantRepository variantRepository,
-            CategoryRepository categoryRepository1, SubCategoriesRepository subCategoriesRepository1,
-            ProductsRepository productsRepository, PhotoRepository photoRepository, UserRepository userRepository,
-            MailService mailService, NotificationRepo notificationRepo) {
-        this.variantRepository = variantRepository;
-        this.categoryRepository = categoryRepository1;
-        this.subCategoriesRepository = subCategoriesRepository1;
-        this.productsRepository = productsRepository;
-        this.photoRepository = photoRepository;
-        this.userRepository = userRepository;
-        this.mailService = mailService;
-        this.notificationRepo = notificationRepo;
-        this.executor = executor;
-    }
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public List<SubCategory> getSubcategoriesByName(String categoryName) {
-        // TODO marshal up a response for when sub category does not exists
-        return subCategoriesRepository.findAll().stream().filter(r -> r.getCategory().equalsIgnoreCase(categoryName))
-                .collect(Collectors.toList());
+        List<String> subCategories=new ArrayList<>();
+         return categoryRepository.findByCategoryName(categoryName).get().getSubCategories();
     }
 
     public List<SubCategory> getAllSubcategories() {
-        // TODO marshal up a response for when sub category does not exists
-        return new ArrayList<>(subCategoriesRepository.findAll());
+        List<SubCategory> subCategories=new ArrayList<>();
+        categoryRepository.findAll().forEach(c->{
+            subCategories.addAll(c.getSubCategories());
+        });
+        return subCategories;
     }
 
     public List<Product> getAllProducts(String subCategoryName) {
-        // TODO marshal up a response for when products do not exists
         List<Product> products = productsRepository.findAll().stream()
                 .filter(r -> r.getSubCategory().equalsIgnoreCase(subCategoryName)).collect(Collectors.toList());
         for (Product product : products) {
@@ -89,29 +77,28 @@ public class ProductsService {
         return products;
     }
 
-    public List<SubCategory> subCategoryByName(String subCategoryName) {
-        // TODO marshal up a response for when product does not exists
-        return subCategoriesRepository.findAll().stream().filter(r -> r.getSubCategoryName().contains(subCategoryName))
-                .collect(Collectors.toList());
-    }
+//    public List<SubCategory> subCategoryByName(String subCategoryName) {
+//        // TODO marshal up a response for when product does not exists
+//        return categoryRepository.findAll()
+//                .stream()
+//                .filter(r -> r.getSubCategories().stream().filter(c->c.getCategoryName().contains(subCategoryName)))
+//                .collect(Collectors.toList());
+//    }
 
     public List<Category> categoryByName(String categoryName) {
         // TODO marshal up a response for when category does not exists
         return categoryRepository.findAll().stream().filter(r -> r.getCategoryName().contains(categoryName))
                 .collect(Collectors.toList());
     }
-
-    public List<Variant> variantByName(String variantName) {
-        return variantRepository.findAll().stream().filter(variant -> variant.getVariantName().contains(variantName))
-                .collect(Collectors.toList());
-    }
-
     /* saving category,subCategory and product */
-    public Category saveCategory(Category category) {
-        Optional<Category> cat = categoryRepository.findByCategoryName(category.getCategoryName());
-
+    public Category saveCategory(CategoryRequest req) {
+        Optional<Category> cat = categoryRepository.findByCategoryName(req.getCategoryName());
         if (!cat.isPresent()) {
-
+            Category category=new Category();
+            category.setCategoryName(req.getCategoryName());
+            category.setCategoryType(req.getCategoryType());
+            category.setDescription(req.getDescription());
+            category.setPhoto(req.getPhoto());
             return categoryRepository.save(category);
 
         }
@@ -120,51 +107,54 @@ public class ProductsService {
         return null;
     }
 
-    public SubCategory saveSubCategory(SubCategory subCategory) {
-        SubCategory subCategory1 = null;
-        if (subCategoriesRepository.findAll().stream().filter(c->c.getSubCategoryName()==subCategory.getSubCategoryName()).collect(Collectors.toList()).isEmpty())
-        subCategory1 = subCategoriesRepository.save(subCategory);
-        return subCategory1;
+    public ResponseEntity<?> saveSubCategory(SubCategoryRequest req) {
+        SubCategory subCategory=new SubCategory();
+        Category category=categoryRepository.findByCategoryName(req.getCategoryName()).orElse(null);
+        if(category!=null){
+            List<SubCategory> subCategories=category.getSubCategories();
+            subCategory.setCategoryId(category.getId());
+            subCategory.setCategoryName(req.getCategoryName());
+            subCategory.setDescription(req.getDescription());
+            subCategory.setPhotos(req.getPhotos());
+            subCategories.add(subCategory);
+            category.setSubCategories(subCategories);
+            categoryRepository.save(category);
+            return ResponseEntity.ok().body(subCategory);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Category not found");
     }
 
-    public Product saveProduct(Product product, Principal principal) {
+    public ResponseEntity<?> saveProduct(ProductCreateRequest req, Principal principal) {
+        String phoneNumber="";
+        if(req.getProviderPhone()!=null&& !req.getProviderPhone().equals("")){
+            phoneNumber= req.getProviderPhone();
+        }else{phoneNumber=principal.getName();}
 
-        Users users = userRepository.findByPhone(principal.getName());
-        if (users!=null){
-            
-        Variant variant = new Variant();
-        variant.setVariantName(product.getProductVariant());
-        variant.setSubCategory(product.getSubCategory());
-        Users users1 = userRepository.findByPhone(product.getUser());
-        if (!subCategoryByName(product.getSubCategory()).isEmpty()) {
-            if (variantByName(product.getProductVariant()).isEmpty())
-                variantRepository.save(variant);
-            if (product.getPosition().length<2)
-                product.setPosition(new double[]{users1.getPosition()[0],users1.getPosition()[1]});
-            sendEmail(users, "createProduct");
-            product.setUser(users.getPhone());
-            Product product1 = productsRepository.save(product);
-            product1.setUsers(users1);
-            return product1;
-        }
-        return null;
+        Users users = userRepository.findByPhone(phoneNumber);
+        if (users!=null) {
+            if (!users.getAccountType().equals("USER")) {
+                Product product = new Product();
+                product.setProductName(req.getProductName());
+                product.setSubCategory(req.getSubCategory());
+                product.setProductDescription(req.getProductDescription());
+                product.setProductQuantity(req.getProductQuantity());
+                product.setProductPrice(req.getProductPrice());
+                product.setPhotos(req.getPhotos());
+                product.setPosition(req.getPosition());
+                product.setUser(users.getPhone());
+                product.setUsers(users);
+                productsRepository.save(product);
+                return ResponseEntity.ok().body(product);
+            }
 
         }
-        // TODO marshal up a response for when subCategory does not exists
-        return null;
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User forbidden to do this action");
     }
 
     public Photos getPhoto(String id) {
         return photoRepository.findById(id).get();
     }
 
-    public Variant createVariant(Variant variant) {
-        if (!subCategoryByName(variant.getSubCategory()).isEmpty()) {
-            return variantRepository.save(variant);
-        }
-        // TODO marshal up a response for when subCategory does not exists
-        return null;
-    }
 
     public ResponseEntity<?> deleteProduct(String id) {
 
@@ -184,45 +174,45 @@ public class ProductsService {
         return ResponseEntity.ok().body(product.getProductName() + " Successfully deleted");
     }
 
-    @Async
-    public void sendEmail(@NonNull  Users users, String action) {
-            String message = null;
-            if (action.equals("createAccount")) {
-                message = "Account successfully created for " + users.getPhone();
-            } else if (action.equals("createProduct")) {
-                message = "Product successfully created by " + users.getPhone();
-            } else if (action.equals("createService")) {
-                message = "Service successfully created by " + users.getPhone();
-            } else if (action.equals("createBooking")) {
-                message = "Booking successfully created by " + users.getPhone();
-            } else if (action.equals("notifyProvider")) {
-                message = "Product booking made for your product";
-            }
-
-        log.info(message);
-        Mail mail = new Mail();
-        mail.setMailFrom(Constants.email);
-        mail.setMailTo(users.getEmail());
-        mail.setMailSubject("Prism-health Notification services");
-        mail.setMailContent(message);
-
-        AccountDetails details = new AccountDetails();
-        details.setEmail(users.getEmail());
-        details.setAccesstoken(users.getVerificationToken());
-        details.setUsername(users.getPhone());
-
-        mailService.sendEmail(mail);
-        Notification notification = new Notification();
-        notification.setEmail(users.getEmail());
-        notification.setUserId(users.getPhone());
-        notification.setMessage(message);
-        notification.setAction(null);
-        notification.setDetails(details);
-        notification.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-        notificationRepo.save(notification);
-        log.info("Sent notification to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-
-    }
+//    @Async
+//    public void sendEmail(@NonNull  Users users, String action) {
+//            String message = null;
+//            if (action.equals("createAccount")) {
+//                message = "Account successfully created for " + users.getPhone();
+//            } else if (action.equals("createProduct")) {
+//                message = "Product successfully created by " + users.getPhone();
+//            } else if (action.equals("createService")) {
+//                message = "Service successfully created by " + users.getPhone();
+//            } else if (action.equals("createBooking")) {
+//                message = "Booking successfully created by " + users.getPhone();
+//            } else if (action.equals("notifyProvider")) {
+//                message = "Product booking made for your product";
+//            }
+//
+//        log.info(message);
+//        Mail mail = new Mail();
+//        mail.setMailFrom(Constants.email);
+//        mail.setMailTo(users.getEmail());
+//        mail.setMailSubject("Prism-health Notice services");
+//        mail.setMailContent(message);
+//
+//        AccountDetails details = new AccountDetails();
+//        details.setEmail(users.getEmail());
+//        details.setAccesstoken(users.getVerificationToken());
+//        details.setUsername(users.getPhone());
+//
+//        mailService.sendEmail(mail);
+//        Notice notices = new Notice();
+//        notices.setEmail(users.getEmail());
+//        notices.setUserId(users.getPhone());
+//        notices.setMessage(message);
+//        notices.setAction(null);
+//        notices.setDetails(details);
+//        notices.setTimestamp(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
+//        notificationRepo.save(notices);
+//        log.info("Sent notices to : " + users.getEmail() + " " + LogMessage.SUCCESS);
+//
+//    }
 
     public List<Product> getAllAvailableProducts() {
         return productsRepository.findAll();
@@ -238,9 +228,9 @@ public class ProductsService {
         return ResponseEntity.ok().body("Successfully deleted..");
     }
 
-    public ResponseEntity<?> deleteSubCategory(String subCategoryName) {
-        subCategoriesRepository.deleteAll(subCategoriesRepository.findAll()
-                .stream().filter(subCategory -> subCategory.getSubCategoryName()==subCategoryName).collect(Collectors.toList()));
-        return ResponseEntity.ok("Successfully deleted");
-    }
+//    public ResponseEntity<?> deleteSubCategory(String subCategoryName) {
+//        subCategoriesRepository.deleteAll(subCategoriesRepository.findAll()
+//                .stream().filter(subCategory -> subCategory.getSubCategoryName()==subCategoryName).collect(Collectors.toList()));
+//        return ResponseEntity.ok("Successfully deleted");
+//    }
 }
