@@ -32,9 +32,9 @@ public class ServiceProviderService {
     private final UserRepository usersRepo;
     private final ServiceRepo serviceRepo;
     private final BookingsRepo bookingsRepo;
-    MailService mailService;
-    UserRepository userRepository;
-    private ExecutorService executorService;
+    private  final MailService mailService;
+    private final UserRepository userRepository;
+    private final ExecutorService executorService;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public List<Bookings> getAllServicesBookings(Principal principal) {
