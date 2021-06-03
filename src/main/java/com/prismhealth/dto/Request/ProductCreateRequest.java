@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prismhealth.Models.Users;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
 @Data
 @JsonIgnoreProperties
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProductCreateRequest {
     @JsonProperty("productQuantity")
     private String productQuantity;

@@ -2,62 +2,34 @@ package com.prismhealth.dto.Request;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prismhealth.Models.Positions;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Transient;
 
 @Data
+@JsonIgnoreProperties
+@AllArgsConstructor
+@NoArgsConstructor
 public class SignUpRequest {
-
+    @JsonProperty
 	private String password;
-
+	@JsonProperty
 	private String roles;
-
+	@JsonProperty
 	private String phone;
-
+	@JsonProperty
 	private String firstName;
-
+	@JsonProperty
 	private String secondName;
-
+	@JsonProperty
 	private String email;
-
+	@JsonProperty
 	private Date DateOfBirth;
-
+	@JsonProperty
 	private String gender;
-
-	private String location;
-
-	private String latitude;
-
-	private String longitude;
-
-	@Transient
-	public Positions getPositions() {
-		Positions positions = new Positions();
-
-		Double lat = 0.0;
-		Double lDouble = 0.0;
-		try {
-			lat = Double.valueOf(latitude);
-			lDouble = Double.valueOf(longitude);
-
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		positions.setLatitude(lat);
-		positions.setLongitude(lDouble);
-
-		positions.setLocationName(location);
-		return positions;
-	}
-
-	@Override
-	public String toString() {
-		return String.format(
-				"SignUpRequest{password = '%s',role = '%s',phone = '%s',"
-						+ "name = '%s',email = '%s',gender = '%s',Dob = '%s'}",
-				password, roles, phone, firstName + " " + secondName, email, gender, DateOfBirth);
-	}
 }
