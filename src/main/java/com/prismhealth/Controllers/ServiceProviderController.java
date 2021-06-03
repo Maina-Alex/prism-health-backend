@@ -60,6 +60,11 @@ public class ServiceProviderController {
         return serviceProviderService.getServicesByProvider(providerId);
     }
 
+    @GetMapping("/user/provider")
+    public List<Services> getServiceByProvider(Principal principal) {
+        return serviceProviderService.getServicesByProvider(principal.getName());
+    }
+
     @GetMapping("/users/near")
     public List<Services> getAllServiceNear(@RequestParam("longitude") double longitude,
             @RequestParam("latitude") double latitude, @RequestParam("radious") double radious) {

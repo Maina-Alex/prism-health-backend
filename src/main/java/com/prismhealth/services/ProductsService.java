@@ -218,8 +218,12 @@ public class ProductsService {
     }
 
     public List<Product> getProductsByProviderId(String providerId) {
-        return productsRepository.findAll().stream().filter(product -> product.getUser() == providerId)
-                .collect(Collectors.toList());
+        return productsRepository.findAllByUser(providerId);
+    }
+
+    public List<Product> getProductsByProvider(Principal principal) {
+
+        return productsRepository.findAllByUser(principal.getName());
     }
 
     public ResponseEntity<?> deleteCategory(String categoryName) {
