@@ -84,7 +84,7 @@ public class PrismHealthBackendApplication implements ApplicationRunner {
 			positions.setLocationName("location");
 			users1.setPassword(passwordEncoder().encode("password"));
 			users1.setPhone("+254711111111");
-			users1.setEmail("joshuajoe12561@gmail.com");
+			users1.setEmail("Admin@gmail.com");
 			users1.setFirstName("Admin");
 			users1.setLocationName("Location");
 			users1.setPosition(new double[] { Double.parseDouble("-1.2345"), Double.parseDouble("24.345") });

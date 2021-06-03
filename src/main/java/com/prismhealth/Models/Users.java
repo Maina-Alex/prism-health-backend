@@ -48,6 +48,7 @@ public class Users {
 	private Positions positions;
 	@JsonProperty("username")
 	private String username;
+
 	private String accountType;
 
 	private boolean verified;
