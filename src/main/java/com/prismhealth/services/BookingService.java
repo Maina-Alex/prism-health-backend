@@ -121,7 +121,6 @@ public class BookingService {
 
     public Map<String, List<Bookings>> getBookingsHistory(Principal principal) {
         Users optional = userRepository.findByPhone(principal.getName());
-
         if (optional.getAccountType().equals("PROVIDER")) {
             List<Bookings> bookings = new ArrayList<>();
             List<Services> services = serviceRepo.findAllByProviderPhone(optional.getPhone());
@@ -135,8 +134,7 @@ public class BookingService {
             }).collect(Collectors.groupingBy(Bookings::getServiceId));
 
         } else {
-
-            return bookingsRepo.findAllByUserId(optional.getPhone(), Sort.by("date").descending()).stream().map(b -> {
+            return bookingsRepo.findAllByUserId(optional.getId(), Sort.by("date").descending()).stream().map(b -> {
                 b.setService(serviceRepo.findById(b.getServiceId()).get());
                 return b;
             }).collect(Collectors.groupingBy(Bookings::getServiceId));
