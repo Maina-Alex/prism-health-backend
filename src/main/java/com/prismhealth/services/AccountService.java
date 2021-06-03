@@ -157,14 +157,8 @@ public class AccountService {
 
     public ResponseEntity<?> updateUser(UserUpdateRequest request, Principal principal) {
         Optional<Users> user = Optional.ofNullable(userRepository.findByPhone(principal.getName()));
-       Optional< Users> duplicateUser = Optional.ofNullable(userRepository.findByPhone(request.getPhone()));
         if (user.isPresent()) {
             try {
-                if (duplicateUser.isPresent() && duplicateUser.get() != user.get()) {
-                    throw new RuntimeException("Phone number already exists");
-                }
-                if (!request.getPhone().equals(""))
-                    user.get().setPhone(request.getPhone());
                 if (request.getDateOfBirth() != null)
                     user.get().setDateOfBirth(request.getDateOfBirth());
                 if (!request.getFirstName().equals(""))

@@ -14,8 +14,6 @@ import java.util.Date;
 @JsonIgnoreProperties
 @NoArgsConstructor
 public class UserUpdateRequest {
-    @JsonProperty("phone")
-    private String phone;
     @JsonProperty("firstName")
     private String firstName;
     @JsonProperty("secondName")

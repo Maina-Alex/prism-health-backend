@@ -37,6 +37,7 @@ public class SosService {
             execute(position,users,users.getEmergencyContact1());
             return  execute(position,users,users.getEmergencyContact2()).get();
         }else {
+            assert users.getEmergencyContact2() != null;
             return execute(position,users,users.getEmergencyContact2()).get();
         }} catch (ExecutionException e) {
             e.printStackTrace();
