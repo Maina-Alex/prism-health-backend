@@ -156,6 +156,7 @@ public class AccountService {
     }
 
     public ResponseEntity<?> updateUser(UserUpdateRequest request, Principal principal) {
+
         Users user = userRepository.findByPhone(principal.getName());
 
         if (user != null) {
@@ -176,6 +177,7 @@ public class AccountService {
                 if (Optional.ofNullable(request.getGender()).isPresent())
                     user.setGender(request.getGender());
                 Users saved = userRepository.save(user);
+
                 return ResponseEntity.ok().body(saved);
             } catch (Exception ex) {
                 ex.printStackTrace();
