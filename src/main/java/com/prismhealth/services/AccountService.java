@@ -156,30 +156,30 @@ public class AccountService {
     }
 
     public ResponseEntity<?> updateUser(UserUpdateRequest request, Principal principal) {
-        Users user = userRepository.findByPhone(principal.getName());
-        Users duplicateUser = userRepository.findByPhone(request.getPhone());
-        if (user != null) {
+        Optional<Users> user = Optional.ofNullable(userRepository.findByPhone(principal.getName()));
+       Optional< Users> duplicateUser = Optional.ofNullable(userRepository.findByPhone(request.getPhone()));
+        if (user.isPresent()) {
             try {
-                if (duplicateUser != null && duplicateUser != user) {
+                if (duplicateUser.isPresent() && duplicateUser.get() != user.get()) {
                     throw new RuntimeException("Phone number already exists");
                 }
                 if (!request.getPhone().equals(""))
-                    user.setPhone(request.getPhone());
+                    user.get().setPhone(request.getPhone());
                 if (request.getDateOfBirth() != null)
-                    user.setDateOfBirth(request.getDateOfBirth());
+                    user.get().setDateOfBirth(request.getDateOfBirth());
                 if (!request.getFirstName().equals(""))
-                    user.setFirstName(request.getFirstName());
+                    user.get().setFirstName(request.getFirstName());
                 if (!request.getSecondName().equals(""))
-                    user.setSecondName(request.getSecondName());
+                    user.get().setSecondName(request.getSecondName());
                 if (!request.getEmergencyContact1().equals(""))
-                    user.setEmergencyContact1(request.getEmergencyContact1());
+                    user.get().setEmergencyContact1(request.getEmergencyContact1());
                 if (!request.getEmergencyContact2().equals(""))
-                    user.setEmergencyContact2(request.getEmergencyContact2());
+                    user.get().setEmergencyContact2(request.getEmergencyContact2());
                 if (!request.getEmail().equals(""))
-                    user.setEmail(request.getEmail());
+                    user.get().setEmail(request.getEmail());
                 if (!request.getGender().equals(""))
-                    user.setGender(request.getGender());
-                Users saved = userRepository.save(user);
+                    user.get().setGender(request.getGender());
+                Users saved = userRepository.save(user.get());
                 return ResponseEntity.ok().body(saved);
             } catch (Exception ex) {
                 return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(ex.getMessage());
