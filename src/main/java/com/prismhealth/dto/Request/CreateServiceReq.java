@@ -2,13 +2,16 @@ package com.prismhealth.dto.Request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+<<<<<<< HEAD
 import com.prismhealth.Models.Positions;
 import lombok.AllArgsConstructor;
+=======
+
+>>>>>>> cc80999eaf48241de3ea22f502c81376cc3ee51e
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -25,7 +28,7 @@ public class CreateServiceReq {
     @NonNull
     @JsonProperty("position")
     private double[] position;
-    @NonNull
+
     @JsonProperty("charges")
     private int charges;
     @NonNull

@@ -2,7 +2,7 @@ package com.prismhealth.dto.Request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.prismhealth.Models.Positions;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -30,6 +30,5 @@ public class UserUpdateRequest {
     private Date dateOfBirth;
     @JsonProperty("gender")
     private String gender;
-
 
 }

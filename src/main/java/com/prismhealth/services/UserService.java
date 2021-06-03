@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
 import com.prismhealth.repository.UserRepository;
-import com.prismhealth.repository.BlockedUserRepo;
+
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -21,15 +21,13 @@ public class UserService {
 
     private final UserRepository usersRepo;
 
-
-
     public ResponseEntity<?> addUserReview(UserReview r) {
-        Users user=usersRepo.findByPhone(r.getUserPhone());
-        if(user!=null){
-            ProviderRating rating=user.getProviderRating();
-            List<UserReview> reviews=rating.getRatings();
+        Users user = usersRepo.findByPhone(r.getUserPhone());
+        if (user != null) {
+            ProviderRating rating = user.getProviderRating();
+            List<UserReview> reviews = rating.getRatings();
             reviews.add(r);
-            double average= reviews.stream().mapToDouble(UserReview::getRating).sum();
+            double average = reviews.stream().mapToDouble(UserReview::getRating).sum();
             rating.setAverageRate(average);
             rating.setRatings(reviews);
             user.setProviderRating(rating);
@@ -41,22 +39,19 @@ public class UserService {
     }
 
     public List<UserReview> getUserRating(String userid) {
-        Users user=usersRepo.findByPhone(userid);
-        return user.getProviderRating().getRatings().stream().sorted(Collections.reverseOrder()).collect(Collectors.toList());
-
+        Users user = usersRepo.findByPhone(userid);
+        return user.getProviderRating().getRatings().stream().sorted(Collections.reverseOrder())
+                .collect(Collectors.toList());
 
     }
-
-
-
 
     public Users getUserById(String phone) {
 
         Users users = usersRepo.findByPhone(phone);
-        if (users !=null)
+        if (users != null)
             return users;
-                    else
-                        return null;
+        else
+            return null;
 
     }
 
@@ -119,7 +114,7 @@ public class UserService {
 
     public boolean verifyUser(String id, Principal principal) {
         Users users = usersRepo.findByPhone(id);
-        if (users !=null) {
+        if (users != null) {
             users.setVerified(true);
             users.setVerifiedBy(principal.getName());
             users.setVerifiedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));

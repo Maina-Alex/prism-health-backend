@@ -6,7 +6,7 @@ import com.prismhealth.dto.Request.UpdateProviderRequest;
 import com.prismhealth.services.AdminProviderService;
 import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,12 +35,14 @@ public class AdminProviderController {
         return providerService.getAllProviders();
 
     }
+
     @PostMapping("/providers/delete")
     public ResponseEntity<?> deleteProvider(@RequestBody Users users) {
         return providerService.deleteProvider(users.getPhone());
     }
+
     @PostMapping("/providers/update")
-    public ResponseEntity<?> updateProvider(@RequestBody UpdateProviderRequest request){
+    public ResponseEntity<?> updateProvider(@RequestBody UpdateProviderRequest request) {
         return providerService.updateProvider(request);
     }
 

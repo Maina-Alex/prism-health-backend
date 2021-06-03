@@ -1,6 +1,5 @@
 package com.prismhealth.Models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,8 +14,8 @@ public class PostCategory {
     private String id;
     private String categoryName;
     private String description;
-    private List<Post> posts=new ArrayList<>();
-    private int postCounter=0;
+    private List<Post> posts = new ArrayList<>();
+    private int postCounter = 0;
 
     public PostCategory(String categoryName, String description) {
         this.categoryName = categoryName;
