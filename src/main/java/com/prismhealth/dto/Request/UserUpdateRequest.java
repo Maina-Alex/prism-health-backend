@@ -28,5 +28,4 @@ public class UserUpdateRequest {
     private Date dateOfBirth;
     @JsonProperty("gender")
     private String gender;
-
 }
