@@ -3,7 +3,10 @@ package com.prismhealth.services;
 import java.security.Principal;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
+import javax.management.Notification;
 
 import com.prismhealth.Models.*;
 
@@ -31,6 +34,7 @@ public class ServiceProviderService {
     private final BookingsRepo bookingsRepo;
     MailService mailService;
     UserRepository userRepository;
+    private ExecutorService executorService;
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public List<Bookings> getAllServicesBookings(Principal principal) {
@@ -61,7 +65,12 @@ public class ServiceProviderService {
             service.setSubCategory(req.getSubCategory());
             Services saved = serviceRepo.save(service);
             sendEmail(provider.getEmail(), service.getName());
-            List<Notice> notices = provider.getNotifications().getNotices();
+            Notifications notifications = Optional.ofNullable(provider.getNotifications()).orElse(new Notifications());
+            provider.setNotifications(notifications);
+
+            Optional<List<Notice>> pNotices = Optional.ofNullable(notifications.getNotices());
+            List<Notice> notices = pNotices.orElse(new ArrayList<Notice>());
+            notifications.setNotices(notices);
             Notice notice = new Notice();
             notice.setEmail(provider.getEmail());
             notice.setUserId(provider.getEmail());
@@ -96,14 +105,17 @@ public class ServiceProviderService {
         return serviceRepo.findByPositionNear(location, distance);
     }
 
-    @Async
     public void sendEmail(String email, String serviceName) {
-        Mail mail = new Mail();
-        mail.setMailTo(email);
-        mail.setMailSubject("Service Created");
-        mail.setMailContent("Great, Your are now a service provider for the following service : " + serviceName);
-        mailService.sendEmail(mail);
-        log.info("Sent service creation email to " + email);
+        Runnable task = () -> {
+
+            Mail mail = new Mail();
+            mail.setMailTo(email);
+            mail.setMailSubject("Service Created");
+            mail.setMailContent("Great, Your are now a service provider for the following service : " + serviceName);
+            mailService.sendEmail(mail);
+            log.info("Sent service creation email to " + email);
+        };
+        executorService.submit(task);
     }
 
     public ResponseEntity<?> getProvidersByServiceId(String serviceId) {

@@ -34,7 +34,6 @@ public class ProductsController {
 
     private final ProductsService productsService;
 
-
     @ApiOperation(value = "Get all categories")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
@@ -82,12 +81,14 @@ public class ProductsController {
     public ResponseEntity<List<Product>> getProduct(@PathVariable String productName) {
         return ResponseEntity.ok(productsService.productByName(productName));
     }
+
     @GetMapping("/getAllAvailableProducts")
-    public ResponseEntity<List<Product>> getAllProducts(){
+    public ResponseEntity<List<Product>> getAllProducts() {
         return ResponseEntity.ok(productsService.getAllAvailableProducts());
     }
+
     @GetMapping("/productByProviderId/{providerId}")
-    public ResponseEntity<List<Product>> getProductByProviderId(@PathVariable String providerId){
+    public ResponseEntity<List<Product>> getProductByProviderId(@PathVariable String providerId) {
         return ResponseEntity.ok(productsService.getProductsByProviderId(providerId));
     }
 
@@ -105,16 +106,15 @@ public class ProductsController {
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/subCategories")
     public ResponseEntity<?> createSubCategory(@RequestBody SubCategoryRequest request) {
-        return ResponseEntity.ok(productsService.saveSubCategory(request));
+        return productsService.saveSubCategory(request);
     }
 
     @ApiOperation(value = "Post a product")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/products")
-    public ResponseEntity<? > createProduct(@RequestBody ProductCreateRequest request, Principal principal) {
-        return new ResponseEntity<>(productsService.saveProduct(request, principal), HttpStatus.CREATED);
-
+    public ResponseEntity<?> createProduct(@RequestBody ProductCreateRequest request, Principal principal) {
+        return productsService.saveProduct(request, principal);
     }
 
     /* PUT MAPPINGS */
@@ -134,13 +134,15 @@ public class ProductsController {
     public ResponseEntity<?> deleteProduct(@PathVariable("productid") String productid) {
         return ResponseEntity.ok(productsService.deleteProduct(productid));
     }
+
     @DeleteMapping("/category/{categoryName}")
     public ResponseEntity<?> deleteCategory(@PathVariable("categoryName") String categoryName) {
         return ResponseEntity.ok(productsService.deleteCategory(categoryName));
     }
-//    @DeleteMapping("/subCategory/{subCategoryName}")
-//    public ResponseEntity<?> deleteSubCategory(@PathVariable("subCategoryName") String subCategoryName) {
-//        return ResponseEntity.ok(productsService.deleteSubCategory(subCategoryName));
-//    }
+    // @DeleteMapping("/subCategory/{subCategoryName}")
+    // public ResponseEntity<?> deleteSubCategory(@PathVariable("subCategoryName")
+    // String subCategoryName) {
+    // return ResponseEntity.ok(productsService.deleteSubCategory(subCategoryName));
+    // }
 
 }
