@@ -46,9 +46,8 @@ public class Users {
 	private double[] position;
 
 	private Positions positions;
-
-	private String username;
 	@JsonProperty("username")
+	private String username;
 	private String accountType;
 
 	private boolean verified;
