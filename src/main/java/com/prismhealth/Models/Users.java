@@ -38,7 +38,7 @@ public class Users {
 	private Date dateOfBirth;
 	@JsonProperty("gender")
 	private String gender;
-	@JsonProperty("gender")
+	@JsonProperty("auth")
 	private String auth;
 	@JsonProperty("locationName")
 	private String locationName;
