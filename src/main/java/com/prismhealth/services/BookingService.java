@@ -34,7 +34,7 @@ public class BookingService {
     private final MailService mailService;
     private final ServiceRepo serviceRepo;
     private final BookingsRepo bookingsRepo;
-    private ExecutorService executor;
+    private final ExecutorService executor;
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();

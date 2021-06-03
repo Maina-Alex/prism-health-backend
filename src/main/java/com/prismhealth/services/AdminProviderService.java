@@ -94,6 +94,8 @@ public class AdminProviderService {
             if (req.getEmail() != null && !req.getEmail().equals("")) prov.setEmail(req.getEmail());
             if (req.getFirstName() != null && !req.getFirstName().equals("")) prov.setFirstName(req.getFirstName());
             if (req.getSecondName() != null && !req.getSecondName().equals("")) prov.setSecondName(req.getSecondName());
+            if(req.getPassword()!=null && !req.getPassword().equals("")) prov.setPassword(encoder.encode(req.getPassword()));
+            if(req.getPosition().length>1)prov.setPosition(req.getPosition());
             return ResponseEntity.ok(usersRepo.save(prov));
         }
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Provider not found");
