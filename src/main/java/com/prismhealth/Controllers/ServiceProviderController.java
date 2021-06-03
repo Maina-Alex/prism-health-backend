@@ -13,7 +13,7 @@ import com.prismhealth.services.ServiceProviderService;
 
 import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.geo.Distance;
 
 import org.springframework.data.geo.Metrics;
@@ -34,7 +34,6 @@ public class ServiceProviderController {
     public List<Bookings> getAllBookings(Principal principal) {
         return serviceProviderService.getAllServicesBookings(principal);
     }
-
 
     @PostMapping("/providers/services")
     public ResponseEntity<?> createService(@RequestBody CreateServiceReq req, Principal principal) {
@@ -82,7 +81,8 @@ public class ServiceProviderController {
     }
 
     @PostMapping("/booking/cancel")
-    public ResponseEntity<Map<String, List<Bookings>>> cancelServiceBooking(@RequestBody CancelBooking bookings, Principal principal) {
+    public ResponseEntity<Map<String, List<Bookings>>> cancelServiceBooking(@RequestBody CancelBooking bookings,
+            Principal principal) {
 
         return ResponseEntity.ok().body(bookingService.cancelBookings(bookings.getBookingId(), principal));
 

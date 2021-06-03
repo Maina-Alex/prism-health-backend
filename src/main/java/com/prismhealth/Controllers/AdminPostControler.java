@@ -1,7 +1,6 @@
 package com.prismhealth.Controllers;
 
 import com.prismhealth.Models.Post;
-import com.prismhealth.Models.PostCategory;
 
 import com.prismhealth.dto.Request.DeletePostReq;
 import com.prismhealth.dto.Request.GetPostRequest;
@@ -11,7 +10,7 @@ import com.prismhealth.services.AdminPostService;
 
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Role;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -58,10 +57,12 @@ public class AdminPostControler {
     public ResponseEntity<?> getPostCategoryById(@PathVariable String id) {
         return postService.getPostsCategory(id);
     }
+
     @PostMapping("/categories")
     public ResponseEntity<?> saveCategory(@RequestBody PostCategoryReq req) {
         return postService.savePostCategory(req);
     }
+
     @PostMapping("/delete/")
     public ResponseEntity<?> deletePost(@RequestBody DeletePostReq req) {
         return postService.deletePost(req);

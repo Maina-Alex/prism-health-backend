@@ -24,9 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.sql.ResultSet;
+
 import java.util.List;
-import java.util.Map;
+
 import java.util.Optional;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
@@ -40,11 +40,11 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 public class AccountController {
     private final AccountService accountService;
     private final UserService userService;
-    public  final UserRepository userRepository;
+    public final UserRepository userRepository;
 
     @ApiOperation(value = "Get User Object by passing the token")
     @GetMapping
-    public ResponseEntity<?> getUser(Principal principal){
+    public ResponseEntity<?> getUser(Principal principal) {
         return accountService.getUsers(principal);
     }
 
@@ -61,7 +61,7 @@ public class AccountController {
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PutMapping("/update")
     public ResponseEntity<?> updateUser(@RequestBody UserUpdateRequest request, Principal principal) {
-        return accountService.updateUser(request,principal);
+        return accountService.updateUser(request, principal);
     }
 
     @ApiOperation(value = "Authenticate phone by sending otp")
@@ -84,10 +84,11 @@ public class AccountController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/updatePassword")
-    public ResponseEntity<?> updatePassword(@RequestBody UpdateForgotPasswordReq req){
+    public ResponseEntity<?> updatePassword(@RequestBody UpdateForgotPasswordReq req) {
         return accountService.updateForgotPassword(req);
     }
-    @ApiOperation(value ="Gets provider by Id" )
+
+    @ApiOperation(value = "Gets provider by Id")
     @GetMapping("/getProviderById")
     public ResponseEntity<?> getProviderByPhone(@RequestBody String phone) {
         return accountService.getProviderByPhone(phone);
@@ -120,17 +121,17 @@ public class AccountController {
 
     }
 
-
     @PostMapping("/postRating")
     public ResponseEntity<?> postRating(@RequestBody UserReview userRating) {
-        return userService.addUserReview(userRating);    }
+        return userService.addUserReview(userRating);
+    }
 
     /*
      * GETS
      */
     @GetMapping("/getReviews")
     public List<UserReview> getReviews(@RequestParam String id) {
-        Users user=userRepository.findByPhone(id);
+
         return userService.getUserRating(id);
     }
 }

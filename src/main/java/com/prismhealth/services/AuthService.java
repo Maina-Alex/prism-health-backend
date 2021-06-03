@@ -12,7 +12,6 @@ import java.util.concurrent.Future;
 import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.MailService;
 
-
 import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
 
@@ -24,11 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.scheduling.annotation.EnableAsync;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 @Service
 @AllArgsConstructor
@@ -80,7 +77,7 @@ public class AuthService {
 
     public Users resetPassword(String password, String phone) {
         Users accounts = usersRepo.findByPhone(phone);
-        if (accounts!=null) {
+        if (accounts != null) {
             accounts.setPassword(encoder.encode(password));
             log.info("Password reset for User id:" + accounts.getPhone() + " " + LogMessage.SUCCESS);
             return usersRepo.save(accounts);

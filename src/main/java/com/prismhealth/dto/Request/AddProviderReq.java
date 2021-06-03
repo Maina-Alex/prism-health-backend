@@ -3,10 +3,12 @@ package com.prismhealth.dto.Request;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 @Data
 @JsonIgnoreProperties
+@NoArgsConstructor
 public class AddProviderReq {
     @NonNull
     @JsonProperty("phone")
