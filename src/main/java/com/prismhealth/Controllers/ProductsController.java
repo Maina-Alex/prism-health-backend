@@ -1,24 +1,21 @@
 package com.prismhealth.Controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prismhealth.Models.Category;
-
 import com.prismhealth.Models.Product;
 import com.prismhealth.Models.SubCategory;
+import com.prismhealth.dto.Request.CategoryRequest;
+import com.prismhealth.dto.Request.ProductCreateRequest;
+import com.prismhealth.dto.Request.SubCategoryRequest;
 import com.prismhealth.repository.CategoryRepository;
-import com.prismhealth.repository.SubCategoriesRepository;
 import com.prismhealth.services.ProductsService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.slf4j.LoggerFactory;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
@@ -30,19 +27,13 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 @RestController
 @RequestMapping("catalog")
 @CrossOrigin
+@AllArgsConstructor
 public class ProductsController {
 
     private final CategoryRepository categoryRepository;
 
     private final ProductsService productsService;
 
-    public ProductsController(ObjectMapper objectMapper, CategoryRepository categoryRepository,
-            SubCategoriesRepository subCategoriesRepository, ProductsService productsService) {
-
-        this.categoryRepository = categoryRepository;
-
-        this.productsService = productsService;
-    }
 
     @ApiOperation(value = "Get all categories")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
@@ -105,26 +96,24 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/categories")
-    public ResponseEntity<Category> createCategory(@RequestBody Category category) {
-        return ResponseEntity.ok(productsService.saveCategory(category));
+    public ResponseEntity<?> createCategory(@RequestBody CategoryRequest request) {
+        return ResponseEntity.ok(productsService.saveCategory(request));
     }
 
     @ApiOperation(value = "Post a sub-category")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/subCategories")
-    public ResponseEntity<SubCategory> createSubCategory(@RequestBody SubCategory subCategory) {
-        return ResponseEntity.ok(productsService.saveSubCategory(subCategory));
+    public ResponseEntity<?> createSubCategory(@RequestBody SubCategoryRequest request) {
+        return ResponseEntity.ok(productsService.saveSubCategory(request));
     }
 
     @ApiOperation(value = "Post a product")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/products")
-    public ResponseEntity<Product> createProduct(@RequestBody Product product, Principal principal) {
-
-        LoggerFactory.getLogger(this.getClass()).info("Products-> " + product.toString());
-        return new ResponseEntity<>(productsService.saveProduct(product, principal), HttpStatus.CREATED);
+    public ResponseEntity<? > createProduct(@RequestBody ProductCreateRequest request, Principal principal) {
+        return new ResponseEntity<>(productsService.saveProduct(request, principal), HttpStatus.CREATED);
 
     }
 
@@ -149,9 +138,9 @@ public class ProductsController {
     public ResponseEntity<?> deleteCategory(@PathVariable("categoryName") String categoryName) {
         return ResponseEntity.ok(productsService.deleteCategory(categoryName));
     }
-    @DeleteMapping("/subCategory/{subCategoryName}")
-    public ResponseEntity<?> deleteSubCategory(@PathVariable("subCategoryName") String subCategoryName) {
-        return ResponseEntity.ok(productsService.deleteSubCategory(subCategoryName));
-    }
+//    @DeleteMapping("/subCategory/{subCategoryName}")
+//    public ResponseEntity<?> deleteSubCategory(@PathVariable("subCategoryName") String subCategoryName) {
+//        return ResponseEntity.ok(productsService.deleteSubCategory(subCategoryName));
+//    }
 
 }

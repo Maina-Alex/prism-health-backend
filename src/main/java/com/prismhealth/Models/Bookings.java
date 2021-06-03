@@ -12,7 +12,7 @@ public class Bookings {
     @Id
     private String id;
     private String serviceId;
-    private String userId;
+    private String userPhone;
     private String date;
     private int hour;
     private boolean cancelled;

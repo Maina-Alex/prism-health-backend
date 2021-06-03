@@ -1,15 +1,18 @@
 package com.prismhealth.Controllers;
 
 import com.prismhealth.Models.PasswordReset;
-import com.prismhealth.Models.UserRating;
+import com.prismhealth.Models.UserReview;
 import com.prismhealth.Models.Users;
 import com.prismhealth.dto.Request.Phone;
 
 import com.prismhealth.dto.Request.SignUpRequest;
 
 import com.prismhealth.dto.Request.UpdateForgotPasswordReq;
+import com.prismhealth.dto.Request.UserUpdateRequest;
 import com.prismhealth.dto.Response.SignUpResponse;
+import com.prismhealth.repository.UserRepository;
 import com.prismhealth.services.AccountService;
+import com.prismhealth.services.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -20,8 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +39,8 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 @AllArgsConstructor
 public class AccountController {
     private final AccountService accountService;
+    private final UserService userService;
+    public  final UserRepository userRepository;
 
     @ApiOperation(value = "Get User Object by passing the token")
     @GetMapping
@@ -55,8 +60,8 @@ public class AccountController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PutMapping("/update")
-    public ResponseEntity<SignUpResponse> updateUser(@RequestBody Users users) {
-        return accountService.updateUser(users);
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateRequest request, Principal principal) {
+        return accountService.updateUser(request,principal);
     }
 
     @ApiOperation(value = "Authenticate phone by sending otp")
@@ -106,7 +111,7 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid User");
     }
 
-    @ApiOperation(value = "actually change password")
+    @ApiOperation(value = " change password")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/changePassword")
@@ -115,21 +120,17 @@ public class AccountController {
 
     }
 
-    @PostMapping("/postReviews")
-    public List<UserRating> postReview(@RequestBody UserRating userRating) {
-        return accountService.addUserReview(userRating);
-    }
 
     @PostMapping("/postRating")
-    public Map<String, Integer> postRating(@RequestBody UserRating userRating) {
-        return accountService.addUserRatings(userRating);
-    }
+    public ResponseEntity<?> postRating(@RequestBody UserReview userRating) {
+        return userService.addUserReview(userRating);    }
 
     /*
      * GETS
      */
     @GetMapping("/getReviews")
-    public List<UserRating> getReviews(@RequestParam String id) {
-        return accountService.getUserReview(id);
+    public List<UserReview> getReviews(@RequestParam String id) {
+        Users user=userRepository.findByPhone(id);
+        return userService.getUserRating(id);
     }
 }

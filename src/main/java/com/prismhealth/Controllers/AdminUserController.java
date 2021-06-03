@@ -45,12 +45,12 @@ public class AdminUserController {
         return userService.getDeleteUser();
     }
 
-    @ApiOperation(value = "Retrieves users pending verification")
-    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "Users not found") })
-    @GetMapping("/pendingverification")
-    public List<Users> getpendingVerifications() {
-        return userService.getPendingVerifications();
-    }
+//    @ApiOperation(value = "Retrieves users pending verification")
+//    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "Users not found") })
+//    @GetMapping("/pendingverification")
+//    public List<Users> getpendingVerifications() {
+//        return userService.getPendingVerifications();
+//    }
 
     @ApiOperation(value = "Approves users using phone number")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })

@@ -11,11 +11,12 @@ import java.util.concurrent.Future;
 
 import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.MailService;
-import com.prismhealth.repository.NotificationRepo;
+
 
 import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
 
+import lombok.AllArgsConstructor;
 import okhttp3.*;
 
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ import org.springframework.stereotype.Service;
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 
 @Service
-@EnableAsync
+@AllArgsConstructor
 public class AuthService {
 
     private final Logger log = LoggerFactory.getLogger(AuthService.class);
@@ -38,17 +39,7 @@ public class AuthService {
     private final UserRepository usersRepo;
     private final BCryptPasswordEncoder encoder;
     private final MailService mailService;
-    private final NotificationRepo notificationRepo;
     private final UwaziiConfig uwaziiConfig;
-
-    public AuthService(UserRepository usersRepo, BCryptPasswordEncoder encoder, MailService mailService,
-                       NotificationRepo notificationRepo, UwaziiConfig uwaziiConfig) {
-        this.usersRepo = usersRepo;
-        this.encoder = encoder;
-        this.mailService = mailService;
-        this.notificationRepo = notificationRepo;
-        this.uwaziiConfig = uwaziiConfig;
-    }
 
     @Async
     public Future<String> getAuthentication(String phone) {

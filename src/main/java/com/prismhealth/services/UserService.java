@@ -3,86 +3,52 @@ package com.prismhealth.services;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import com.prismhealth.Models.BlockedUser;
-import com.prismhealth.Models.PushContent;
-import com.prismhealth.Models.Users;
-import com.prismhealth.Models.UserRating;
+import com.prismhealth.Models.*;
 import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.BlockedUserRepo;
-import com.prismhealth.repository.UserRatingsRepo;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
     private final UserRepository usersRepo;
 
-    private final BlockedUserRepo blockedUserRepo;
 
-    private final AuthService authService;
 
-    private final NotificationService notificationService;
-
-    private final UserRatingsRepo userRatingsRepo;
-
-    public UserService(UserRepository usersRepo, BlockedUserRepo blockedUserRepo, AuthService authService,
-                       NotificationService notificationService, UserRatingsRepo userRatingsRepo, UserRepository usersRepo1, BlockedUserRepo blockedUserRepo1, AuthService authService1, NotificationService notificationService1, UserRatingsRepo userRatingsRepo1){
-
-        this.usersRepo = usersRepo1;
-        this.blockedUserRepo = blockedUserRepo1;
-        this.authService = authService1;
-        this.notificationService = notificationService1;
-        this.userRatingsRepo = userRatingsRepo1;
-    }
-    public Map<String, Integer> addUserRatings(UserRating r) {
-        if (r.getRating() > 0 && r.getRating() < 6)
-            userRatingsRepo.save(r);
-        return getUserRating(r.getUserId());
-    }
-
-    public List<UserRating> getUserReview(String userid) {
-        return userRatingsRepo.findAllByUserId(userid, Sort.by("timestamp").descending()).stream()
-                .filter(c -> c.getRating() == 0).collect(Collectors.toList());
-
-    }
-
-    public Map<String, Integer> getUserRating(String userId) {
-        Map<String, Integer> crating = new HashMap<>();
-        List<UserRating> ratings = userRatingsRepo.findAllByUserId(userId, Sort.unsorted()).stream()
-                .filter(c -> c.getRating() > 0).collect(Collectors.toList());
-        if (!ratings.isEmpty()) {
-
-            int sum = ratings.stream().map(UserRating::getRating).reduce(0, (a, b) -> a + b);
-            int rating = sum / ratings.size();
-            crating.put("count", ratings.size());
-            crating.put("rating", rating);
-            return crating;
+    public ResponseEntity<?> addUserReview(UserReview r) {
+        Users user=usersRepo.findByPhone(r.getUserPhone());
+        if(user!=null){
+            ProviderRating rating=user.getProviderRating();
+            List<UserReview> reviews=rating.getRatings();
+            reviews.add(r);
+            double average= reviews.stream().mapToDouble(UserReview::getRating).sum();
+            rating.setAverageRate(average);
+            rating.setRatings(reviews);
+            user.setProviderRating(rating);
+            return new ResponseEntity<>(HttpStatus.OK);
 
         }
-
-        crating.put("count", 0);
-        crating.put("rating", 0);
-        return crating;
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
 
     }
 
-    public List<UserRating> addUserReview(UserRating r) {
-        r.setRating(0);
-        userRatingsRepo.save(r);
-        // send user verification;
-        // notificationService.carReviewNotification(r);
-        return userRatingsRepo.findAllByUserId(r.getUserId(), Sort.by("timestamp").descending()).stream()
-                .filter(c -> c.getRating() == 0).collect(Collectors.toList());
+    public List<UserReview> getUserRating(String userid) {
+        Users user=usersRepo.findByPhone(userid);
+        return user.getProviderRating().getRatings().stream().sorted(Collections.reverseOrder()).collect(Collectors.toList());
+
 
     }
+
+
+
 
     public Users getUserById(String phone) {
 
@@ -93,18 +59,6 @@ public class UserService {
                         return null;
 
     }
-
-    public Users addUserDeviceToken(String token, Principal principal) {
-        Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
-        if (optional.isPresent()) {
-            Users users = optional.get();
-            users.setVerificationToken(token);
-            return usersRepo.save(users);
-        } else
-            return null;
-
-    }
-
 
     public boolean deleteUser(String id, Principal principal) {
         Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(id));
@@ -143,15 +97,7 @@ public class UserService {
             users.setBlocked(true);
             users.setBlockedBy(principal.getName());
             users.setBlockedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
-            BlockedUser blockedUser = new BlockedUser();
-            blockedUser.setUser(users);
-            blockedUser.setBlockedOn(users.getBlockedOn());
-            blockedUser.setBlockedBy(users.getBlockedBy());
-            blockedUserRepo.save(blockedUser);
-
             usersRepo.save(users);
-            PushContent content = new PushContent("Prism-health Services", "Your account has been blocked");
-            //notificationService.genericUserNotification(user.getPhone(), content);
             return true;
 
         } else
@@ -164,8 +110,6 @@ public class UserService {
             Users users = optional.get();
             users.setBlocked(false);
             usersRepo.save(users);
-            PushContent content = new PushContent("Prism-health Services", "Your account has been unblocked");
-            //notificationService.genericUserNotification(user.getPhone(), content);
             return true;
 
         } else
@@ -180,8 +124,6 @@ public class UserService {
             users.setVerifiedBy(principal.getName());
             users.setVerifiedOn(Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()));
             usersRepo.save(users);
-            PushContent content = new PushContent("Prism-health Services", "Your account has been approved");
-            //notificationService.genericUserNotification(user.getPhone(), content);
             return true;
 
         } else
@@ -196,11 +138,6 @@ public class UserService {
 
     public List<Users> getDeleteUser() {
         return usersRepo.findByDeletedAndApproveDelete(true, false, Sort.by("deletedOn").descending());
-    }
-
-    public List<Users> getPendingVerifications() {
-        return usersRepo.findByVerified(false).stream().filter(u -> authService.checkUserValidity(u))
-                .collect(Collectors.toList());
     }
 
 }

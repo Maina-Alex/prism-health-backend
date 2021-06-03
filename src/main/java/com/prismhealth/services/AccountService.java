@@ -7,6 +7,8 @@ import com.prismhealth.dto.Request.Phone;
 import com.prismhealth.dto.Request.SignUpRequest;
 
 import com.prismhealth.dto.Request.UpdateForgotPasswordReq;
+import com.prismhealth.Models.UserReview;
+import com.prismhealth.dto.Request.UserUpdateRequest;
 import com.prismhealth.dto.Response.SignInResponse;
 import com.prismhealth.dto.Response.SignUpResponse;
 import com.prismhealth.repository.*;
@@ -30,6 +32,7 @@ import java.security.Principal;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
@@ -40,7 +43,6 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 public class AccountService {
     private final UserRepository userRepository;
     private final AuthService authService;
-    private final UserRatingsRepo userRatingsRepo;
     private final UserRolesRepo userRolesRepo;
     private final BCryptPasswordEncoder encoder;
     private final MessageSender messageSender;
@@ -164,66 +166,31 @@ public class AccountService {
         return ResponseEntity.ok(authService.resetPassword(reset.getPassword(), reset.getAuthCode()));
     }
 
-    public Map<String, Integer> getUserRating(String userId) {
-        Map<String, Integer> crating = new HashMap<>();
-        List<UserRating> ratings = userRatingsRepo.findAllByUserId(userId, Sort.unsorted()).stream()
-                .filter(c -> c.getRating() > 0).collect(Collectors.toList());
-        if (!ratings.isEmpty()) {
 
-            int sum = ratings.stream().map(UserRating::getRating).reduce(0, Integer::sum);
-            int rating = sum / ratings.size();
-            crating.put("count", ratings.size());
-            crating.put("rating", rating);
-            return crating;
-        }
-        crating.put("count", 0);
-        crating.put("rating", 0);
-        return crating;
-
-    }
-
-    public List<UserRating> addUserReview(UserRating r) {
-        r.setRating(0);
-        userRatingsRepo.save(r);
-        return userRatingsRepo.findAllByUserId(r.getUserId(), Sort.by("timestamp").descending()).stream()
-                .filter(c -> c.getRating() == 0).collect(Collectors.toList());
-
-    }
-
-    public Map<String, Integer> addUserRatings(UserRating r) {
-        if (r.getRating() > 0 && r.getRating() < 6)
-            userRatingsRepo.save(r);
-        return getUserRating(r.getUserId());
-    }
-
-    public List<UserRating> getUserReview(String userid) {
-        return userRatingsRepo.findAllByUserId(userid, Sort.by("timestamp").descending()).stream()
-                .filter(c -> c.getRating() == 0).collect(Collectors.toList());
-
-    }
-
-    public ResponseEntity<SignUpResponse> updateUser(Users users) {
-        SignUpResponse signUpResponse = new SignUpResponse();
-        Users user = userRepository.findByPhone(users.getPhone());
+    public ResponseEntity<?> updateUser(UserUpdateRequest request,Principal principal) {
+        Users user = userRepository.findByPhone(principal.getName());
+        Users duplicateUser=userRepository.findByPhone(request.getPhone());
         if (user != null) {
-            Positions positions = new Positions();
-            if (user.getPosition().length >= 2) {
-                positions.setLatitude(users.getPosition()[0]);
-                positions.setLongitude(users.getPosition()[1]);
-                positions.setLocationName(users.getLocationName());
-                users.setPositions(positions);
-            } else {
-                users.setPositions(user.getPositions());
+            try{
+                if(duplicateUser!=null && duplicateUser!=user){
+                    throw new RuntimeException("Phone number already exists");
+                }
+                if(!request.getPhone().equals(""))user.setPhone(request.getPhone());
+                if(request.getDateOfBirth()!=null)user.setDateOfBirth(request.getDateOfBirth());
+                if(!request.getFirstName().equals(""))user.setFirstName(request.getFirstName());
+                if(!request.getSecondName().equals("")) user.setSecondName(request.getSecondName());
+                if(!request.getEmergencyContact1().equals(""))user.setEmergencyContact1(request.getEmergencyContact1());
+                if(!request.getEmergencyContact2().equals(""))user.setEmergencyContact2(request.getEmergencyContact2());
+                if(!request.getEmail().equals(""))user.setEmail(request.getEmail());
+                if(!request.getGender().equals(""))user.setGender(request.getGender());
+                Users saved=userRepository.save(user);
+                return ResponseEntity.ok().body(saved);
+            }catch (Exception ex){
+                return  ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(ex.getMessage());
             }
-            users.setRoles(user.getRoles());
-            users.setRating(user.getRating());
-            users.setPassword(user.getPassword());
-            signUpResponse.setMessage("successfully updated");
-            signUpResponse.setUsers(userRepository.save(users));
-            return ResponseEntity.ok(signUpResponse);
+
         }
-        signUpResponse.setMessage("Failed update, User not found");
-        return ResponseEntity.badRequest().body(signUpResponse);
+        return ResponseEntity.badRequest().body("User with phone number already exists");
     }
 
     public ResponseEntity<?> getUsers(Principal principal) {

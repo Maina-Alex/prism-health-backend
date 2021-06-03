@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class ProductsService {
-    private final VariantRepository variantRepository;
     private final CategoryRepository categoryRepository;
     private final ProductsRepository productsRepository;
     private final PhotoRepository photoRepository;
