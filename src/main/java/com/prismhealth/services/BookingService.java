@@ -134,7 +134,7 @@ public class BookingService {
             }).collect(Collectors.groupingBy(Bookings::getServiceId));
 
         } else {
-            return bookingsRepo.findAllByUserId(optional.getId(), Sort.by("date").descending()).stream().map(b -> {
+            return bookingsRepo.findAllByUserPhone(optional.getPhone(), Sort.by("date").descending()).stream().map(b -> {
                 b.setService(serviceRepo.findById(b.getServiceId()).get());
                 return b;
             }).collect(Collectors.groupingBy(Bookings::getServiceId));

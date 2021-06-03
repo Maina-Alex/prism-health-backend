@@ -13,6 +13,6 @@ public interface BookingsRepo extends MongoRepository<Bookings, String> {
 
     List<Bookings> findAllByServiceId(String serviceId, Sort sort);
 
-    List<Bookings> findAllByUserId(String userId, Sort sort);
+    List<Bookings> findAllByUserPhone(String userId, Sort sort);
 
 }

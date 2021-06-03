@@ -40,7 +40,7 @@ public class ServiceProviderService {
     public List<Bookings> getAllServicesBookings(Principal principal) {
         Optional<Users> optional = Optional.ofNullable(usersRepo.findByPhone(principal.getName()));
         if (optional.isPresent()) {
-            return bookingsRepo.findAllByUserId(optional.get().getPhone(), Sort.by("timestamp").descending());
+            return bookingsRepo.findAllByUserPhone(optional.get().getPhone(), Sort.by("timestamp").descending());
         }
 
         else
