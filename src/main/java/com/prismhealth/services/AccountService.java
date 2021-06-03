@@ -100,7 +100,6 @@ public class AccountService {
             signUpResponse.setUsers(users1);
             return ResponseEntity.ok().body(signUpResponse);
         } else {
-
             signUpResponse.setMessage("User already exists sign in..");
             return ResponseEntity.badRequest().body(signUpResponse);
         }
@@ -148,7 +147,6 @@ public class AccountService {
         return users.map(value -> JWT.create().withSubject(value.getPhone())
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .sign(HMAC512(SecurityConstants.SECRET.getBytes()))).orElse(null);
-
     }
 
     public ResponseEntity<?> changePassword(PasswordReset reset) {
