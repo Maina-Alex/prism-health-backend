@@ -92,6 +92,11 @@ public class ProductsController {
         return ResponseEntity.ok(productsService.getProductsByProviderId(providerId));
     }
 
+    @GetMapping("/productByProvider")
+    public ResponseEntity<List<Product>> getProductByProvider(Principal principal) {
+        return ResponseEntity.ok(productsService.getProductsByProviderId(principal.getName()));
+    }
+
     /* POST_MAPPINGS */
     @ApiOperation(value = "Post a category")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
