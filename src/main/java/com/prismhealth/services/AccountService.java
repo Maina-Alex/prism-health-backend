@@ -154,27 +154,32 @@ public class AccountService {
     }
 
     public ResponseEntity<?> updateUser(UserUpdateRequest request, Principal principal) {
-        Optional<Users> user = Optional.ofNullable(userRepository.findByPhone(principal.getName()));
-        if (user.isPresent()) {
+
+        Users user = userRepository.findByPhone(principal.getName());
+
+        if (user != null) {
             try {
-                if (request.getDateOfBirth() != null)
-                    user.get().setDateOfBirth(request.getDateOfBirth());
-                if (!request.getFirstName().equals(""))
-                    user.get().setFirstName(request.getFirstName());
-                if (!request.getSecondName().equals(""))
-                    user.get().setSecondName(request.getSecondName());
-                if (!request.getEmergencyContact1().equals(""))
-                    user.get().setEmergencyContact1(request.getEmergencyContact1());
-                if (!request.getEmergencyContact2().equals(""))
-                    user.get().setEmergencyContact2(request.getEmergencyContact2());
-                if (!request.getEmail().equals(""))
-                    user.get().setEmail(request.getEmail());
-                if (!request.getGender().equals(""))
-                    user.get().setGender(request.getGender());
-                Users saved = userRepository.save(user.get());
+
+                if (Optional.ofNullable(request.getDateOfBirth()).isPresent())
+                    user.setDateOfBirth(request.getDateOfBirth());
+                if (Optional.ofNullable(request.getFirstName()).isPresent())
+                    user.setFirstName(request.getFirstName());
+                if (Optional.ofNullable(request.getSecondName()).isPresent())
+                    user.setSecondName(request.getSecondName());
+                if (Optional.ofNullable(request.getEmergencyContact1()).isPresent())
+                    user.setEmergencyContact1(request.getEmergencyContact1());
+                if (Optional.ofNullable(request.getEmergencyContact2()).isPresent())
+                    user.setEmergencyContact2(request.getEmergencyContact2());
+                if (Optional.ofNullable(request.getEmail()).isPresent())
+                    user.setEmail(request.getEmail());
+                if (Optional.ofNullable(request.getGender()).isPresent())
+                    user.setGender(request.getGender());
+                Users saved = userRepository.save(user);
+
                 return ResponseEntity.ok().body(saved);
             } catch (Exception ex) {
-                return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(ex.getMessage());
+                ex.printStackTrace();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
             }
 
         }
