@@ -157,32 +157,29 @@ public class AccountService {
 
     public ResponseEntity<?> updateUser(UserUpdateRequest request, Principal principal) {
         Users user = userRepository.findByPhone(principal.getName());
-        Users duplicateUser = userRepository.findByPhone(request.getPhone());
+
         if (user != null) {
             try {
-                if (duplicateUser != null && duplicateUser != user) {
-                    throw new RuntimeException("Phone number already exists");
-                }
-                if (!request.getPhone().equals(""))
-                    user.setPhone(request.getPhone());
-                if (request.getDateOfBirth() != null)
+
+                if (Optional.ofNullable(request.getDateOfBirth()).isPresent())
                     user.setDateOfBirth(request.getDateOfBirth());
-                if (!request.getFirstName().equals(""))
+                if (Optional.ofNullable(request.getFirstName()).isPresent())
                     user.setFirstName(request.getFirstName());
-                if (!request.getSecondName().equals(""))
+                if (Optional.ofNullable(request.getSecondName()).isPresent())
                     user.setSecondName(request.getSecondName());
-                if (!request.getEmergencyContact1().equals(""))
+                if (Optional.ofNullable(request.getEmergencyContact1()).isPresent())
                     user.setEmergencyContact1(request.getEmergencyContact1());
-                if (!request.getEmergencyContact2().equals(""))
+                if (Optional.ofNullable(request.getEmergencyContact2()).isPresent())
                     user.setEmergencyContact2(request.getEmergencyContact2());
-                if (!request.getEmail().equals(""))
+                if (Optional.ofNullable(request.getEmail()).isPresent())
                     user.setEmail(request.getEmail());
-                if (!request.getGender().equals(""))
+                if (Optional.ofNullable(request.getGender()).isPresent())
                     user.setGender(request.getGender());
                 Users saved = userRepository.save(user);
                 return ResponseEntity.ok().body(saved);
             } catch (Exception ex) {
-                return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body(ex.getMessage());
+                ex.printStackTrace();
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
             }
 
         }

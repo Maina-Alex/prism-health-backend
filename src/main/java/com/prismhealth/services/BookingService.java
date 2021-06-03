@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
@@ -21,7 +23,7 @@ import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Async;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,6 +34,7 @@ public class BookingService {
     private final MailService mailService;
     private final ServiceRepo serviceRepo;
     private final BookingsRepo bookingsRepo;
+    private ExecutorService executor;
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();
@@ -73,13 +76,14 @@ public class BookingService {
         Map<String, List<ServiceBooking>> services = bookings.stream()
                 .collect(Collectors.groupingBy(ServiceBooking::getDay));
 
-        return services;
+        return new TreeMap<String, List<ServiceBooking>>(services);
 
     }
 
     public Map<String, List<ServiceBooking>> createBookings(List<Bookings> bookings, Principal principal) {
-        Optional<Users> optional = userRepository.findById(principal.getName());
-        optional.ifPresent(users -> bookings.forEach(b -> {
+        Users users = userRepository.findByPhone(principal.getName());
+
+        bookings.forEach(b -> {
             if (!b.getServiceId().isEmpty()
                     && !bookingsRepo.existsByServiceIdAndDateAndHour(b.getServiceId(), b.getDate(), b.getHour())) {
                 b.setUserPhone(users.getPhone());
@@ -88,7 +92,7 @@ public class BookingService {
                 sendEmail(users, serviceRepo.findById(b.getServiceId()).get(), "notifyProvider");
             }
 
-        }));
+        });
 
         return this.getServiceBookings(bookings.get(0).getServiceId());
     }
@@ -107,8 +111,8 @@ public class BookingService {
                 if (sOptional.isPresent())
 
                     sendEmail(optional.get(), sOptional.get(), "cancelled");
-            }else {
-                log.error("booking with id "+id+" does not exist");
+            } else {
+                log.error("booking with id " + id + " does not exist");
             }
 
         }
@@ -131,15 +135,15 @@ public class BookingService {
 
         } else {
 
-            return bookingsRepo
-                    .findAllByUserId(optional.getPhone(), Sort.by("date").descending()).stream()
+            return bookingsRepo.findAllByUserId(optional.getPhone(), Sort.by("date").descending()).stream()
                     .collect(Collectors.groupingBy(Bookings::getServiceId));
         }
 
     }
 
-    @Async
     public void sendEmail(Users users, Services services, String action) {
+        Runnable task = () -> {
+
             if (users == null) {
                 log.info("User with phone number not found");
             }
@@ -149,7 +153,7 @@ public class BookingService {
                 message = "Booking for service, " + services.getName() + " made successfully for " + users.getEmail();
             } else if (action.equals("cancelled")) {
                 message = "Booking for service " + services.getName() + " cancelled successfully";
-            }else if (action.equals("notifyProvider")){
+            } else if (action.equals("notifyProvider")) {
                 message = "";
             }
 
@@ -166,29 +170,40 @@ public class BookingService {
                 notice.setMessage(message);
                 notice.setAction(null);
                 notice.setDetails(details);
-                List<Notice> noticeList=users.getNotifications().getNotices();
+
+                Notifications notifications = Optional.ofNullable(users.getNotifications()).orElse(new Notifications());
+                List<Notice> noticeList = Optional.ofNullable(notifications.getNotices())
+                        .orElse(new ArrayList<Notice>());
+                notifications.setNotices(noticeList);
                 noticeList.add(notice);
+                users.setNotifications(notifications);
                 users.getNotifications().setNotices(noticeList);
                 userRepository.save(users);
                 log.info("Sent notices to : " + users.getEmail() + " " + LogMessage.SUCCESS);
-                if(users.getEmail()!=null&& !users.getEmail().equals("")){
+                if (users.getEmail() != null && !users.getEmail().equals("")) {
                     Mail mail = new Mail();
                     mail.setMailFrom(Constants.email);
                     mail.setMailTo(users.getEmail());
                     mail.setMailSubject("Prism-health Notice services");
-                    mail.setMailContent("You have successfully created booking for service "+services.getName()+ " at "+services.getTimestamp());
+                    mail.setMailContent("You have successfully created booking for service " + services.getName()
+                            + " at " + services.getTimestamp());
                     mailService.sendEmail(mail);
                 }
-                String email=userRepository.findByPhone(services.getProviderPhone()).getEmail();
+                String email = userRepository.findByPhone(services.getProviderPhone()).getEmail();
                 Mail providerMail = new Mail();
                 providerMail.setMailFrom(Constants.email);
                 providerMail.setMailTo(email);
                 providerMail.setMailSubject("Prism-health Notice services");
-                providerMail.setMailContent("You have a new booking for service "+services.getName()+ " at "+services.getTimestamp());
+                providerMail.setMailContent(
+                        "You have a new booking for service " + services.getName() + " at " + services.getTimestamp());
                 mailService.sendEmail(providerMail);
             } else {
                 log.info("Sending notification  " + LogMessage.FAILED + " User does not exist");
 
             }
+
+        };
+
+        executor.submit(task);
     }
 }
