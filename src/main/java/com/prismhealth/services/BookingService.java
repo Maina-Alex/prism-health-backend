@@ -131,12 +131,15 @@ public class BookingService {
             return bookings.stream().peek(b -> {
                 Optional<Users> u = Optional.ofNullable(userRepository.findByPhone(b.getUserPhone()));
                 b.setUser(u.orElse(null));
+                b.setService(serviceRepo.findById(b.getServiceId()).get());
             }).collect(Collectors.groupingBy(Bookings::getServiceId));
 
         } else {
 
-            return bookingsRepo.findAllByUserId(optional.getPhone(), Sort.by("date").descending()).stream()
-                    .collect(Collectors.groupingBy(Bookings::getServiceId));
+            return bookingsRepo.findAllByUserId(optional.getPhone(), Sort.by("date").descending()).stream().map(b -> {
+                b.setService(serviceRepo.findById(b.getServiceId()).get());
+                return b;
+            }).collect(Collectors.groupingBy(Bookings::getServiceId));
         }
 
     }
