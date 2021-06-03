@@ -33,12 +33,15 @@ public class AdminProviderController {
     @GetMapping("/providers")
     public List<Users> getAllProviders() {
         return providerService.getAllProviders();
-
     }
 
-    @PostMapping("/providers/delete")
-    public ResponseEntity<?> deleteProvider(@RequestBody Users users) {
-        return providerService.deleteProvider(users.getPhone());
+    @PostMapping("/providers/block/{phone}")
+    public ResponseEntity<?> blockProvider(@PathVariable String phone) {
+        return providerService.blockProvider(phone);
+    }
+    @PostMapping("/providers/enable/{phone}")
+    public ResponseEntity<?> enableProvider(@PathVariable String phone) {
+        return providerService.unBlock(phone);
     }
 
     @PostMapping("/providers/update")

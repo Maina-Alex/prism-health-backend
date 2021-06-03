@@ -44,12 +44,22 @@ public class AdminProviderService {
                         .collect(Collectors.toList()))).collect(Collectors.toList());
     }
 
-    public ResponseEntity<?> deleteProvider(String phone) {
+    public ResponseEntity<?> blockProvider(String phone) {
         Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(phone));
         if (user.isPresent() && !user.get().getEmail().equals("admin@prismhealth.com")) {
             Users prov=user.get();
-             prov.setDeleted(true);
+             prov.setBlocked(true);
              usersRepo.save(prov);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+    public ResponseEntity<?> unBlock(String phone) {
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(phone));
+        if (user.isPresent() && !user.get().getEmail().equals("admin@prismhealth.com")) {
+            Users prov=user.get();
+            prov.setBlocked(false);
+            usersRepo.save(prov);
             return new ResponseEntity<>(HttpStatus.OK);
         } else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
