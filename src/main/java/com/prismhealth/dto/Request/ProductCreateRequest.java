@@ -13,6 +13,7 @@ import java.util.List;
 @JsonIgnoreProperties
 @NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProductCreateRequest {
     @JsonProperty("productQuantity")
     private String productQuantity;

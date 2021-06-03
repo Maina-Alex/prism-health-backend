@@ -12,6 +12,7 @@ import lombok.NonNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+
 public class UpdateForgotPasswordReq {
     @JsonProperty("phone")
     @NonNull

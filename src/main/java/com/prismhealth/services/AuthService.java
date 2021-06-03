@@ -3,29 +3,22 @@ package com.prismhealth.services;
 import com.prismhealth.Models.Users;
 import com.prismhealth.config.UwaziiConfig;
 import com.prismhealth.dto.Request.UwaziiSmsRequest;
-
-import java.io.IOException;
-
-import java.util.Objects;
-import java.util.concurrent.Future;
-
 import com.prismhealth.repository.UserRepository;
-import com.prismhealth.repository.MailService;
 
 import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
-
 import lombok.AllArgsConstructor;
 import okhttp3.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.Objects;
+import java.util.concurrent.Future;
 
 @Service
 @AllArgsConstructor
@@ -35,7 +28,6 @@ public class AuthService {
 
     private final UserRepository usersRepo;
     private final BCryptPasswordEncoder encoder;
-    private final MailService mailService;
     private final UwaziiConfig uwaziiConfig;
 
     @Async

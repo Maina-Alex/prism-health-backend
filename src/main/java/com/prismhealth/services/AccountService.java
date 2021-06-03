@@ -78,12 +78,6 @@ public class AccountService {
             users1.setSecondName(signUpRequest.getSecondName());
             users1.setGender(signUpRequest.getGender());
             users1.setDateOfBirth(signUpRequest.getDateOfBirth());
-            users1.setLocationName(signUpRequest.getLocation());
-
-            users1.setPositions(signUpRequest.getPositions());
-
-            users1.setPosition(
-                    new double[] { users1.getPositions().getLatitude(), users1.getPositions().getLongitude() });
             users1.setEmergencyContact1(null);
             users1.setEmergencyContact2(null);
             users1.setAccountType("USER");
