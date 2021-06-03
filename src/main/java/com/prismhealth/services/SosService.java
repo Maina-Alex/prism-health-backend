@@ -6,6 +6,7 @@ import com.prismhealth.config.UwaziiConfig;
 import com.prismhealth.dto.Request.UwaziiSmsRequest;
 import com.prismhealth.repository.UserRepository;
 import com.prismhealth.util.HelperUtility;
+import lombok.AllArgsConstructor;
 import okhttp3.*;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.geo.Point;
@@ -21,14 +22,11 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 @Service
+@AllArgsConstructor
 public class SosService {
     private final UserRepository userRepository;
     private final UwaziiConfig uwaziiConfig;
 
-    public SosService(UserRepository userRepository, UwaziiConfig uwaziiConfig) {
-        this.userRepository = userRepository;
-        this.uwaziiConfig = uwaziiConfig;
-    }
 
     public ResponseEntity<String> sendSos(Positions position, Principal principal) {
         Users users = userRepository.findByPhone(principal.getName());
