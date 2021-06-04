@@ -48,7 +48,7 @@ public class ProductsService {
         List<Category> categoryList = categoryRepository.findAll();
         for (Category c : categoryList) {
             if (c.getSubCategories() != null) {
-                subCategories.addAll(c.getSubCategories());
+                subCategories.addAll(c.getSubCategories().stream().filter(cat->cat.getSubCategoryName()!=null).collect(Collectors.toList()));
             }
         }
         return subCategories;
@@ -268,7 +268,6 @@ public class ProductsService {
     }
 
     public List<Product> getProductsByProvider(Principal principal) {
-
         return productsRepository.findAllByUser(principal.getName());
     }
 
