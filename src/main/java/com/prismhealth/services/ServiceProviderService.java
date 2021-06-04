@@ -42,7 +42,6 @@ public class ServiceProviderService {
         if (optional.isPresent()) {
             return bookingsRepo.findAllByUserPhone(optional.get().getPhone(), Sort.by("timestamp").descending());
         }
-
         else
             return new ArrayList<>();
     }
