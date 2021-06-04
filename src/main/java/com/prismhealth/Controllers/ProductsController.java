@@ -3,11 +3,13 @@ package com.prismhealth.Controllers;
 import com.prismhealth.Models.Category;
 import com.prismhealth.Models.Product;
 import com.prismhealth.Models.SubCategory;
-import com.prismhealth.dto.Request.CategoryRequest;
+
 import com.prismhealth.dto.Request.ProductCreateRequest;
 import com.prismhealth.dto.Request.SubCategoryRequest;
+import com.prismhealth.dto.Request.UpdateCategoryRequest;
 import com.prismhealth.repository.CategoryRepository;
 import com.prismhealth.services.ProductsService;
+import com.prismhealth.dto.Request.CategoryRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -57,8 +59,16 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
     @GetMapping("/{categoryName}")
-    public ResponseEntity<List<Category>> getCategoryByName(@PathVariable String categoryName) {
+    public ResponseEntity<Category> getCategoryByName(@PathVariable String categoryName) {
         return ResponseEntity.ok(productsService.categoryByName(categoryName));
+    }
+
+    @ApiOperation(value = "Get category by name")
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
+            @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
+    @PostMapping("/update/")
+    public ResponseEntity<Category> updateCategoryByName(@RequestBody UpdateCategoryRequest req) {
+        return ResponseEntity.ok(productsService.updateCategory(req));
     }
 
     @ApiOperation(value = "Get sub-categories by name")

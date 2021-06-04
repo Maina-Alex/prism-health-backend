@@ -5,6 +5,7 @@ import com.prismhealth.Models.*;
 import com.prismhealth.dto.Request.CategoryRequest;
 import com.prismhealth.dto.Request.ProductCreateRequest;
 import com.prismhealth.dto.Request.SubCategoryRequest;
+import com.prismhealth.dto.Request.UpdateCategoryRequest;
 import com.prismhealth.repository.*;
 
 import lombok.AllArgsConstructor;
@@ -92,16 +93,27 @@ public class ProductsService {
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Not modified");
     }
 
-    public List<Category> categoryByName(String categoryName) {
+    public Category categoryByName(String categoryName) {
         // TODO marshal up a response for when category does not exists
-        return categoryRepository.findAll().stream().filter(r -> r.getCategoryName().contains(categoryName))
-                .collect(Collectors.toList());
+        return categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(categoryName)).findAny().orElse(null);
+    }
+    public Category updateCategory(UpdateCategoryRequest req) {
+        Category cat = categoryRepository.findAll().stream().filter(c -> c.getCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
+        ;
+        if (cat != null) {
+            if (!req.getCategoryName().equals("")) cat.setCategoryName(req.getCategoryName());
+            if (!req.getCategoryType().equals("")) cat.setCategoryType(req.getCategoryType());
+            if (!req.getDescription().equals("")) cat.setDescription(req.getDescription());
+            if (!req.getPhoto().equals("")) cat.setPhoto(req.getPhoto());
+            return categoryRepository.save(cat);
+        }
+        return null;
     }
 
     /* saving category,subCategory and product */
     public Category saveCategory(CategoryRequest req) {
-        Optional<Category> cat = categoryRepository.findByCategoryName(req.getCategoryName());
-        if (!cat.isPresent()) {
+        Category cat = categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);;
+        if (cat==null) {
             Category category = new Category();
             category.setCategoryName(req.getCategoryName());
             category.setCategoryType(req.getCategoryType());
