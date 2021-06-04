@@ -19,6 +19,4 @@ public class Notice {
     private String action;
     private String message;
     private Date timestamp = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());
-    private PushNotification pushNotification;
-
 }
