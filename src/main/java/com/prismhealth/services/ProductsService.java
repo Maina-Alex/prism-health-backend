@@ -159,7 +159,8 @@ public class ProductsService {
            if (category != null) {
                Optional<List<SubCategory>> subOp = Optional.ofNullable(category.getSubCategories());
                List<SubCategory> subCategories = subOp.orElse(new ArrayList<>());
-               if(!category.getCategoryType().equals(""))subCategory.setCategoryName(category.getCategoryName()); else throw new RuntimeException("Subcategory name cannot be null");
+               subCategory.setCategoryName(category.getCategoryName());
+               if(!req.getSubCategoryName().equals("")) subCategory.setSubCategoryName(req.getSubCategoryName()); else throw new RuntimeException("Subcategory name cannot be null");
                if(!req.getDescription().equals(""))subCategory.setDescription(req.getDescription());
                if(!req.getPhoto().equals(""))subCategory.setPhotos(req.getPhoto());
                subCategories.add(subCategory);
@@ -167,7 +168,6 @@ public class ProductsService {
                categoryRepository.save(category);
                return ResponseEntity.ok().body(subCategory);
            }
-
        } catch (Exception ex) {
            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category not found");
        }

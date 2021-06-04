@@ -18,5 +18,5 @@ public class Category {
 	private String description;
 	private String photo;
 	private List<SubCategory>subCategories;
-	private boolean disabled;
+	private boolean disabled=false;
 }
