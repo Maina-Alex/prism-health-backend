@@ -47,19 +47,19 @@ public class AccountService {
 
     public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
-        Users users = userRepository.findByPhone(phone.getPhone());
-        if (users != null) {
-            log.info("phone->" + users.getPhone());
-            signUpResponse.setMessage("user already exists");
+
+        if (!userRepository.existsByPhone(phone.getPhone())) {
+
+            signUpResponse.setMessage("user does not  exists");
             return ResponseEntity.badRequest().body(signUpResponse);
         } else {
-            String authCode = null;
-            try {
-                authCode = authService.getAuthentication(phone.getPhone()).get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            signUpResponse.setMessage("Create new user..");
+            String authCode = "ABCDE";
+            // try {
+            // authCode = authService.getAuthentication(phone.getPhone()).get();
+            // } catch (InterruptedException | ExecutionException e) {
+            // e.printStackTrace();
+            // }
+            signUpResponse.setMessage("get otp");
             signUpResponse.setAuthCode(authCode);
         }
         return ResponseEntity.ok(signUpResponse);
