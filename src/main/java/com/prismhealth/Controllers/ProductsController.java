@@ -3,10 +3,7 @@ package com.prismhealth.Controllers;
 import com.prismhealth.Models.Category;
 import com.prismhealth.Models.Product;
 import com.prismhealth.Models.SubCategory;
-import com.prismhealth.dto.Request.CategoryRequest;
-import com.prismhealth.dto.Request.ProductCreateRequest;
-import com.prismhealth.dto.Request.SubCategoryRequest;
-import com.prismhealth.dto.Request.UpdateCategoryRequest;
+import com.prismhealth.dto.Request.*;
 import com.prismhealth.repository.CategoryRepository;
 import com.prismhealth.services.ProductsService;
 import io.swagger.annotations.Api;
@@ -47,7 +44,7 @@ public class ProductsController {
 
     @PostMapping("/category/disable/{name}")
     public ResponseEntity<?>deleteCategory(@PathVariable String name){
-        return ResponseEntity.ok(productsService.delCategory(name));
+        return ResponseEntity.ok(productsService.disableCategory(name));
     }
 
     @ApiOperation(value = "Get category by name")
@@ -80,6 +77,19 @@ public class ProductsController {
     @GetMapping("/subCategories")
     public ResponseEntity<List<SubCategory>> getAllSubCategories() {
         return ResponseEntity.ok(productsService.getAllSubcategories());
+    }
+
+    @PostMapping("/subCategory/disable/{name}")
+    public ResponseEntity<?>enableSubCategory(@RequestBody UpdateSubCategoryReq req){
+        return ResponseEntity.ok(productsService.enableSubCategory(req));
+    }
+    @PostMapping("/subCategory/disable/{name}")
+    public ResponseEntity<?>disableCategory(@RequestBody UpdateSubCategoryReq req){
+        return ResponseEntity.ok(productsService.disableSubCategory(req));
+    }
+    @PostMapping("/category/disable/{name}")
+    public ResponseEntity<?>updateSubCategory(@RequestBody UpdateSubCategoryReq req){
+        return ResponseEntity.ok(productsService.updateSubCategory(req));
     }
 
     @ApiOperation(value = "Get products under a sub-category")
