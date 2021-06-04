@@ -43,7 +43,7 @@ public class ProductsService {
     public List<SubCategory> getAllSubcategories() {
         List<SubCategory> subCategories = new ArrayList<>();
         categoryRepository.findAll().forEach(c -> {
-            subCategories.addAll(c.getSubCategories());
+            if(c!=null)subCategories.addAll(c.getSubCategories());
         });
         return subCategories;
     }
