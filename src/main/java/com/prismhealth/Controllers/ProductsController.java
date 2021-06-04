@@ -3,25 +3,22 @@ package com.prismhealth.Controllers;
 import com.prismhealth.Models.Category;
 import com.prismhealth.Models.Product;
 import com.prismhealth.Models.SubCategory;
-
+import com.prismhealth.dto.Request.CategoryRequest;
 import com.prismhealth.dto.Request.ProductCreateRequest;
 import com.prismhealth.dto.Request.SubCategoryRequest;
 import com.prismhealth.dto.Request.UpdateCategoryRequest;
 import com.prismhealth.repository.CategoryRepository;
 import com.prismhealth.services.ProductsService;
-import com.prismhealth.dto.Request.CategoryRequest;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
@@ -32,9 +29,7 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 @CrossOrigin
 @AllArgsConstructor
 public class ProductsController {
-
     private final CategoryRepository categoryRepository;
-
     private final ProductsService productsService;
 
     @ApiOperation(value = "Get all categories")
@@ -66,7 +61,7 @@ public class ProductsController {
     @ApiOperation(value = "Get category by name")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
-    @PostMapping("/update/")
+    @PostMapping("/updateCategory/")
     public ResponseEntity<Category> updateCategoryByName(@RequestBody UpdateCategoryRequest req) {
         return ResponseEntity.ok(productsService.updateCategory(req));
     }
@@ -160,15 +155,5 @@ public class ProductsController {
     public ResponseEntity<?> deleteProduct(@PathVariable("productid") String productid) {
         return ResponseEntity.ok(productsService.deleteProduct(productid));
     }
-//
-//    @DeleteMapping("/category/{categoryName}")
-//    public ResponseEntity<?> deleteCategory(@PathVariable("categoryName") String categoryName) {
-//        return ResponseEntity.ok(productsService.deleteCategory(categoryName));
-//    }
-    // @DeleteMapping("/subCategory/{subCategoryName}")
-    // public ResponseEntity<?> deleteSubCategory(@PathVariable("subCategoryName")
-    // String subCategoryName) {
-    // return ResponseEntity.ok(productsService.deleteSubCategory(subCategoryName));
-    // }
 
 }
