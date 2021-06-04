@@ -227,6 +227,7 @@ public class ProductsService {
 
     public List<Product> getProductsByProviderId(String providerId) {
         return productsRepository.findAllByUser(providerId);
+<<<<<<< HEAD
     }
 
     public List<Product> getProductsByProvider(Principal principal) {
@@ -292,6 +293,8 @@ public class ProductsService {
 
     public ResponseEntity<?> getSubCategoryByName(UpdateSubCategoryReq request) {
         return null;
+=======
+>>>>>>> f35f395594943ba7de1189dc58b901bd2b37bade
     }
 
     public Product getProductById(String id) {

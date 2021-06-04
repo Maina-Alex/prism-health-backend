@@ -170,7 +170,8 @@ public class ProductsController {
     @ApiOperation(value = "Update a product")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "Product not found") })
-    @PutMapping("/products")
+    @PutMapping
+
     public ResponseEntity<?> updateProducts(@RequestBody Product product) {
         return ResponseEntity.ok(productsService.updateProduct(product));
     }
