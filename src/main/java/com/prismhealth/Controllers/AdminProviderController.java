@@ -43,6 +43,10 @@ public class AdminProviderController {
     public ResponseEntity<?> enableProvider(@PathVariable String phone) {
         return providerService.unBlock(phone);
     }
+    @PostMapping("/providers/delete/{phone}")
+    public ResponseEntity<?> deleteProvider(@PathVariable String phone) {
+        return providerService.delete(phone);
+    }
 
     @PostMapping("/providers/update")
     public ResponseEntity<?> updateProvider(@RequestBody UpdateProviderRequest request) {

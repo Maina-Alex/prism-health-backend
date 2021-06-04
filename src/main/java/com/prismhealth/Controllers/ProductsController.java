@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
@@ -40,6 +41,16 @@ public class ProductsController {
     @GetMapping("/categories")
     public ResponseEntity<List<Category>> getAllCategories() {
         return ResponseEntity.ok(categoryRepository.findAll());
+    }
+
+    @PostMapping("/category/enable/{name}")
+    public ResponseEntity<?>enableCategory(@PathVariable String name){
+        return ResponseEntity.ok(productsService.enableCategory(name));
+    }
+
+    @PostMapping("/category/disable/{name}")
+    public ResponseEntity<?>deleteCategory(@PathVariable String name){
+        return ResponseEntity.ok(productsService.delCategory(name));
     }
 
     @ApiOperation(value = "Get category by name")
@@ -139,11 +150,11 @@ public class ProductsController {
     public ResponseEntity<?> deleteProduct(@PathVariable("productid") String productid) {
         return ResponseEntity.ok(productsService.deleteProduct(productid));
     }
-
-    @DeleteMapping("/category/{categoryName}")
-    public ResponseEntity<?> deleteCategory(@PathVariable("categoryName") String categoryName) {
-        return ResponseEntity.ok(productsService.deleteCategory(categoryName));
-    }
+//
+//    @DeleteMapping("/category/{categoryName}")
+//    public ResponseEntity<?> deleteCategory(@PathVariable("categoryName") String categoryName) {
+//        return ResponseEntity.ok(productsService.deleteCategory(categoryName));
+//    }
     // @DeleteMapping("/subCategory/{subCategoryName}")
     // public ResponseEntity<?> deleteSubCategory(@PathVariable("subCategoryName")
     // String subCategoryName) {

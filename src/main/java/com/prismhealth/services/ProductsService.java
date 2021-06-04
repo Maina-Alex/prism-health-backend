@@ -71,14 +71,26 @@ public class ProductsService {
         return products;
     }
 
-    // public List<SubCategory> subCategoryByName(String subCategoryName) {
-    // // TODO marshal up a response for when product does not exists
-    // return categoryRepository.findAll()
-    // .stream()
-    // .filter(r ->
-    // r.getSubCategories().stream().filter(c->c.getCategoryName().contains(subCategoryName)))
-    // .collect(Collectors.toList());
-    // }
+    public ResponseEntity<?>enableCategory(String name){
+        Optional<Category> category=categoryRepository.findByCategoryName(name);
+        if(category.isPresent()){
+            Category cat=category.get();
+            cat.setDisabled(false);
+            categoryRepository.save(cat);
+            return  ResponseEntity.ok(cat);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Not modified");
+    }
+    public ResponseEntity<?>delCategory(String name){
+        Optional<Category> category=categoryRepository.findByCategoryName(name);
+        if(category.isPresent()){
+            Category cat=category.get();
+            cat.setDisabled(true);
+            categoryRepository.save(cat);
+            return  ResponseEntity.ok(cat);
+        }
+        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Not modified");
+    }
 
     public List<Category> categoryByName(String categoryName) {
         // TODO marshal up a response for when category does not exists

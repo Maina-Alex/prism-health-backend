@@ -64,6 +64,18 @@ public class AdminProviderService {
         } else
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+    public ResponseEntity<?> delete(String phone) {
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(phone));
+        if (user.isPresent() && !user.get().getEmail().equals("admin@prismhealth.com")) {
+            String [] p=phone.split("/+");
+            Users prov=user.get();
+            prov.setDeleted(true);
+            prov.setPhone(p[1]);
+            usersRepo.save(prov);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
 
     public ResponseEntity<?> addProvider(AddProviderReq req) {
             Optional<Users> u = Optional.ofNullable(usersRepo.findByPhone(req.getPhone()));
