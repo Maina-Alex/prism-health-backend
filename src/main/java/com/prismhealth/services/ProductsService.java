@@ -36,15 +36,17 @@ public class ProductsService {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public List<SubCategory> getSubcategoriesByName(String categoryName) {
-
         return categoryRepository.findByCategoryName(categoryName).get().getSubCategories();
     }
 
     public List<SubCategory> getAllSubcategories() {
         List<SubCategory> subCategories = new ArrayList<>();
-        categoryRepository.findAll().forEach(c -> {
-            if(c!=null)subCategories.addAll(c.getSubCategories());
-        });
+        List<Category> categoryList=categoryRepository.findAll();
+        for(Category c:categoryList) {
+            if (c.getSubCategories() != null) {
+                subCategories.addAll(c.getSubCategories());
+            }
+        }
         return subCategories;
     }
 
@@ -128,9 +130,8 @@ public class ProductsService {
         SubCategory subCategory = new SubCategory();
         Category category=categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
         if (category != null) {
-
             Optional<List<SubCategory>> subOp = Optional.ofNullable(category.getSubCategories());
-            List<SubCategory> subCategories = subOp.orElse(new ArrayList<SubCategory>());
+            List<SubCategory> subCategories = subOp.orElse(new ArrayList<>());
             subCategory.setCategoryName(category.getCategoryName());
             subCategory.setSubCategoryName(req.getCategoryName());
             subCategory.setDescription(req.getDescription());
