@@ -31,12 +31,16 @@ public class ProductsService {
     private final ProductsRepository productsRepository;
     private final PhotoRepository photoRepository;
     private final UserRepository userRepository;
-    private final MailService mailService;
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public List<SubCategory> getSubcategoriesByName(String categoryName) {
-        return categoryRepository.findByCategoryName(categoryName).get().getSubCategories();
+      Category cat= categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(categoryName))
+                .findAny().orElse(null);
+        if(cat!=null) return  cat.getSubCategories();
+        return new ArrayList<>();
     }
 
     public List<SubCategory> getAllSubcategories() {
@@ -72,32 +76,41 @@ public class ProductsService {
     }
 
     public ResponseEntity<?>enableCategory(String name){
-        Optional<Category> category=categoryRepository.findByCategoryName(name);
-        if(category.isPresent()){
-            Category cat=category.get();
-            cat.setDisabled(false);
-            categoryRepository.save(cat);
-            return  ResponseEntity.ok(cat);
+        Category category=categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(name))
+                .findAny().orElse(null);
+        if(category!=null){
+            category.setDisabled(false);
+            categoryRepository.save(category);
+            return  ResponseEntity.ok(category);
         }
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Not modified");
     }
     public ResponseEntity<?> disableCategory(String name){
-        Optional<Category> category=categoryRepository.findByCategoryName(name);
-        if(category.isPresent()){
-            Category cat=category.get();
-            cat.setDisabled(true);
-            categoryRepository.save(cat);
-            return  ResponseEntity.ok(cat);
+    Category category=categoryRepository.findAll().stream()
+                 .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(name))
+                .findAny().orElse(null);
+        if(category!=null){
+            category.setDisabled(true);
+            categoryRepository.save(category);
+            return  ResponseEntity.ok(category);
         }
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Not modified");
     }
 
     public Category categoryByName(String categoryName) {
-        return categoryRepository.findAll().stream().filter(c -> c.getCategoryName().equalsIgnoreCase(categoryName))
+        return categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(categoryName))
                 .findAny().orElse(null);
     }
     public Category updateCategory(UpdateCategoryRequest req) {
-        Category cat = categoryRepository.findAll().stream().filter(c -> c.getCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
+        Category cat = categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getOldName()))
+                .findAny().orElse(null);
         ;
         if (cat != null) {
             if (!req.getCategoryName().equals("")) cat.setCategoryName(req.getCategoryName());
@@ -111,7 +124,10 @@ public class ProductsService {
 
     /* saving category,subCategory and product */
     public Category saveCategory(CategoryRequest req) {
-        Category cat = categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
+        Category cat = categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+                .findAny().orElse(null);
         if (cat==null) {
             Category category = new Category();
             category.setCategoryName(req.getCategoryName());
@@ -127,7 +143,10 @@ public class ProductsService {
 
     public ResponseEntity<?> saveSubCategory(SubCategoryRequest req) {
         SubCategory subCategory = new SubCategory();
-        Category category=categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
+        Category category=categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+                .findAny().orElse(null);
         if (category != null) {
             Optional<List<SubCategory>> subOp = Optional.ofNullable(category.getSubCategories());
             List<SubCategory> subCategories = subOp.orElse(new ArrayList<>());
@@ -144,7 +163,10 @@ public class ProductsService {
     }
 
    public ResponseEntity<?> updateSubCategory(UpdateSubCategoryReq req){
-        Category category=categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
+        Category category=categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+               .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+               .findAny().orElse(null);
         if(category!=null){
             List<SubCategory> subCategoryList=category.getSubCategories();
             SubCategory sub=subCategoryList.stream().filter(s->s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
@@ -165,7 +187,10 @@ public class ProductsService {
 
 
     public ResponseEntity<?> enableSubCategory(UpdateSubCategoryReq req){
-        Category category=categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
+        Category category=categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+                .findAny().orElse(null);
         if(category!=null){
             List<SubCategory> subCategoryList=category.getSubCategories();
             SubCategory sub=subCategoryList.stream().filter(s->s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
@@ -183,7 +208,10 @@ public class ProductsService {
     }
 
     public ResponseEntity<?> disableSubCategory(UpdateSubCategoryReq req){
-        Category category=categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
+        Category category=categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+                .findAny().orElse(null);
         if(category!=null){
             List<SubCategory> subCategoryList=category.getSubCategories();
             SubCategory sub=subCategoryList.stream().filter(s->s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
@@ -201,7 +229,10 @@ public class ProductsService {
     }
 
     public ResponseEntity<?> getSubCategoryByName(UpdateSubCategoryReq req){
-        Category category=categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
+        Category category=categoryRepository.findAll().stream()
+                .filter(c->c.getCategoryName()!=null)
+                .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+                .findAny().orElse(null);
         if(category!=null){
             List<SubCategory> subCategoryList=category.getSubCategories();
             SubCategory sub=subCategoryList.stream().filter(s->s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
