@@ -160,17 +160,12 @@ public class BookingService {
 
             if (users != null) {
                 log.info(message);
-                AccountDetails details = new AccountDetails();
-                details.setEmail(users.getEmail());
-                details.setAccesstoken(users.getVerificationToken());
-                details.setUsername(users.getPhone());
-
                 Notice notice = new Notice();
                 notice.setEmail(users.getEmail());
                 notice.setUserId(users.getPhone());
                 notice.setMessage(message);
                 notice.setAction(null);
-                notice.setDetails(details);
+
 
                 Notifications notifications = Optional.ofNullable(users.getNotifications()).orElse(new Notifications());
                 List<Notice> noticeList = Optional.ofNullable(notifications.getNotices())

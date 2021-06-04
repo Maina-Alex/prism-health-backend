@@ -15,7 +15,6 @@ public class Notice {
     private String userId;
     private String email;
     private String title;
-    private AccountDetails details;
     private String action;
     private String message;
     private Date timestamp = Date.from(LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant());

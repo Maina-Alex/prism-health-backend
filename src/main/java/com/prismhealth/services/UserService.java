@@ -48,7 +48,7 @@ public class UserService {
     public List<Notice> getUserNotifications(String phone){
         Users user= usersRepo.findByPhone(phone);
         if(user!=null){
-            return user.getNotifications().getNotices().stream().sorted(Collections.reverseOrder()).collect(Collectors.toList());
+            return user.getNotifications().getNotices();
         }
         return new ArrayList<>();
     }
