@@ -128,68 +128,80 @@ public class ProductsService {
     }
 
     /* saving category,subCategory and product */
-    public Category saveCategory(CategoryRequest req) {
-        Category cat = categoryRepository.findAll().stream()
-                .filter(c->c.getCategoryName()!=null)
-                .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
-                .findAny().orElse(null);
-        if (cat==null) {
+    public ResponseEntity<?> saveCategory(CategoryRequest req) {
+        try{
+            Category cat = categoryRepository.findAll().stream()
+                    .filter(c->c.getCategoryName()!=null)
+                    .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+                    .findAny().orElse(null);
+            if (cat==null) {
 
-            Category category = new Category();
-            category.setCategoryName(req.getCategoryName());
-            category.setCategoryType(req.getCategoryType());
-            category.setDescription(req.getDescription());
-            category.setPhoto(req.getPhoto());
-            return categoryRepository.save(category);
+                Category category = new Category();
+                if(!req.getCategoryName().equals(""))category.setCategoryName(req.getCategoryName());else throw new RuntimeException("category cannot be null");
+                if(!req.getCategoryType().equals("")){category.setCategoryType(req.getCategoryType());}else throw new RuntimeException("category type cannot be null");
+                if(!req.getDescription().equals(""))category.setDescription(req.getDescription()); else throw new RuntimeException("description cannot be null");
+                if(!req.getPhoto().equals(""))category.setPhoto(req.getPhoto());else throw new RuntimeException("photo cannot be null");
+                return ResponseEntity.ok(categoryRepository.save(category));
 
+            }
+
+        }catch (Exception ex){
+           return ResponseEntity.badRequest().body(ex.getMessage());
         }
-
-        // TODO marshal up a response for when category exists
         return null;
     }
 
     public ResponseEntity<?> saveSubCategory(SubCategoryRequest req) {
-        SubCategory subCategory = new SubCategory();
-        Category category=categoryRepository.findAll().stream()
-                .filter(c->c.getCategoryName()!=null)
-                .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
-                .findAny().orElse(null);
-        if (category != null) {
-            Optional<List<SubCategory>> subOp = Optional.ofNullable(category.getSubCategories());
-            List<SubCategory> subCategories = subOp.orElse(new ArrayList<>());
-            subCategory.setCategoryName(category.getCategoryName());
-            subCategory.setSubCategoryName(req.getCategoryName());
-            subCategory.setDescription(req.getDescription());
-            subCategory.setPhotos(req.getPhoto());
-            subCategories.add(subCategory);
-            category.setSubCategories(subCategories);
-            categoryRepository.save(category);
-            return ResponseEntity.ok().body(subCategory);
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category not found");
+       try{
+           SubCategory subCategory = new SubCategory();
+           Category category=categoryRepository.findAll().stream()
+                   .filter(c->c.getCategoryName()!=null)
+                   .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+                   .findAny().orElse(null);
+           if (category != null) {
+               Optional<List<SubCategory>> subOp = Optional.ofNullable(category.getSubCategories());
+               List<SubCategory> subCategories = subOp.orElse(new ArrayList<>());
+               if(!category.getCategoryType().equals(""))subCategory.setCategoryName(category.getCategoryName()); else throw new RuntimeException("Subcategory name cannot be null");
+               if(!req.getDescription().equals(""))subCategory.setDescription(req.getDescription());
+               if(!req.getPhoto().equals(""))subCategory.setPhotos(req.getPhoto());
+               subCategories.add(subCategory);
+               category.setSubCategories(subCategories);
+               categoryRepository.save(category);
+               return ResponseEntity.ok().body(subCategory);
+           }
+
+       } catch (Exception ex) {
+           return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category not found");
+       }
+        return null;
     }
 
    public ResponseEntity<?> updateSubCategory(UpdateSubCategoryReq req){
-        Category category=categoryRepository.findAll().stream()
-                .filter(c->c.getCategoryName()!=null)
-               .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
-               .findAny().orElse(null);
-        if(category!=null){
-            List<SubCategory> subCategoryList=category.getSubCategories();
-            SubCategory sub=subCategoryList.stream().filter(s->s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
-            if(sub!=null){
-                if(!req.getSubCategoryName().equals(""))sub.setSubCategoryName(req.getSubCategoryName());
-                if(!req.getDescription().equals("")) sub.setDescription(req.getDescription());
-                if(!req.getPhoto().equals(""))sub.setPhotos(req.getPhoto());
-                subCategoryList.remove(sub);
-                subCategoryList.add(sub);
-                category.setSubCategories(subCategoryList);
-                categoryRepository.save(category);
-                return new ResponseEntity<>(HttpStatus.OK);
-            }
+        try {
+            Category category = categoryRepository.findAll().stream()
+                    .filter(c -> c.getCategoryName() != null)
+                    .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
+                    .findAny().orElseThrow(()->new RuntimeException("Category is null"));
+            if (category != null) {
+                List<SubCategory> subCategoryList = category.getSubCategories();
+                SubCategory sub = subCategoryList.stream().filter(s -> s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
+                if (sub != null) {
+                    if (!req.getSubCategoryName().equals("")) sub.setSubCategoryName(req.getSubCategoryName());
+                    else throw new RuntimeException("SubCategory name cannot be null");
+                    if (!req.getDescription().equals("")) sub.setDescription(req.getDescription());
+                    if (!req.getPhoto().equals("")) sub.setPhotos(req.getPhoto());
+                    subCategoryList.remove(sub);
+                    subCategoryList.add(sub);
+                    category.setSubCategories(subCategoryList);
+                    categoryRepository.save(category);
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }
 
+            }
+        }catch (Exception ex){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Sub Category not modified");
+        return null;
     }
 
     public ResponseEntity<?> enableSubCategory(UpdateSubCategoryReq req){
@@ -210,7 +222,7 @@ public class ProductsService {
             }
 
         }
-        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Sub Category not modified");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category is null");
     }
 
     public ResponseEntity<?> disableSubCategory(UpdateSubCategoryReq req){
@@ -231,7 +243,7 @@ public class ProductsService {
             }
 
         }
-        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Sub Category not modified");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Category is null");
     }
 
     public ResponseEntity<?> getSubCategoryByName(UpdateSubCategoryReq req){
