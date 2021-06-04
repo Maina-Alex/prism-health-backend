@@ -7,6 +7,7 @@ import com.prismhealth.repository.UserRepository;
 
 import com.prismhealth.util.HelperUtility;
 import com.prismhealth.util.LogMessage;
+import com.prismhealth.util.PhoneTrim;
 import lombok.AllArgsConstructor;
 import okhttp3.*;
 import org.slf4j.Logger;
@@ -68,7 +69,7 @@ public class AuthService {
     }
 
     public Users resetPassword(String password, String phone) {
-        Users accounts = usersRepo.findByPhone(phone);
+        Users accounts = usersRepo.findByPhone(PhoneTrim.trim(phone));
         if (accounts != null) {
             accounts.setPassword(encoder.encode(password));
             log.info("Password reset for User id:" + accounts.getPhone() + " " + LogMessage.SUCCESS);

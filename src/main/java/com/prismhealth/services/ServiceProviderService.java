@@ -13,6 +13,7 @@ import com.prismhealth.Models.*;
 import com.prismhealth.dto.Request.CreateServiceReq;
 import com.prismhealth.repository.*;
 
+import com.prismhealth.util.PhoneTrim;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class ServiceProviderService {
         String providerPhone = principal.getName();
         Services service = new Services();
         if (req.getProviderPhone() != null) {
-            providerPhone = req.getProviderPhone();
+            providerPhone = PhoneTrim.trim(req.getProviderPhone());
         }
         Users provider = usersRepo.findByPhone(providerPhone);
         if (provider != null) {

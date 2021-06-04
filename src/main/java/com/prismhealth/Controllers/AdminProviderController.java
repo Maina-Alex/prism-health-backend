@@ -4,6 +4,7 @@ import com.prismhealth.Models.Users;
 import com.prismhealth.dto.Request.AddProviderReq;
 import com.prismhealth.dto.Request.UpdateProviderRequest;
 import com.prismhealth.services.AdminProviderService;
+import com.prismhealth.util.PhoneTrim;
 import io.swagger.annotations.Api;
 import lombok.AllArgsConstructor;
 
@@ -22,7 +23,7 @@ public class AdminProviderController {
 
     @GetMapping("/providers/{phone}")
     public ResponseEntity<?> getProviderById(@PathVariable String phone) {
-        return providerService.getProviderById(phone);
+        return providerService.getProviderById(PhoneTrim.trim(phone));
     }
 
     @PostMapping("/providers")

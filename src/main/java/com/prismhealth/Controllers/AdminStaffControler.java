@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.prismhealth.Models.Users;
 import com.prismhealth.services.AdminStaffService;
+import com.prismhealth.util.PhoneTrim;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,7 @@ public class AdminStaffControler {
 
     @GetMapping("/id/{phone}")
     public Users getStaffById(@PathVariable("phone") String phone) {
-        return staffService.getStaffById(phone);
+        return staffService.getStaffById(PhoneTrim.trim(phone));
 
     }
 

@@ -5,6 +5,7 @@ import com.prismhealth.Models.*;
 import com.prismhealth.dto.Request.*;
 import com.prismhealth.repository.*;
 
+import com.prismhealth.util.PhoneTrim;
 import lombok.AllArgsConstructor;
 
 import org.slf4j.Logger;
@@ -277,12 +278,12 @@ public class ProductsService {
     public ResponseEntity<?> saveProduct(ProductCreateRequest req, Principal principal) {
         String phoneNumber = "";
         if (req.getProviderPhone() != null && !req.getProviderPhone().equals("")) {
-            phoneNumber = req.getProviderPhone();
+            phoneNumber = PhoneTrim.trim(req.getProviderPhone());
         } else {
             phoneNumber = principal.getName();
         }
 
-        Users users = userRepository.findByPhone(phoneNumber);
+        Users users = userRepository.findByPhone(PhoneTrim.trim(phoneNumber));
         if (users != null) {
             if (!users.getAccountType().equals("USER")) {
                 Product product = new Product();

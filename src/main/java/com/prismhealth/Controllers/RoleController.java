@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import com.prismhealth.Models.UserRoles;
 import com.prismhealth.services.RoleService;
+import com.prismhealth.util.PhoneTrim;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,16 +43,16 @@ public class RoleController {
 
     @PostMapping("/approverole/{phone}")
     public ResponseEntity<?> approveRoleById(@PathVariable String phone, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(roleService.approveRoleById(phone, principal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(roleService.approveRoleById(PhoneTrim.trim(phone), principal));
     }
 
     @DeleteMapping("/deleterole/{phone}")
     public ResponseEntity<?> deleteRoleById(@PathVariable String phone, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(roleService.deleteById(phone, principal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(roleService.deleteById(PhoneTrim.trim(phone), principal));
     }
     @DeleteMapping("/approvedelete/{phone}")
     public ResponseEntity<?> approveDeleteById(@PathVariable String phone, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(roleService.approveDeleteById(phone, principal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(roleService.approveDeleteById(PhoneTrim.trim(phone), principal));
 
     }
 

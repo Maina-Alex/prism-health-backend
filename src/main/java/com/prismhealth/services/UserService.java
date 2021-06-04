@@ -7,8 +7,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.prismhealth.Models.*;
+import com.prismhealth.dto.Request.Phone;
 import com.prismhealth.repository.UserRepository;
 
+import com.prismhealth.util.PhoneTrim;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,7 @@ public class UserService {
     private final UserRepository usersRepo;
 
     public ResponseEntity<?> addUserReview(UserReview r) {
-        Users user = usersRepo.findByPhone(r.getUserPhone());
+        Users user = usersRepo.findByPhone(PhoneTrim.trim(r.getUserPhone()));
         if (user != null) {
             ProviderRating rating = user.getProviderRating();
             List<UserReview> reviews = rating.getRatings();
@@ -39,14 +41,14 @@ public class UserService {
     }
 
     public List<UserReview> getUserRating(String userid) {
-        Users user = usersRepo.findByPhone(userid);
+        Users user = usersRepo.findByPhone(PhoneTrim.trim(userid));
         return user.getProviderRating().getRatings().stream().sorted(Collections.reverseOrder())
                 .collect(Collectors.toList());
 
     }
 
     public List<Notice> getUserNotifications(String phone){
-        Users user= usersRepo.findByPhone(phone);
+        Users user= usersRepo.findByPhone(PhoneTrim.trim(phone));
         if(user!=null){
             return user.getNotifications().getNotices();
         }
@@ -54,7 +56,7 @@ public class UserService {
     }
     public Users getUserById(String phone) {
 
-        Users users = usersRepo.findByPhone(phone);
+        Users users = usersRepo.findByPhone(PhoneTrim.trim(phone));
         if (users != null)
             return users;
         else
