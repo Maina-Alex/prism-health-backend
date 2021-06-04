@@ -48,11 +48,6 @@ public class AccountService {
     public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
 
-        if (!userRepository.existsByPhone(phone.getPhone())) {
-
-            signUpResponse.setMessage("user does not  exists");
-            return ResponseEntity.badRequest().body(signUpResponse);
-        } else {
             String authCode = "ABCDE";
             // try {
             // authCode = authService.getAuthentication(phone.getPhone()).get();
@@ -61,7 +56,7 @@ public class AccountService {
             // }
             signUpResponse.setMessage("get otp");
             signUpResponse.setAuthCode(authCode);
-        }
+        
         return ResponseEntity.ok(signUpResponse);
     }
 
