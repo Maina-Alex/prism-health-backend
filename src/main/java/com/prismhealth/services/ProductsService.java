@@ -93,8 +93,8 @@ public class ProductsService {
     }
 
     public Category categoryByName(String categoryName) {
-        // TODO marshal up a response for when category does not exists
-        return categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(categoryName)).findAny().orElse(null);
+         Optional<Category> category=categoryRepository.findByCategoryName(categoryName);
+        return category.orElse(null);
     }
     public Category updateCategory(UpdateCategoryRequest req) {
         Category cat = categoryRepository.findAll().stream().filter(c -> c.getCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
