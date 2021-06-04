@@ -163,6 +163,7 @@ public class ProductsService {
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Sub Category not modified");
    }
 
+
     public ResponseEntity<?> enableSubCategory(UpdateSubCategoryReq req){
         Category category=categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
         if(category!=null){
@@ -197,6 +198,20 @@ public class ProductsService {
 
         }
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Sub Category not modified");
+    }
+
+    public ResponseEntity<?> getSubCategoryByName(UpdateSubCategoryReq req){
+        Category category=categoryRepository.findAll().stream().filter(c->c.getCategoryName().equalsIgnoreCase(req.getCategoryName())).findAny().orElse(null);
+        if(category!=null){
+            List<SubCategory> subCategoryList=category.getSubCategories();
+            SubCategory sub=subCategoryList.stream().filter(s->s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
+            if(sub!=null){
+
+                return ResponseEntity.ok(sub);
+            }
+
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sub Category not found");
     }
 
 
@@ -249,6 +264,10 @@ public class ProductsService {
 
         productsRepository.save(product);
         return ResponseEntity.ok().body(product.getProductName() + " Successfully deleted");
+    }
+
+    public Product getProductById(String productId){
+        return productsRepository.findById(productId).orElse(null);
     }
 
 
