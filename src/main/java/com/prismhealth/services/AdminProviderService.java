@@ -91,7 +91,7 @@ public class AdminProviderService {
             users.setPassword(encoder.encode(req.getPassword()));
             users.setEmail(req.getEmail());
             users.setPosition(req.getPosition());
-            users.setPhone(req.getPhone());
+            users.setPhone(PhoneTrim.trim(req.getPhone()));
             users.setAccountType("PROVIDER");
             users.setBlocked(false);
             users.setDeleted(false);
@@ -111,7 +111,7 @@ public class AdminProviderService {
     }
 
     public ResponseEntity<?> updateProvider(UpdateProviderRequest req) {
-        Optional<Users> provider = Optional.ofNullable(usersRepo.findByPhone(req.getOldPhone()));
+        Optional<Users> provider = Optional.ofNullable(usersRepo.findByPhone(PhoneTrim.trim(req.getOldPhone())));
         if (provider.isPresent()) {
             Users prov = provider.get();
             if (req.getNewPhone() != null && !req.getNewPhone().equals(""))
