@@ -239,15 +239,68 @@ public class ProductsService {
         return ResponseEntity.ok().body("Successfully deleted..");
     }
 
+    public ResponseEntity<?> saveProduct(ProductCreateRequest req, Principal principal) {
+        String phoneNumber = "";
+        if (req.getProviderPhone() != null && !req.getProviderPhone().equals("")) {
+            phoneNumber = req.getProviderPhone();
+        } else {
+            phoneNumber = principal.getName();
+        }
+
+        Users users = userRepository.findByPhone(phoneNumber);
+        if (users != null) {
+            if (!users.getAccountType().equals("USER")) {
+                Product product = new Product();
+                product.setProductName(req.getProductName());
+                product.setSubCategory(req.getSubCategory());
+                product.setProductDescription(req.getProductDescription());
+                product.setProductQuantity(req.getProductQuantity());
+                product.setProductPrice(req.getProductPrice());
+                product.setPhotos(req.getPhotos());
+                product.setPosition(req.getPosition());
+                product.setUser(users.getPhone());
+                product.setUsers(users);
+                productsRepository.save(product);
+                return ResponseEntity.status(HttpStatus.CREATED).body(product);
+            }
+
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User forbidden to do this action");
+    }
+
+    public Photos getPhoto(String id) {
+        return photoRepository.findById(id).get();
+    }
+
+    public ResponseEntity<?> deleteProduct(String id) {
+
+        Optional<Product> prod = productsRepository.findById(id);
+
+        if (prod.isPresent()) {
+            productsRepository.delete(prod.get());
+            return ResponseEntity.ok().body(prod.get());
+        } else
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("product not found");
+
+    }
+
+    public ResponseEntity<?> updateProduct(Product product) {
+
+        productsRepository.save(product);
+        return ResponseEntity.ok().body(product.getProductName() + " Successfully deleted");
+    }
+
+    public ResponseEntity<?> getSubCategoryByName(UpdateSubCategoryReq request) {
+        return null;
+    }
+
     public Product getProductById(String id) {
+        Optional<Product> prod = productsRepository.findById(id);
+        if (prod.isPresent()) {
+            return prod.get();
+        }
         return null;
-    }
 
-    public void deleteProduct(String id) {
-    }
-
-    public ResponseEntity<?> saveProduct(ProductCreateRequest request, Principal principal) {
-        return null;
     }
 
 }
