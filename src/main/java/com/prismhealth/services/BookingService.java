@@ -34,7 +34,7 @@ public class BookingService {
     private final MailService mailService;
     private final ServiceRepo serviceRepo;
     private final BookingsRepo bookingsRepo;
-    private ExecutorService executor;
+    private final ExecutorService executor;
 
     public Map<String, List<ServiceBooking>> getServiceBookings(String serviceId) {
         LocalDate today = LocalDate.now();
@@ -121,7 +121,6 @@ public class BookingService {
 
     public Map<String, List<Bookings>> getBookingsHistory(Principal principal) {
         Users optional = userRepository.findByPhone(principal.getName());
-
         if (optional.getAccountType().equals("PROVIDER")) {
             List<Bookings> bookings = new ArrayList<>();
             List<Services> services = serviceRepo.findAllByProviderPhone(optional.getPhone());
@@ -135,11 +134,11 @@ public class BookingService {
             }).collect(Collectors.groupingBy(Bookings::getServiceId));
 
         } else {
-
-            return bookingsRepo.findAllByUserId(optional.getPhone(), Sort.by("date").descending()).stream().map(b -> {
-                b.setService(serviceRepo.findById(b.getServiceId()).get());
-                return b;
-            }).collect(Collectors.groupingBy(Bookings::getServiceId));
+            return bookingsRepo.findAllByUserPhone(optional.getPhone(), Sort.by("date").descending()).stream()
+                    .map(b -> {
+                        b.setService(serviceRepo.findById(b.getServiceId()).get());
+                        return b;
+                    }).collect(Collectors.groupingBy(Bookings::getServiceId));
         }
 
     }
@@ -162,17 +161,11 @@ public class BookingService {
 
             if (users != null) {
                 log.info(message);
-                AccountDetails details = new AccountDetails();
-                details.setEmail(users.getEmail());
-                details.setAccesstoken(users.getVerificationToken());
-                details.setUsername(users.getPhone());
-
                 Notice notice = new Notice();
                 notice.setEmail(users.getEmail());
                 notice.setUserId(users.getPhone());
                 notice.setMessage(message);
                 notice.setAction(null);
-                notice.setDetails(details);
 
                 Notifications notifications = Optional.ofNullable(users.getNotifications()).orElse(new Notifications());
                 List<Notice> noticeList = Optional.ofNullable(notifications.getNotices())

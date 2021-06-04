@@ -35,6 +35,7 @@ public class ServiceProviderController {
         return serviceProviderService.getAllServicesBookings(principal);
     }
 
+
     @PostMapping("/providers/services")
     public ResponseEntity<?> createService(@RequestBody CreateServiceReq req, Principal principal) {
         return serviceProviderService.createService(req, principal);
@@ -48,6 +49,10 @@ public class ServiceProviderController {
     @GetMapping("/getServiceById/{serviceId}")
     public Services getServiceById(@PathVariable String serviceId) {
         return serviceProviderService.getServiceById(serviceId);
+    }
+    @GetMapping("/getServiceBookings/{serviceId}")
+    public ResponseEntity<?> getAllBookingsByService(@PathVariable String serviceId){
+        return ResponseEntity.ok(bookingService.getServiceBookings(serviceId));
     }
 
     @GetMapping("/users/all")

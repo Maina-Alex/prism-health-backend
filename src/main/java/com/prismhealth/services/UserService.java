@@ -45,6 +45,13 @@ public class UserService {
 
     }
 
+    public List<Notice> getUserNotifications(String phone){
+        Users user= usersRepo.findByPhone(phone);
+        if(user!=null){
+            return user.getNotifications().getNotices();
+        }
+        return new ArrayList<>();
+    }
     public Users getUserById(String phone) {
 
         Users users = usersRepo.findByPhone(phone);

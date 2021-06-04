@@ -1,5 +1,6 @@
 package com.prismhealth.Controllers;
 
+import com.prismhealth.Models.Notice;
 import com.prismhealth.Models.PasswordReset;
 import com.prismhealth.Models.UserReview;
 import com.prismhealth.Models.Users;
@@ -133,5 +134,10 @@ public class AccountController {
     public List<UserReview> getReviews(@RequestParam String id) {
 
         return userService.getUserRating(id);
+    }
+
+    @GetMapping("/notification/all/{phone}")
+    public List<Notice> getAllUserNotifications(@PathVariable String phone){
+        return  userService.getUserNotifications(phone);
     }
 }

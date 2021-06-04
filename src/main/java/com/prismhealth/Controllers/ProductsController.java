@@ -3,9 +3,7 @@ package com.prismhealth.Controllers;
 import com.prismhealth.Models.Category;
 import com.prismhealth.Models.Product;
 import com.prismhealth.Models.SubCategory;
-import com.prismhealth.dto.Request.CategoryRequest;
-import com.prismhealth.dto.Request.ProductCreateRequest;
-import com.prismhealth.dto.Request.SubCategoryRequest;
+import com.prismhealth.dto.Request.*;
 import com.prismhealth.repository.CategoryRepository;
 import com.prismhealth.services.ProductsService;
 import io.swagger.annotations.Api;
@@ -13,7 +11,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +19,7 @@ import java.util.List;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
+import lombok.AllArgsConstructor;
 
 @Api(tags = "Products Api")
 @RestController
@@ -29,9 +27,7 @@ import static javax.servlet.http.HttpServletResponse.SC_OK;
 @CrossOrigin
 @AllArgsConstructor
 public class ProductsController {
-
     private final CategoryRepository categoryRepository;
-
     private final ProductsService productsService;
 
     @ApiOperation(value = "Get all categories")
@@ -42,12 +38,30 @@ public class ProductsController {
         return ResponseEntity.ok(categoryRepository.findAll());
     }
 
+    @PostMapping("/category/enable/{name}")
+    public ResponseEntity<?> enableCategory(@PathVariable String name) {
+        return ResponseEntity.ok(productsService.enableCategory(name));
+    }
+
+    @PostMapping("/category/disable/{name}")
+    public ResponseEntity<?> deleteCategory(@PathVariable String name) {
+        return ResponseEntity.ok(productsService.disableCategory(name));
+    }
+
     @ApiOperation(value = "Get category by name")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
     @GetMapping("/{categoryName}")
-    public ResponseEntity<List<Category>> getCategoryByName(@PathVariable String categoryName) {
+    public ResponseEntity<Category> getCategoryByName(@PathVariable String categoryName) {
         return ResponseEntity.ok(productsService.categoryByName(categoryName));
+    }
+
+    @ApiOperation(value = "Get category by name")
+    @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
+            @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
+    @PostMapping("/updateCategory/")
+    public ResponseEntity<Category> updateCategoryByName(@RequestBody UpdateCategoryRequest req) {
+        return ResponseEntity.ok(productsService.updateCategory(req));
     }
 
     @ApiOperation(value = "Get sub-categories by name")
@@ -64,6 +78,21 @@ public class ProductsController {
     @GetMapping("/subCategories")
     public ResponseEntity<List<SubCategory>> getAllSubCategories() {
         return ResponseEntity.ok(productsService.getAllSubcategories());
+    }
+
+    @PostMapping("/subCategory/enable")
+    public ResponseEntity<?> enableSubCategory(@RequestBody UpdateSubCategoryReq req) {
+        return ResponseEntity.ok(productsService.enableSubCategory(req));
+    }
+
+    @PostMapping("/subCategory/disable")
+    public ResponseEntity<?> disableCategory(@RequestBody UpdateSubCategoryReq req) {
+        return ResponseEntity.ok(productsService.disableSubCategory(req));
+    }
+
+    @PostMapping("/subCategory/update")
+    public ResponseEntity<?> updateSubCategory(@RequestBody UpdateSubCategoryReq req) {
+        return ResponseEntity.ok(productsService.updateSubCategory(req));
     }
 
     @ApiOperation(value = "Get products under a sub-category")
@@ -127,7 +156,7 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "Product not found") })
     @PutMapping("/products")
-    public ResponseEntity<?> updateProduct(@RequestBody Product product) {
+    public ResponseEntity<?> updateProducts(@RequestBody Product product) {
         return ResponseEntity.ok(productsService.updateProduct(product));
     }
 
@@ -136,18 +165,8 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "Product not found") })
     @DeleteMapping("/products/{productid}")
-    public ResponseEntity<?> deleteProduct(@PathVariable("productid") String productid) {
+    public ResponseEntity<?> deleteProducts(@PathVariable("productid") String productid) {
         return ResponseEntity.ok(productsService.deleteProduct(productid));
     }
-
-    @DeleteMapping("/category/{categoryName}")
-    public ResponseEntity<?> deleteCategory(@PathVariable("categoryName") String categoryName) {
-        return ResponseEntity.ok(productsService.deleteCategory(categoryName));
-    }
-    // @DeleteMapping("/subCategory/{subCategoryName}")
-    // public ResponseEntity<?> deleteSubCategory(@PathVariable("subCategoryName")
-    // String subCategoryName) {
-    // return ResponseEntity.ok(productsService.deleteSubCategory(subCategoryName));
-    // }
 
 }
