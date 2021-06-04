@@ -134,10 +134,11 @@ public class BookingService {
             }).collect(Collectors.groupingBy(Bookings::getServiceId));
 
         } else {
-            return bookingsRepo.findAllByUserPhone(optional.getPhone(), Sort.by("date").descending()).stream().map(b -> {
-                b.setService(serviceRepo.findById(b.getServiceId()).get());
-                return b;
-            }).collect(Collectors.groupingBy(Bookings::getServiceId));
+            return bookingsRepo.findAllByUserPhone(optional.getPhone(), Sort.by("date").descending()).stream()
+                    .map(b -> {
+                        b.setService(serviceRepo.findById(b.getServiceId()).get());
+                        return b;
+                    }).collect(Collectors.groupingBy(Bookings::getServiceId));
         }
 
     }
@@ -165,7 +166,6 @@ public class BookingService {
                 notice.setUserId(users.getPhone());
                 notice.setMessage(message);
                 notice.setAction(null);
-
 
                 Notifications notifications = Optional.ofNullable(users.getNotifications()).orElse(new Notifications());
                 List<Notice> noticeList = Optional.ofNullable(notifications.getNotices())

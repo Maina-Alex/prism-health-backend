@@ -19,6 +19,7 @@ import java.util.List;
 
 import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
 import static javax.servlet.http.HttpServletResponse.SC_OK;
+import lombok.AllArgsConstructor;
 
 @Api(tags = "Products Api")
 @RestController
@@ -38,12 +39,12 @@ public class ProductsController {
     }
 
     @PostMapping("/category/enable/{name}")
-    public ResponseEntity<?>enableCategory(@PathVariable String name){
+    public ResponseEntity<?> enableCategory(@PathVariable String name) {
         return ResponseEntity.ok(productsService.enableCategory(name));
     }
 
     @PostMapping("/category/disable/{name}")
-    public ResponseEntity<?>deleteCategory(@PathVariable String name){
+    public ResponseEntity<?> deleteCategory(@PathVariable String name) {
         return ResponseEntity.ok(productsService.disableCategory(name));
     }
 
@@ -80,15 +81,17 @@ public class ProductsController {
     }
 
     @PostMapping("/subCategory/enable")
-    public ResponseEntity<?>enableSubCategory(@RequestBody UpdateSubCategoryReq req){
+    public ResponseEntity<?> enableSubCategory(@RequestBody UpdateSubCategoryReq req) {
         return ResponseEntity.ok(productsService.enableSubCategory(req));
     }
+
     @PostMapping("/subCategory/disable")
-    public ResponseEntity<?>disableCategory(@RequestBody UpdateSubCategoryReq req){
+    public ResponseEntity<?> disableCategory(@RequestBody UpdateSubCategoryReq req) {
         return ResponseEntity.ok(productsService.disableSubCategory(req));
     }
+
     @PostMapping("/subCategory/update")
-    public ResponseEntity<?>updateSubCategory(@RequestBody UpdateSubCategoryReq req){
+    public ResponseEntity<?> updateSubCategory(@RequestBody UpdateSubCategoryReq req) {
         return ResponseEntity.ok(productsService.updateSubCategory(req));
     }
 
@@ -167,7 +170,7 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "Product not found") })
     @PutMapping("/products")
-    public ResponseEntity<?> updateProduct(@RequestBody Product product) {
+    public ResponseEntity<?> updateProducts(@RequestBody Product product) {
         return ResponseEntity.ok(productsService.updateProduct(product));
     }
 
@@ -176,7 +179,7 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "Product not found") })
     @DeleteMapping("/products/{productid}")
-    public ResponseEntity<?> deleteProduct(@PathVariable("productid") String productid) {
+    public ResponseEntity<?> deleteProducts(@PathVariable("productid") String productid) {
         return ResponseEntity.ok(productsService.deleteProduct(productid));
     }
 
