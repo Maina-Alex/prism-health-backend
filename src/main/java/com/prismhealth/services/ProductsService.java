@@ -45,8 +45,8 @@ public class ProductsService {
 
     public List<SubCategory> getAllSubcategories() {
         List<SubCategory> subCategories = new ArrayList<>();
-        List<Category> categoryList=categoryRepository.findAll();
-        for(Category c:categoryList) {
+        List<Category> categoryList = categoryRepository.findAll();
+        for (Category c : categoryList) {
             if (c.getSubCategories() != null) {
                 subCategories.addAll(c.getSubCategories());
             }
@@ -106,17 +106,22 @@ public class ProductsService {
                 .filter(c -> c.getCategoryName().equalsIgnoreCase(categoryName))
                 .findAny().orElse(null);
     }
+
     public Category updateCategory(UpdateCategoryRequest req) {
         Category cat = categoryRepository.findAll().stream()
                 .filter(c->c.getCategoryName()!=null)
                 .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getOldName()))
                 .findAny().orElse(null);
-        ;
+
         if (cat != null) {
-            if (!req.getCategoryName().equals("")) cat.setCategoryName(req.getCategoryName());
-            if (!req.getCategoryType().equals("")) cat.setCategoryType(req.getCategoryType());
-            if (!req.getDescription().equals("")) cat.setDescription(req.getDescription());
-            if (!req.getPhoto().equals("")) cat.setPhoto(req.getPhoto());
+            if (!req.getCategoryName().equals(""))
+                cat.setCategoryName(req.getCategoryName());
+            if (!req.getCategoryType().equals(""))
+                cat.setCategoryType(req.getCategoryType());
+            if (!req.getDescription().equals(""))
+                cat.setDescription(req.getDescription());
+            if (!req.getPhoto().equals(""))
+                cat.setPhoto(req.getPhoto());
             return categoryRepository.save(cat);
         }
         return null;
@@ -129,12 +134,14 @@ public class ProductsService {
                 .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
                 .findAny().orElse(null);
         if (cat==null) {
+
             Category category = new Category();
             category.setCategoryName(req.getCategoryName());
             category.setCategoryType(req.getCategoryType());
             category.setDescription(req.getDescription());
             category.setPhoto(req.getPhoto());
             return categoryRepository.save(category);
+
         }
 
         // TODO marshal up a response for when category exists
@@ -183,8 +190,7 @@ public class ProductsService {
 
         }
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Sub Category not modified");
-   }
-
+    }
 
     public ResponseEntity<?> enableSubCategory(UpdateSubCategoryReq req){
         Category category=categoryRepository.findAll().stream()
@@ -233,18 +239,31 @@ public class ProductsService {
                 .filter(c->c.getCategoryName()!=null)
                 .filter(c -> c.getCategoryName().equalsIgnoreCase(req.getCategoryName()))
                 .findAny().orElse(null);
-        if(category!=null){
-            List<SubCategory> subCategoryList=category.getSubCategories();
-            SubCategory sub=subCategoryList.stream().filter(s->s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
-            if(sub!=null){
-
+        if(category!=null) {
+            List<SubCategory> subCategoryList = category.getSubCategories();
+            SubCategory sub = subCategoryList.stream().
+                    filter(s -> s.getSubCategoryName() != null)
+                    .filter(s -> s.getSubCategoryName().equalsIgnoreCase(req.getOldName())).findAny().orElse(null);
+            if (sub != null) {
                 return ResponseEntity.ok(sub);
             }
-
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sub Category not found");
+        return  null;
     }
 
+    public List<Product> getProductsByProviderId(String providerId) {
+        return productsRepository.findAllByUser(providerId);
+    }
+
+    public List<Product> getProductsByProvider(Principal principal) {
+
+        return productsRepository.findAllByUser(principal.getName());
+    }
+
+    public ResponseEntity<?> deleteCategory(String categoryName) {
+        categoryRepository.delete(categoryRepository.findByCategoryName(categoryName).get());
+        return ResponseEntity.ok().body("Successfully deleted..");
+    }
 
     public ResponseEntity<?> saveProduct(ProductCreateRequest req, Principal principal) {
         String phoneNumber = "";
@@ -297,28 +316,17 @@ public class ProductsService {
         return ResponseEntity.ok().body(product.getProductName() + " Successfully deleted");
     }
 
-    public Product getProductById(String productId){
-        return productsRepository.findById(productId).orElse(null);
+
+    public Product getProductById(String id) {
+        Optional<Product> prod = productsRepository.findById(id);
+        return prod.orElse(null);
+
     }
 
-
-    public List<Product> getAllAvailableProducts() {
-        return productsRepository.findAll();
+    public List<Product> getAllAvailableProducts(){
+        return productsRepository.findAll().stream()
+                .filter(Product::isNotDisabled)
+                .collect(Collectors.toList());
     }
-
-    public List<Product> getProductsByProviderId(String providerId) {
-        return productsRepository.findAllByUser(providerId);
-    }
-
-    public List<Product> getProductsByProvider(Principal principal) {
-
-        return productsRepository.findAllByUser(principal.getName());
-    }
-
-    public ResponseEntity<?> deleteCategory(String categoryName) {
-        categoryRepository.delete(categoryRepository.findByCategoryName(categoryName).get());
-        return ResponseEntity.ok().body("Successfully deleted..");
-    }
-
 
 }

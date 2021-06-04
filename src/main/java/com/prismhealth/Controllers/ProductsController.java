@@ -144,7 +144,7 @@ public class ProductsController {
     }
 
     @GetMapping("/subcategory/")
-    public ResponseEntity<?>  getSubCategory(@RequestBody UpdateSubCategoryReq request){
+    public ResponseEntity<?> getSubCategory(@RequestBody UpdateSubCategoryReq request) {
         return productsService.getSubCategoryByName(request);
     }
 
@@ -157,19 +157,21 @@ public class ProductsController {
     }
 
     @GetMapping("/product/{id}")
-    public Product findProductById(@PathVariable String id){
+    public Product findProductById(@PathVariable String id) {
         return productsService.getProductById(id);
     }
+
     @PostMapping("/product/{id}")
-    public void deleteProductById(@PathVariable String id){
-         productsService.deleteProduct(id);
+    public void deleteProductById(@PathVariable String id) {
+        productsService.deleteProduct(id);
     }
 
     /* PUT MAPPINGS */
     @ApiOperation(value = "Update a product")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "Product not found") })
-    @PutMapping("/products")
+    @PutMapping
+
     public ResponseEntity<?> updateProducts(@RequestBody Product product) {
         return ResponseEntity.ok(productsService.updateProduct(product));
     }
