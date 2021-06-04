@@ -79,15 +79,15 @@ public class ProductsController {
         return ResponseEntity.ok(productsService.getAllSubcategories());
     }
 
-    @PostMapping("/subCategory/disable/{name}")
+    @PostMapping("/subCategory/enable")
     public ResponseEntity<?>enableSubCategory(@RequestBody UpdateSubCategoryReq req){
         return ResponseEntity.ok(productsService.enableSubCategory(req));
     }
-    @PostMapping("/subCategory/disable/{name}")
+    @PostMapping("/subCategory/disable")
     public ResponseEntity<?>disableCategory(@RequestBody UpdateSubCategoryReq req){
         return ResponseEntity.ok(productsService.disableSubCategory(req));
     }
-    @PostMapping("/category/disable/{name}")
+    @PostMapping("/subCategory/update")
     public ResponseEntity<?>updateSubCategory(@RequestBody UpdateSubCategoryReq req){
         return ResponseEntity.ok(productsService.updateSubCategory(req));
     }
