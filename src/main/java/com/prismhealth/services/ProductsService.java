@@ -36,15 +36,17 @@ public class ProductsService {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     public List<SubCategory> getSubcategoriesByName(String categoryName) {
-
         return categoryRepository.findByCategoryName(categoryName).get().getSubCategories();
     }
 
     public List<SubCategory> getAllSubcategories() {
         List<SubCategory> subCategories = new ArrayList<>();
-        categoryRepository.findAll().forEach(c -> {
-            subCategories.addAll(c.getSubCategories());
-        });
+        List<Category> categoryList = categoryRepository.findAll();
+        for (Category c : categoryList) {
+            if (c.getSubCategories() != null) {
+                subCategories.addAll(c.getSubCategories());
+            }
+        }
         return subCategories;
     }
 
@@ -135,6 +137,7 @@ public class ProductsService {
 
     public ResponseEntity<?> saveSubCategory(SubCategoryRequest req) {
         SubCategory subCategory = new SubCategory();
+
         Optional<Category> category = categoryRepository.findByCategoryName(req.getCategoryName());
         if (category.isPresent()) {
 
@@ -142,6 +145,7 @@ public class ProductsService {
             List<SubCategory> subCategories = subOp.orElse(new ArrayList<SubCategory>());
             subCategory.setCategoryName(category.get().getCategoryName());
             subCategory.setSubCategoryName(req.getSubCategoryName());
+
             subCategory.setDescription(req.getDescription());
             subCategory.setPhotos(req.getPhoto());
             subCategories.add(subCategory);
@@ -215,57 +219,6 @@ public class ProductsService {
 
         }
         return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Sub Category not modified");
-    }
-
-    public ResponseEntity<?> saveProduct(ProductCreateRequest req, Principal principal) {
-        String phoneNumber = "";
-        if (req.getProviderPhone() != null && !req.getProviderPhone().equals("")) {
-            phoneNumber = req.getProviderPhone();
-        } else {
-            phoneNumber = principal.getName();
-        }
-
-        Users users = userRepository.findByPhone(phoneNumber);
-        if (users != null) {
-            if (!users.getAccountType().equals("USER")) {
-                Product product = new Product();
-                product.setProductName(req.getProductName());
-                product.setSubCategory(req.getSubCategory());
-                product.setProductDescription(req.getProductDescription());
-                product.setProductQuantity(req.getProductQuantity());
-                product.setProductPrice(req.getProductPrice());
-                product.setPhotos(req.getPhotos());
-                product.setPosition(req.getPosition());
-                product.setUser(users.getPhone());
-                product.setUsers(users);
-                productsRepository.save(product);
-                return ResponseEntity.status(HttpStatus.CREATED).body(product);
-            }
-
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User forbidden to do this action");
-    }
-
-    public Photos getPhoto(String id) {
-        return photoRepository.findById(id).get();
-    }
-
-    public ResponseEntity<?> deleteProduct(String id) {
-
-        Optional<Product> prod = productsRepository.findById(id);
-
-        if (prod.isPresent()) {
-            productsRepository.delete(prod.get());
-            return ResponseEntity.ok().body(prod.get());
-        } else
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("product not found");
-
-    }
-
-    public ResponseEntity<?> updateProduct(Product product) {
-
-        productsRepository.save(product);
-        return ResponseEntity.ok().body(product.getProductName() + " Successfully deleted");
     }
 
     public List<Product> getAllAvailableProducts() {

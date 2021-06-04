@@ -143,12 +143,26 @@ public class ProductsController {
         return productsService.saveSubCategory(request);
     }
 
+    @GetMapping("/subcategory/")
+    public ResponseEntity<?>  getSubCategory(@RequestBody UpdateSubCategoryReq request){
+        return productsService.getSubCategoryByName(request);
+    }
+
     @ApiOperation(value = "Post a product")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/products")
     public ResponseEntity<?> createProduct(@RequestBody ProductCreateRequest request, Principal principal) {
         return productsService.saveProduct(request, principal);
+    }
+
+    @GetMapping("/product/{id}")
+    public Product findProductById(@PathVariable String id){
+        return productsService.getProductById(id);
+    }
+    @PostMapping("/product/{id}")
+    public void deleteProductById(@PathVariable String id){
+         productsService.deleteProduct(id);
     }
 
     /* PUT MAPPINGS */
