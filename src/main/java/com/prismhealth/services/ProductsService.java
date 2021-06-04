@@ -47,9 +47,7 @@ public class ProductsService {
         List<SubCategory> subCategories = new ArrayList<>();
         List<Category> categoryList = categoryRepository.findAll();
         for (Category c : categoryList) {
-            if (c.getSubCategories() != null) {
-                subCategories.addAll(c.getSubCategories().stream().filter(cat->cat.getSubCategoryName()!=null).collect(Collectors.toList()));
-            }
+            subCategories.addAll(c.getSubCategories());
         }
         return subCategories;
     }

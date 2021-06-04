@@ -35,7 +35,7 @@ public class ProductsController {
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
     @GetMapping("/categories")
     public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok(categoryRepository.findAll());
+        return ResponseEntity.ok().body(categoryRepository.findAll());
     }
 
     @PostMapping("/category/enable/{name}")
