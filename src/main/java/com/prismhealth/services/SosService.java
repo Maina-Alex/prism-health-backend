@@ -69,7 +69,7 @@ public class SosService {
             Response response = new OkHttpClient().newCall(request).execute();
             if (response.code() == 200) {
                 response.close();
-                return new AsyncResult<ResponseEntity<String>>( new ResponseEntity<String>("successfully sent", HttpStatus.ACCEPTED));
+                return new AsyncResult<ResponseEntity<String>>( new ResponseEntity<String>("successfully sent", HttpStatus.OK));
             }
         } catch (IOException e) {
             LoggerFactory.getLogger(this.getClass())

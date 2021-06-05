@@ -64,7 +64,7 @@ public class AccountService {
     public ResponseEntity<SignUpResponse> signUpUser(SignUpRequest signUpRequest) {
         SignUpResponse signUpResponse = new SignUpResponse();
 
-        Users thisUsers = userRepository.findByPhone(signUpRequest.getPhone());
+        Users thisUsers = userRepository.findByPhone(PhoneTrim.trim(signUpRequest.getPhone()));
         if (thisUsers == null) {
             Users users1 = new Users();
             users1.setPassword(encoder.encode(signUpRequest.getPassword()));
