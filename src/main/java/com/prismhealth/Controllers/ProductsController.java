@@ -92,7 +92,7 @@ public class ProductsController {
 
     @PostMapping("/subCategory/update")
     public ResponseEntity<?> updateSubCategory(@RequestBody UpdateSubCategoryReq req) {
-        return ResponseEntity.ok(productsService.updateSubCategory(req));
+        return productsService.updateSubCategory(req);
     }
 
     @ApiOperation(value = "Get products under a sub-category")
