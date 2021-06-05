@@ -50,6 +50,7 @@ public class UserService {
     public List<Notice> getUserNotifications(String phone){
         Users user= usersRepo.findByPhone(PhoneTrim.trim(phone));
         if(user!=null){
+            if(user.getNotifications().getNotices()!=null)
             return user.getNotifications().getNotices();
         }
         return new ArrayList<>();

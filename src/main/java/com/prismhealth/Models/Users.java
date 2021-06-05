@@ -79,7 +79,7 @@ public class Users {
 
 	private boolean approveDelete;
 
-	private Notifications notifications;
+	private Notifications notifications=new Notifications();
 
 	private ProviderRating providerRating;
 }
