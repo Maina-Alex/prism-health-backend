@@ -59,7 +59,7 @@ public class ProductsController {
     @ApiOperation(value = "Get category by name")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
-    @PostMapping("/updateCategory/")
+    @PostMapping("/updateCategory")
     public ResponseEntity<Category> updateCategoryByName(@RequestBody UpdateCategoryRequest req) {
         return ResponseEntity.ok(productsService.updateCategory(req));
     }
