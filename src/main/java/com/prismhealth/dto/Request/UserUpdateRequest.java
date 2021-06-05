@@ -11,7 +11,7 @@ import java.util.Date;
 
 @AllArgsConstructor
 @Data
-@JsonIgnoreProperties
+@JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
 public class UserUpdateRequest {
     @JsonProperty("firstName")

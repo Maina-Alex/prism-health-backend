@@ -3,6 +3,7 @@ package com.prismhealth.security;
 import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prismhealth.Models.Users;
+import com.prismhealth.util.PhoneTrim;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,7 +39,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             throws AuthenticationException {
         try {
             Users creds = new ObjectMapper().readValue(req.getInputStream(), Users.class);
-            String username = creds.getPhone();
+            String username = PhoneTrim.trim(creds.getPhone());
             String password = creds.getPassword();
 
             return authenticationManager

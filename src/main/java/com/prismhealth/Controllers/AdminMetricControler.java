@@ -19,10 +19,10 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class AdminMetricControler {
 
-    private BookingsRepo bookings;
-    private ServiceRepo serviceRepo;
-    private ProductsRepository productsRepository;
-    private AdminProviderService provider;
+    private final BookingsRepo bookings;
+    private  final ServiceRepo serviceRepo;
+    private final ProductsRepository productsRepository;
+    private final AdminProviderService provider;
 
     @GetMapping
     public Map<String, Long> getMetrics() {

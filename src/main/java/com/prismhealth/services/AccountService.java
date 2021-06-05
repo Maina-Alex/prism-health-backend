@@ -15,6 +15,7 @@ import com.prismhealth.repository.*;
 import com.prismhealth.security.SecurityConstants;
 
 import com.prismhealth.util.HelperUtility;
+import com.prismhealth.util.PhoneTrim;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +68,7 @@ public class AccountService {
         if (thisUsers == null) {
             Users users1 = new Users();
             users1.setPassword(encoder.encode(signUpRequest.getPassword()));
-            users1.setPhone(signUpRequest.getPhone());
+            users1.setPhone(PhoneTrim.trim(signUpRequest.getPhone()));
             users1.setEmail(signUpRequest.getEmail());
             users1.setFirstName(signUpRequest.getFirstName());
             users1.setSecondName(signUpRequest.getSecondName());
@@ -76,7 +77,7 @@ public class AccountService {
             users1.setEmergencyContact1(null);
             users1.setEmergencyContact2(null);
             users1.setAccountType("USER");
-            log.info("Registering new Mobile User:  Id:" + users1.getPhone());
+            log.info("Registering new Mobile User:  Id:" + PhoneTrim.trim(users1.getPhone()));
 
             users1.setVerified(true);
             users1.setBlocked(false);
@@ -114,12 +115,12 @@ public class AccountService {
     public ResponseEntity<?> forgotPassword(@NonNull Phone phone) {
 
         try {
-            Users users = userRepository.findByPhone(phone.getPhone());
+            Users users = userRepository.findByPhone(PhoneTrim.trim(phone.getPhone()));
             if (users == null) {
                 return new ResponseEntity<>("User with phone number " + phone + " not found", HttpStatus.NOT_FOUND);
             } else {
                 log.info("Forgot password request, user email  " + users.getEmail());
-                String code = Objects.requireNonNull(forgotPasswordMail(phone.getPhone())).get();
+                String code = Objects.requireNonNull(forgotPasswordMail(PhoneTrim.trim(phone.getPhone()))).get();
                 if (code != null) {
                     users.setVerificationToken(code);
                     userRepository.save(users);
@@ -134,11 +135,11 @@ public class AccountService {
 
     private Future<String> forgotPasswordMail(String phone) {
         String code = HelperUtility.getConfirmCodeNumber();
-        return messageSender.sendMessage(phone, code);
+        return messageSender.sendMessage(PhoneTrim.trim(phone), code);
     }
 
     public String getToken(String phone) {
-        Optional<Users> users = Optional.ofNullable(userRepository.findByPhone(phone));
+        Optional<Users> users = Optional.ofNullable(userRepository.findByPhone(PhoneTrim.trim(phone)));
         return users.map(value -> JWT.create().withSubject(value.getPhone())
                 .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
                 .sign(HMAC512(SecurityConstants.SECRET.getBytes()))).orElse(null);
@@ -157,17 +158,17 @@ public class AccountService {
 
                 if (Optional.ofNullable(request.getDateOfBirth()).isPresent())
                     user.setDateOfBirth(request.getDateOfBirth());
-                if (Optional.ofNullable(request.getFirstName()).isPresent())
+                if ( !request.getFirstName().equals(""))
                     user.setFirstName(request.getFirstName());
-                if (Optional.ofNullable(request.getSecondName()).isPresent())
+                if (!request.getSecondName().equals(""))
                     user.setSecondName(request.getSecondName());
-                if (Optional.ofNullable(request.getEmergencyContact1()).isPresent())
+                if (!request.getEmergencyContact1().equals(""))
                     user.setEmergencyContact1(request.getEmergencyContact1());
-                if (Optional.ofNullable(request.getEmergencyContact2()).isPresent())
+                if (!request.getEmergencyContact2().equals(""))
                     user.setEmergencyContact2(request.getEmergencyContact2());
-                if (Optional.ofNullable(request.getEmail()).isPresent())
+                if (!request.getEmail().equals(""))
                     user.setEmail(request.getEmail());
-                if (Optional.ofNullable(request.getGender()).isPresent())
+                if (!request.getGender().equals(""))
                     user.setGender(request.getGender());
                 Users saved = userRepository.save(user);
 
@@ -178,13 +179,13 @@ public class AccountService {
             }
 
         }
-        return ResponseEntity.badRequest().body("User with phone number already exists");
+        return ResponseEntity.badRequest().body("Invalid credentials");
     }
 
     public ResponseEntity<?> getUsers(Principal principal) {
         SignInResponse signInResponse = new SignInResponse();
         String phone = principal.getName();
-        Optional<Users> users = Optional.ofNullable(userRepository.findByPhone(phone));
+        Optional<Users> users = Optional.ofNullable(userRepository.findByPhone(PhoneTrim.trim(phone)));
         if (users.isPresent()) {
             Users u = users.get();
             u.setRoles(userRolesRepo.findAllByUserId(u.getPhone()).stream().map(UserRoles::getRole)
@@ -200,13 +201,13 @@ public class AccountService {
 
     @Async
     public void sendMessage(@NonNull String phone) {
-        String message = "Your account has been successfully created for the following phone number " + phone;
-        messageSender.sendMessage(phone, message);
+        String message = "Your account has been successfully created for the following phone number " + PhoneTrim.trim(phone);
+        messageSender.sendMessage(PhoneTrim.trim(phone), message);
     }
 
     public ResponseEntity<?> getProviderByPhone(String phone) {
 
-        Users user = userRepository.findByPhone(phone);
+        Users user = userRepository.findByPhone(PhoneTrim.trim(phone));
         if (user != null) {
             return ResponseEntity.ok().body(user);
         }

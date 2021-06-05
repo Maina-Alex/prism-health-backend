@@ -6,6 +6,7 @@ import com.prismhealth.dto.Request.AddProviderReq;
 import com.prismhealth.dto.Request.UpdateProviderRequest;
 import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.UserRolesRepo;
+import com.prismhealth.util.PhoneTrim;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,11 @@ public class AdminProviderService {
     private final UserRolesRepo userRolesRepo;
 
     public ResponseEntity<?> getProviderById(String phone) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(phone));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(PhoneTrim.trim(phone)));
         if (user.isPresent()) {
             Users u = user.get();
             u.setRoles(
-                    userRolesRepo.findAllByUserId(phone).stream().map(UserRoles::getRole).collect(Collectors.toList()));
+                    userRolesRepo.findAllByUserId(PhoneTrim.trim(phone)).stream().map(UserRoles::getRole).collect(Collectors.toList()));
 
             return ResponseEntity.ok(u);
         } else
@@ -46,7 +47,7 @@ public class AdminProviderService {
     }
 
     public ResponseEntity<?> blockProvider(String phone) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(phone));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(PhoneTrim.trim(phone)));
         if (user.isPresent() && !user.get().getEmail().equals("admin@prismhealth.com")) {
             Users prov = user.get();
             prov.setBlocked(true);
@@ -57,7 +58,7 @@ public class AdminProviderService {
     }
 
     public ResponseEntity<?> unBlock(String phone) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(phone));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(PhoneTrim.trim(phone)));
         if (user.isPresent() && !user.get().getEmail().equals("admin@prismhealth.com")) {
             Users prov = user.get();
             prov.setBlocked(false);
@@ -68,12 +69,10 @@ public class AdminProviderService {
     }
 
     public ResponseEntity<?> delete(String phone) {
-        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(phone));
+        Optional<Users> user = Optional.ofNullable(usersRepo.findByPhone(PhoneTrim.trim(phone)));
         if (user.isPresent() && !user.get().getEmail().equals("admin@prismhealth.com")) {
-            String[] p = phone.split("/+");
             Users prov = user.get();
             prov.setDeleted(true);
-            prov.setPhone(p[1]);
             usersRepo.save(prov);
             return new ResponseEntity<>(HttpStatus.OK);
         } else
@@ -81,7 +80,7 @@ public class AdminProviderService {
     }
 
     public ResponseEntity<?> addProvider(AddProviderReq req) {
-        Optional<Users> u = Optional.ofNullable(usersRepo.findByPhone(req.getPhone()));
+        Optional<Users> u = Optional.ofNullable(usersRepo.findByPhone(PhoneTrim.trim(req.getPhone())));
         if (req.getEmail().equals("admin@healthprism.com")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Credentials not allowed");
         }
@@ -92,7 +91,7 @@ public class AdminProviderService {
             users.setPassword(encoder.encode(req.getPassword()));
             users.setEmail(req.getEmail());
             users.setPosition(req.getPosition());
-            users.setPhone(req.getPhone());
+            users.setPhone(PhoneTrim.trim(req.getPhone()));
             users.setAccountType("PROVIDER");
             users.setBlocked(false);
             users.setDeleted(false);
@@ -112,11 +111,11 @@ public class AdminProviderService {
     }
 
     public ResponseEntity<?> updateProvider(UpdateProviderRequest req) {
-        Optional<Users> provider = Optional.ofNullable(usersRepo.findByPhone(req.getOldPhone()));
+        Optional<Users> provider = Optional.ofNullable(usersRepo.findByPhone(PhoneTrim.trim(req.getOldPhone())));
         if (provider.isPresent()) {
             Users prov = provider.get();
             if (req.getNewPhone() != null && !req.getNewPhone().equals(""))
-                prov.setPhone(req.getNewPhone());
+                prov.setPhone(PhoneTrim.trim(req.getNewPhone()));
             if (req.getEmail() != null && !req.getEmail().equals(""))
                 prov.setEmail(req.getEmail());
             if (req.getFirstName() != null && !req.getFirstName().equals(""))

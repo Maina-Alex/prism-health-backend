@@ -9,6 +9,7 @@ import com.prismhealth.Models.UserRoles;
 import com.prismhealth.Models.Users;
 import com.prismhealth.repository.UserRepository;
 import com.prismhealth.repository.UserRolesRepo;
+import com.prismhealth.util.PhoneTrim;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -31,7 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
 
-        Optional<Users> phoneUser = Optional.ofNullable(userRepository.findByPhone(phone));
+        Optional<Users> phoneUser = Optional.ofNullable(userRepository.findByPhone(PhoneTrim.trim(phone)));
         if (phoneUser.isPresent()) {
             List<SimpleGrantedAuthority> grantedAuthorities = roleRepo.findAllByUserId(phoneUser.get().getPhone()).stream()
                     .map(UserRoles::getRole).map(SimpleGrantedAuthority::new).collect(Collectors.toList());

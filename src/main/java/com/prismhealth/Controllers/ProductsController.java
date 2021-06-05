@@ -35,7 +35,7 @@ public class ProductsController {
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
     @GetMapping("/categories")
     public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok(categoryRepository.findAll());
+        return ResponseEntity.ok().body(categoryRepository.findAll());
     }
 
     @PostMapping("/category/enable/{name}")
@@ -59,7 +59,7 @@ public class ProductsController {
     @ApiOperation(value = "Get category by name")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
-    @PostMapping("/updateCategory/")
+    @PostMapping("/updateCategory")
     public ResponseEntity<Category> updateCategoryByName(@RequestBody UpdateCategoryRequest req) {
         return ResponseEntity.ok(productsService.updateCategory(req));
     }
@@ -143,7 +143,7 @@ public class ProductsController {
         return productsService.saveSubCategory(request);
     }
 
-    @GetMapping("/subcategory/")
+    @PostMapping("/subcategory")
     public ResponseEntity<?> getSubCategory(@RequestBody UpdateSubCategoryReq request) {
         return productsService.getSubCategoryByName(request);
     }

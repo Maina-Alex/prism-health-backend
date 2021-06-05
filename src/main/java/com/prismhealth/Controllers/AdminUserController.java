@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.prismhealth.Models.Users;
 import com.prismhealth.services.UserService;
+import com.prismhealth.util.PhoneTrim;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -28,7 +29,7 @@ public class AdminUserController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @GetMapping("/find/{phone}")
     public Users getUserById(@PathVariable String phone) {
-        return userService.getUserById(phone);
+        return userService.getUserById(PhoneTrim.trim(phone));
     }
 
     @ApiOperation(value = "Retrieves users that are blocked")
@@ -56,35 +57,35 @@ public class AdminUserController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/verify/{phone}")
     public ResponseEntity<?> approveUserAccount(@PathVariable("phone") String phone, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.verifyUser(phone, principal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.verifyUser(PhoneTrim.trim(phone), principal));
     }
 
     @ApiOperation(value = "Unblocks users using phone number")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/unblock/{phone}")
     public ResponseEntity<?> unblockUser(@PathVariable("phone") String phone, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.unBlockUser(phone, principal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.unBlockUser(PhoneTrim.trim(phone), principal));
     }
 
     @ApiOperation(value = "Blocks a user using phone number")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("/block/{phone}")
     public ResponseEntity<?> blockeUser(@PathVariable("phone") String phone, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.blockUser(phone, principal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.blockUser(PhoneTrim.trim(phone), principal));
     }
 
     @ApiOperation(value = "Approve deletion of users using phone number")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("approvedelete/{phone}")
     public ResponseEntity<?> approveUserDeletion(@PathVariable("phone") String phone, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.approveDeleteUser(phone, principal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.approveDeleteUser(PhoneTrim.trim(phone), principal));
     }
 
     @ApiOperation(value = "Delete users using phone number")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"), @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @PostMapping("delete/{phone}")
     public ResponseEntity<?> deleteUser(@PathVariable("phone") String phone, Principal principal) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.deleteUser(phone, principal));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.deleteUser(PhoneTrim.trim(phone), principal));
     }
 
 }
