@@ -339,9 +339,7 @@ public class ProductsService {
     }
 
     public List<Product> getAllAvailableProducts(){
-        return productsRepository.findAll().stream()
-                .filter(Product::isNotDisabled)
-                .collect(Collectors.toList());
+        return new ArrayList<>(productsRepository.findAll());
     }
 
 }

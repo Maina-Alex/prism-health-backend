@@ -45,6 +45,6 @@ public class Product {
 	@JsonProperty("provider")
 	private Users users;
 
-	private boolean notDisabled;
+	private boolean notDisabled=true;
 
 }
