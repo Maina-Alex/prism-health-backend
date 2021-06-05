@@ -34,60 +34,60 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
     @GetMapping("/categories")
-    public ResponseEntity<List<Category>> getAllCategories() {
-        return ResponseEntity.ok().body(categoryRepository.findAll());
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
 
     @PostMapping("/category/enable/{name}")
     public ResponseEntity<?> enableCategory(@PathVariable String name) {
-        return ResponseEntity.ok(productsService.enableCategory(name));
+        return productsService.enableCategory(name);
     }
 
     @PostMapping("/category/disable/{name}")
     public ResponseEntity<?> deleteCategory(@PathVariable String name) {
-        return ResponseEntity.ok(productsService.disableCategory(name));
+        return productsService.disableCategory(name);
     }
 
     @ApiOperation(value = "Get category by name")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
     @GetMapping("/{categoryName}")
-    public ResponseEntity<Category> getCategoryByName(@PathVariable String categoryName) {
-        return ResponseEntity.ok(productsService.categoryByName(categoryName));
+    public Category getCategoryByName(@PathVariable String categoryName) {
+        return productsService.categoryByName(categoryName);
     }
 
     @ApiOperation(value = "Get category by name")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "category not found") })
     @PostMapping("/updateCategory")
-    public ResponseEntity<Category> updateCategoryByName(@RequestBody UpdateCategoryRequest req) {
-        return ResponseEntity.ok(productsService.updateCategory(req));
+    public Category updateCategoryByName(@RequestBody UpdateCategoryRequest req) {
+        return productsService.updateCategory(req);
     }
 
     @ApiOperation(value = "Get sub-categories by name")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "sub-category not found") })
     @GetMapping("/subCategories/{categoryName}")
-    public ResponseEntity<List<SubCategory>> getSubCategories(@PathVariable String categoryName) {
-        return ResponseEntity.ok(productsService.getSubcategoriesByName(categoryName));
+    public List<SubCategory> getSubCategories(@PathVariable String categoryName) {
+        return productsService.getSubcategoriesByName(categoryName);
     }
 
     @ApiOperation(value = "Get sub-categories ")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "sub-category not found") })
     @GetMapping("/subCategories")
-    public ResponseEntity<List<SubCategory>> getAllSubCategories() {
-        return ResponseEntity.ok(productsService.getAllSubcategories());
+    public List<SubCategory> getAllSubCategories() {
+        return productsService.getAllSubcategories();
     }
 
     @PostMapping("/subCategory/enable")
     public ResponseEntity<?> enableSubCategory(@RequestBody UpdateSubCategoryReq req) {
-        return ResponseEntity.ok(productsService.enableSubCategory(req));
+        return productsService.enableSubCategory(req);
     }
 
     @PostMapping("/subCategory/disable")
     public ResponseEntity<?> disableCategory(@RequestBody UpdateSubCategoryReq req) {
-        return ResponseEntity.ok(productsService.disableSubCategory(req));
+        return productsService.disableSubCategory(req);
     }
 
     @PostMapping("/subCategory/update")
@@ -99,31 +99,31 @@ public class ProductsController {
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "User not found") })
     @GetMapping("/{subCategoryName}/products")
-    public ResponseEntity<List<Product>> getSubCategoryProducts(@PathVariable String subCategoryName) {
-        return ResponseEntity.ok(productsService.getAllProducts(subCategoryName));
+    public List<Product> getSubCategoryProducts(@PathVariable String subCategoryName) {
+        return productsService.getAllProducts(subCategoryName);
     }
 
     @ApiOperation(value = "Get products by name")
     @ApiResponses(value = { @ApiResponse(code = SC_OK, message = "ok"),
             @ApiResponse(code = SC_BAD_REQUEST, message = "Product not found") })
     @GetMapping("/products/{productName}")
-    public ResponseEntity<List<Product>> getProduct(@PathVariable String productName) {
-        return ResponseEntity.ok(productsService.productByName(productName));
+    public List<Product> getProduct(@PathVariable String productName) {
+        return productsService.productByName(productName);
     }
 
     @GetMapping("/getAllAvailableProducts")
-    public ResponseEntity<List<Product>> getAllProducts() {
-        return ResponseEntity.ok(productsService.getAllAvailableProducts());
+    public List<Product> getAllProducts() {
+        return productsService.getAllAvailableProducts();
     }
 
     @GetMapping("/productByProviderId/{providerId}")
-    public ResponseEntity<List<Product>> getProductByProviderId(@PathVariable String providerId) {
-        return ResponseEntity.ok(productsService.getProductsByProviderId(providerId));
+    public List<Product> getProductByProviderId(@PathVariable String providerId) {
+        return productsService.getProductsByProviderId(providerId);
     }
 
     @GetMapping("/productByProvider")
-    public ResponseEntity<List<Product>> getProductByProvider(Principal principal) {
-        return ResponseEntity.ok(productsService.getProductsByProviderId(principal.getName()));
+    public List<Product>getProductByProvider(Principal principal) {
+        return productsService.getProductsByProviderId(principal.getName());
     }
 
     /* POST_MAPPINGS */
@@ -132,7 +132,7 @@ public class ProductsController {
             @ApiResponse(code = SC_BAD_REQUEST, message = "null") })
     @PostMapping("/categories")
     public ResponseEntity<?> createCategory(@RequestBody CategoryRequest request) {
-        return ResponseEntity.ok(productsService.saveCategory(request));
+        return productsService.saveCategory(request);
     }
 
     @ApiOperation(value = "Post a sub-category")
@@ -173,7 +173,7 @@ public class ProductsController {
     @PutMapping
 
     public ResponseEntity<?> updateProducts(@RequestBody Product product) {
-        return ResponseEntity.ok(productsService.updateProduct(product));
+        return productsService.updateProduct(product);
     }
 
     /* DELETE MAPPINGS */
@@ -182,7 +182,7 @@ public class ProductsController {
             @ApiResponse(code = SC_BAD_REQUEST, message = "Product not found") })
     @DeleteMapping("/products/{productid}")
     public ResponseEntity<?> deleteProducts(@PathVariable("productid") String productid) {
-        return ResponseEntity.ok(productsService.deleteProduct(productid));
+        return productsService.deleteProduct(productid);
     }
 
 }
