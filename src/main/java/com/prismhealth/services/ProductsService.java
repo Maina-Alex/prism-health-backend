@@ -205,7 +205,7 @@ public class ProductsService {
         }catch (Exception ex){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         }
-        return null;
+        return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Not modified");
     }
 
     public ResponseEntity<?> enableSubCategory(UpdateSubCategoryReq req){
