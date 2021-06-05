@@ -48,12 +48,12 @@ public class AccountService {
     public ResponseEntity<SignUpResponse> authentication(Phone phone) {
         SignUpResponse signUpResponse = new SignUpResponse();
 
-            String authCode = "ABCDE";
-            // try {
-            // authCode = authService.getAuthentication(phone.getPhone()).get();
-            // } catch (InterruptedException | ExecutionException e) {
-            // e.printStackTrace();
-            // }
+            String authCode = "";
+            try {
+            authCode = authService.getAuthentication(phone.getPhone()).get();
+            } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            }
             signUpResponse.setMessage("get otp");
             signUpResponse.setAuthCode(authCode);
         
