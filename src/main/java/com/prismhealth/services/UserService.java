@@ -138,7 +138,6 @@ public class UserService {
     public List<Users> getBlockedUsers() {
         return usersRepo.findByBlocked(true, Sort.by("blockedOn").descending()).stream()
                 .filter(u -> !u.isDeleted() && !u.isApproveDelete()).collect(Collectors.toList());
-
     }
 
     public List<Users> getDeleteUser() {
