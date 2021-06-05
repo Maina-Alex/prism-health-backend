@@ -143,7 +143,7 @@ public class ProductsController {
         return productsService.saveSubCategory(request);
     }
 
-    @GetMapping("/subcategory/")
+    @PostMapping("/subcategory")
     public ResponseEntity<?> getSubCategory(@RequestBody UpdateSubCategoryReq request) {
         return productsService.getSubCategoryByName(request);
     }
