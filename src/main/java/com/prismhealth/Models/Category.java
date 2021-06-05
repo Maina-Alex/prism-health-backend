@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -17,6 +18,6 @@ public class Category {
 	private String categoryName;
 	private String description;
 	private String photo;
-	private List<SubCategory>subCategories;
+	private List<SubCategory>subCategories=new ArrayList<>();
 	private boolean disabled=false;
 }
